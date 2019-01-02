@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>接口调用测试</title>
+    <style type="text/css">
+        body,html{
+            width: 100%;
+            height: 100%;
+            margin: 0px;
+            padding: 0px;
+        }
+        #myConsole{
+            display:block;
+            overflow-x: hidden;
+            overflow-y: scroll;
+        }
+    </style>
+    <script type="text/javascript" src="jq.js"></script>
+    <script type="text/javascript">
+        var gmlhost = "http://localhost:39855/";//"https://www.juliaol.cn:39855/"
+        var gmlConsole = null;
+        var dv = null;
+        window.onload = function(){
+            gmlConsole = document.getElementById("myConsole");
+            dv = document.getElementById("divContext");
+            dv.style.height = (document.body.clientHeight - 200) + "px";
+
+        }
+
+        window.addEventListener("resize",function(evt){
+            if(dv){
+                dv.style.height = (document.body.clientHeight - 200) + "px";
+            }
+        });
+
+        /**
+         * 请求服务器
+         * */
+        function reqServer(url,argobj,method,callback){
+            //登录
+            $.ajax({
+                type:method,
+                url:url,
+                timeout:30000,
+                data:argobj,
+                success:function(data,b){
+                    var sp = document.createElement("span")
+                    sp.innerHTML = "收到回信" + JSON.stringify(data);
+                    gmlConsole.appendChild(sp);
+                    gmlConsole.appendChild(document.createElement("br"));
+                    gmlConsole.scrollTop = gmlConsole.scrollHeight;
+                    if(callback){
+                        callback(data);
+                    }
+                },
+                error:function(err){
+                    console.log("请求发生错误",err);
+                }
+            })
+        }
+
+        function businessLogin(evt){
+            var ln = document.getElementById("loginName");
+            var pwd = document.getElementById("loginPWD");
+            if(ln && pwd && ln.value && ln.value != "" && pwd.value && pwd.value != ""){
+                //取账号密码
+                var lnVal = ln.value;
+                var pwdVal = pwd.value;
+                reqServer(gmlhost + "businessLogin",{
+                    "ln":lnVal,
+                    "pwd":pwdVal
+                },"post");
+            }
+        }
+
+        function businessRegister(evt){
+            var ln = document.getElementById("registerName");
+            var pwd = document.getElementById("registerPWD");
+            if(ln && pwd && ln.value && ln.value != "" && pwd.value && pwd.value != ""){
+                //取账号密码
+                var lnVal = ln.value;
+                var pwdVal = pwd.value;
+                reqServer(gmlhost + "businessRegister",{
+                    "ln":lnVal,
+                    "pwd":pwdVal
+                },"post");
+            }
+        }
+
+        function businessLogout(evt){
+            var ln = document.getElementById("logoutName");
+            var bc = document.getElementById("logoutBussinessCode");
+            if(ln && bc && ln.value && ln.value != "" && bc.value && bc.value != ""){
+                //取账号密码
+                var lnVal = ln.value;
+                var bcVal = bc.value;
+                reqServer(gmlhost + "businessLogout",{
+                    "ln":lnVal,
+                    "bc":bcVal
+                },"post");
+            }
+        }
+
+        /**
+         * 查询企业信息
+         * */
+        function selbusinessInfo(evt){
+            var bmCode = document.getElementById("bmCode");
+            if(bmCode && bmCode.value && bmCode.value != ""){
+                //取账号密码
+                var bmCodeVal = bmCode.value;
+                reqServer(gmlhost + "getBusinessInfo",{
+                    "bc":bmCodeVal
+                },"post",function onCallBack(obj){
+                    obj.Code = obj.Code || "0";
+                    if(obj.Code == "1") {
+                        //查询成功后,读取数据
+                        var bmn = document.getElementById("bmn");
+                        bmn.value = obj.BusinessName;
+                        var bmdes = document.getElementById("bmdes");
+                        bmdes.value = obj.BusinessDes;
+                    }
+                });
+            }
+        }
+
+        /**
+         * 更新企业信息
+         * */
+        function updatebusinessInfo(evt){
+            var bmCode = document.getElementById("bmCode");
+            var bmn = document.getElementById("bmn");
+            var bmdes = document.getElementById("bmdes");
+            if(bmCode && bmCode.value && bmCode.value != "" && bmn && bmn.value && bmn.value != "" && bmdes && bmdes.value && bmdes.value != ""){
+                //取账号密码
+                var bmCodeVal = bmCode.value;
+                var bmnVal = bmn.value;
+                var bmdesVal = bmdes.value;
+                reqServer(gmlhost + "updateBusinessInfo",{
+                    "bc":bmCodeVal,
+                    "bmn":bmnVal,
+                    "bmdes":bmdesVal
+                },"post",function onCallBack(obj){
+                    obj.Code = obj.Code || "0";
+                    if(obj.Code == "1") {
+                        //更新数据成功后,填充数据
+                        bmn.value = obj.BusinessName;
+                        bmdes.value = obj.BusinessDes;
+                    }
+                });
+            }
+        }
+
+        /**
+         * 创建项目
+         * */
+        function createProject(evt){
+            var cpbidstr = document.getElementById("cpbidstr");
+            var cpname = document.getElementById("cpname");
+            if(cpbidstr && cpbidstr.value && cpbidstr.value != "" && cpname && cpname.value && cpname.value != ""){
+                var cpbidstrVal = cpbidstr.value;
+                var cpnameVal = cpname.value;
+                var cpdes = document.getElementById("cpdes").value;
+                reqServer(gmlhost + "createProject",{
+                    "pName":cpnameVal,
+                    "pDes":cpdes,
+                    "bidstr":cpbidstrVal
+                },"post");
+            }
+        }
+
+        /**
+         * 更新项目信息
+         * */
+        function updateProject(evt){
+            var upbidstr = document.getElementById("upbidstr");
+            var upname = document.getElementById("upname");
+            var upid = document.getElementById("upid");
+            var updes = document.getElementById("updes");
+            if(upid.value == "" || upbidstr.value == "") return;
+            reqServer(gmlhost + "updateProject",{
+                "pName":upname.value || "",
+                "pDes":updes.value,
+                "pid":upid.value,
+                "bidstr":upbidstr.value
+            },"post");
+
+        }
+
+        /**
+         * 删除项目信息
+         * */
+        function deleteProject(evt){
+            var upbidstr = document.getElementById("upbidstr");
+            var upid = document.getElementById("upid");
+            if(upid.value == "" || upbidstr.value == "") return;
+            reqServer(gmlhost + "deleteProject",{
+                "pid":upid.value,
+                "bidstr":upbidstr.value
+            },"post");
+        }
+
+        /**
+         * 获取项目信息列表
+         * */
+        function getProjectList(evt){
+            var gpbidstr = document.getElementById("gpbidstr");
+            if(gpbidstr.value == "") return;
+            reqServer(gmlhost + "getProjectList",{
+                "bidstr":gpbidstr.value
+            },"post");
+        }
+
+        /**
+         * 更改企业账号密码
+         * */
+        function changePWD(evt){
+            var changepwdbidstr = document.getElementById("changepwdbidstr");
+            var oldPWD = document.getElementById("oldPWD");
+            var newPWD = document.getElementById("newPWD");
+            reqServer(gmlhost + "businessChangePassword",{
+                "bidstr":changepwdbidstr.value,
+                "oldp":oldPWD.value,
+                "newp":newPWD.value
+            },"post");
+        }
+
+        /**
+         * 创建课程
+         * */
+        function createLesson(evt){
+            var b_cid = document.getElementById("clbcid").value;
+            var bidstr = document.getElementById("clbidstr").value;
+            var b_lessonInfo = document.getElementById("clblessoninfo").value;
+            var startTime = document.getElementById("clbstartTime").value;
+            startTime = parseInt(new Date(startTime).valueOf() / 1000);
+            var lessonTimeLengh = document.getElementById("clblessonTimeLength").value;
+            lessonTimeLengh = Number(lessonTimeLengh);
+            lessonTimeLengh = lessonTimeLengh < 0 ? 0 : lessonTimeLengh;
+            var maxCap = document.getElementById("clbmaxCap").value;
+            maxCap = Number(maxCap);
+            maxCap = maxCap < 0 ? 0 : maxCap;
+            var maxLine = document.getElementById("clbmaxLine").value;
+            maxLine = Number(maxLine);
+            maxLine = maxLine < 0 ? 0 : maxLine;
+            var pid = document.getElementById("clpid").value;
+            pid = Number(pid);
+            pid = pid < 0 ? 0 : pid;
+            reqServer(gmlhost + "createLesson",{
+                "b_cid":b_cid,
+                "bidstr":bidstr,
+                "b_lessonInfo":b_lessonInfo,
+                "startTime":startTime,
+                "lessonTimeLengh":lessonTimeLengh,
+                "maxCap":maxCap,
+                "maxLine":maxLine,
+                "pid":pid
+            },"post");
+        }
+        /**
+         * 更新课程
+         * */
+        function updateLesson(evt){
+            var cid = document.getElementById("clcid").value;
+            var b_cid = document.getElementById("clbcid").value;
+            var bidstr = document.getElementById("clbidstr").value;
+            var b_lessonInfo = document.getElementById("clblessoninfo").value;
+            var startTime = document.getElementById("clbstartTime").value;
+            startTime = parseInt(new Date(startTime).valueOf() / 1000);
+            var lessonTimeLengh = document.getElementById("clblessonTimeLength").value;
+            lessonTimeLengh = Number(lessonTimeLengh);
+            lessonTimeLengh = lessonTimeLengh < 0 ? 0 : lessonTimeLengh;
+            var maxCap = document.getElementById("clbmaxCap").value;
+            maxCap = Number(maxCap);
+            maxCap = maxCap < 0 ? 0 : maxCap;
+            var maxLine = document.getElementById("clbmaxLine").value;
+            maxLine = Number(maxLine);
+            maxLine = maxLine < 0 ? 0 : maxLine;
+            var pid = document.getElementById("clpid").value;
+            pid = Number(pid);
+            pid = pid < 0 ? 0 : pid;
+            reqServer(gmlhost + "updateLesson",{
+                "cid":cid,
+                "b_cid":b_cid,
+                "bidstr":bidstr,
+                "b_lessonInfo":b_lessonInfo,
+                "startTime":startTime,
+                "lessonTimeLengh":lessonTimeLengh,
+                "maxCap":maxCap,
+                "maxLine":maxLine,
+                "pid":pid
+            },"post");
+        }
+
+        /**
+         * 批量删除课程
+         * */
+        function deleteLesson(evt){
+            var delcids = document.getElementById("dellesssons").value;
+            reqServer(gmlhost + "deleteLesson",{
+                "delcids":delcids
+            },"post");
+        }
+
+        /**
+         * 根据企业标识获取课程信息列表
+         * */
+        function getLessonListByBidstr(evt){
+            var bidstr = document.getElementById("gllbbbid").value;
+            reqServer(gmlhost + "getLessonListByBidstr",{
+                "bid_str":bidstr
+            },"post");
+        }
+
+        /**
+         * 预约课程
+         * */
+        function bookLesson(evt){
+            var bid_key = document.getElementById("bsbid_key").value;
+            var cid = document.getElementById("bscid").value;
+            var b_uid = document.getElementById("bsb_uid").value;
+            var b_user_nickName = document.getElementById("bsb_user_nickName").value;
+            var b_user_headerImage = document.getElementById("bsb_user_headerImage").value;
+            var b_user_sex = document.getElementById("bsb_user_sex").value;
+            var bsb_user_isOwnner = document.getElementById("bsb_user_isOwnner").value;
+            reqServer(gmlhost + "bookLesson",{
+                "bid_key":bid_key,
+                "cid":cid,
+                "b_uid":b_uid,
+                "b_user_nickName":b_user_nickName,
+                "b_user_headerImage":b_user_headerImage,
+                "b_user_sex":b_user_sex,
+                "isOwnner":bsb_user_isOwnner
+            },"post",function(data){
+                if(data.Code == "1"){
+                    //跳转网页
+                    var gmlcid = data.Cid;
+                    var gmluid = data.Uid;
+                    var urlStr = "https://www.juliaol.cn/classroom/indexV2.html?cid="+gmlcid+"&uid=" +gmluid;
+                    var atag = document.createElement("a");
+                    atag.href = urlStr;
+                    atag.target = "_blank";
+                    atag.innerHTML = "点击进入课程=>"+urlStr;
+                    document.getElementById("myConsole").appendChild(atag);
+                }
+            });
+        }
+
+        /**
+         * 根据用户ID 获取用户信息
+         * */
+        function getUserInfoByUID(evt){
+            var getUserUid = document.getElementById("getUserUid").value;
+            reqServer(gmlhost + "getUserInfoByUID",{
+                "uid":getUserUid,
+            },"post");
+        }
+    </script>
+</head>
+<body>
+<div style="width: 100%;height: 100%;display: block;overflow-y: hidden;overflow-x: hidden;">
+    <div style="width: 100%;height: 200px;background-color: #eda898" id="myConsole">
+    </div>
+    <div style="display: block;overflow-x: hidden;overflow-y: scroll" id="divContext">
+        <div style="background-color: aquamarine;">后台登录</div><br/>
+        账号:<input id="loginName" type="text" placeholder="账号">&nbsp;&nbsp;&nbsp;密码:<input id="loginPWD" type="password" placeholder="密码">&nbsp;&nbsp;&nbsp;
+        <input type="button" value="登录" onclick="javascript:void(0);businessLogin(this);">
+
+        <div style="background-color: aquamarine;">企业账号注册</div><br/>
+        账号:<input id="registerName" type="text" placeholder="账号">&nbsp;&nbsp;&nbsp;密码:<input id="registerPWD" type="password" placeholder="密码">&nbsp;&nbsp;&nbsp;
+        <input type="button" value="注册" onclick="javascript:void(0);businessRegister(this);">
+
+        <div style="background-color: aquamarine;">更改企业账号密码</div><br/>
+        企业代码:<input id="changepwdbidstr" type="text" placeholder="企业代码">&nbsp;&nbsp;&nbsp;原密码:<input id="oldPWD" type="password" placeholder="原密码">&nbsp;&nbsp;&nbsp;
+        新密码:<input id="newPWD" type="password" placeholder="新密码">&nbsp;&nbsp;&nbsp;
+        <input type="button" value="修改密码" onclick="javascript:void(0);changePWD(this);">
+
+        <div style="background-color: aquamarine;">后台登出</div><br/>
+        账号:<input id="logoutName" type="text" placeholder="账号">&nbsp;&nbsp;&nbsp;企业代码:<input id="logoutBussinessCode" type="text" placeholder="企业代码">
+        <input type="button" value="登出" onclick="javascript:void(0);businessLogout(this);">
+
+
+        <div style="background-color: aquamarine;">企业信息管理</div><br/>
+        企业代码:<input id="bmCode" type="text" placeholder="企业代码" value="3a4630f5-d4e3-4a87-a10b-1d9c1d9d">&nbsp;&nbsp;&nbsp;企业名称:<input id="bmn" type="text" placeholder="企业名称"><br />
+        企业描述:<textarea id="bmdes" placeholder="企业描述"></textarea><br />
+        <input type="button" value="获取信息" onclick="javascript:void(0);selbusinessInfo(this);"><input type="button" value="更新信息" onclick="javascript:void(0);updatebusinessInfo(this);">
+
+        <div style="background-color: aquamarine;">创建项目</div><br/>
+        企业代码:<input id="cpbidstr" type="text" placeholder="企业代码">&nbsp;&nbsp;&nbsp;项目名称:<input id="cpname" type="text" placeholder="项目名称"><br />
+        项目描述:<textarea id="cpdes" placeholder="项目描述"></textarea>
+        <input type="button" value="提交" onclick="javascript:void(0);createProject(this);">
+
+        <div style="background-color: aquamarine;">获取项目列表</div><br/>
+        企业代码:<input id="gpbidstr" type="text" placeholder="企业代码">
+        <input type="button" value="请求" onclick="javascript:void(0);getProjectList(this);">
+
+        <div style="background-color: aquamarine;">更新项目信息</div><br/>
+        企业代码:<input id="upbidstr" type="text" placeholder="企业代码">&nbsp;&nbsp;&nbsp;项目ID:<input id="upid" type="text" placeholder="项目id">
+        <br />项目名称:<input id="upname" type="text" placeholder="项目名称"><br />
+        项目描述:<textarea id="updes" placeholder="项目描述"></textarea>
+        <input type="button" value="提交" onclick="javascript:void(0);updateProject(this);">
+        <input type="button" value="删除" onclick="javascript:void(0);deleteProject(this);">
+
+        <div style="background-color: aquamarine;">创建课程</div><br/>
+        企业代码:<input id="clbidstr" type="text" placeholder="企业代码" value="3a4630f5-d4e3-4a87-a10b-1d9c1d9d">&nbsp;&nbsp;&nbsp;项目ID:<input id="clpid" type="text" placeholder="项目id" value="14">&nbsp;&nbsp;&nbsp;原始课程ID:<input id="clbcid" type="text" placeholder="原始课程ID" value="333">
+        课程开始时间:<input id="clbstartTime" type="date" placeholder="开始时间" value="2018-12-21">&nbsp;&nbsp;&nbsp;课程时长(s):<input id="clblessonTimeLength" type="number" placeholder="课程时长:秒" max="1000000" value="1800"><br />
+        课程容纳人数:<input id="clbmaxCap" type="number" placeholder="课程容纳人数" max="1000000" value="1000">&nbsp;&nbsp;&nbsp;课中最大上台数:<input id="clbmaxLine" type="number" placeholder="课中最大上台数" max="100" value="16"><br />
+        课程信息:<textarea id="clblessoninfo" placeholder="课程信息">{"teachingMaterialPath":"../../4b7598199953ffe850ed9d672991ccc6.pdf"}</textarea>
+        <input type="button" value="创建课程" onclick="javascript:void(0);createLesson(this);"><br />
+        课程id:<input id="clcid" type="text" placeholder="课程id">&nbsp;&nbsp;&nbsp;<input type="button" value="更新课程" onclick="javascript:void(0);updateLesson(this);">
+
+        <div style="background-color: aquamarine;">批量删除课程信息</div><br/>
+        课程id:<input id="dellesssons" type="text" placeholder="请填写cid,多个cid用','分割" width="300">
+        <input type="button" value="批量删除课程" onclick="javascript:void(0);deleteLesson(this);">
+
+        <div style="background-color: aquamarine;">获取课程信息列表</div><br/>
+        企业代码:<input id="gllbbbid" type="text" placeholder="企业代码">
+        <input type="button" value="获取课程信息" onclick="javascript:void(0);getLessonListByBidstr(this);">
+
+        <div style="background-color: aquamarine;">预约课程</div><br/>
+        企业代码:<input id="bsbid_key" type="text" placeholder="企业代码">&nbsp;&nbsp;&nbsp;
+        课程id:<input id="bscid" type="text" placeholder="课程ID">&nbsp;&nbsp;&nbsp;
+        企业内部userID:<input id="bsb_uid" type="text" placeholder="企业内部userID">&nbsp;&nbsp;&nbsp;
+        用户昵称:<input id="bsb_user_nickName" type="text" placeholder="用户昵称">&nbsp;&nbsp;&nbsp;
+        用户头像url:<input id="bsb_user_headerImage" type="text" placeholder="用户头像url">&nbsp;&nbsp;&nbsp;
+        性别:<input id="bsb_user_sex" type="text" placeholder="性别" value="0">&nbsp;&nbsp;&nbsp;
+        是否是主讲:<input id="bsb_user_isOwnner" type="text" placeholder="是否是主讲" value="0">&nbsp;&nbsp;&nbsp;
+        <input type="button" value="约课" onclick="javascript:void(0);bookLesson(this);">
+
+        <div style="background-color: aquamarine;">获取用户信息</div><br/>
+        用户id:<input id="getUserUid" type="text" placeholder="用户id">&nbsp;&nbsp;&nbsp;
+        <input type="button" value="获取用户信息" onclick="javascript:void(0);getUserInfoByUID(this);">
+    </div>
+</div>
+
+</body>
+</html>
