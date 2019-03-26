@@ -37,7 +37,7 @@ type SQLInterface interface{
 /**
 新建SQL
 */
-func New(_SQLType,_DBFullURL string)SQLProxy  {
+func NewSQL(_SQLType,_DBFullURL string)SQLProxy  {
 	return SQLProxy{
 		SQLType:_SQLType,
 		DBFullURL:_DBFullURL,

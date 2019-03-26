@@ -11,11 +11,11 @@
             "mode": "debug",
             "port":34338,//随便写
             "host":"127.0.0.1",//  net/Http绑定监听的ip地址，如有必要的话，才需要配置这项
-            "program": "/Users/guominglong/Desktop/GMLP/GMLWebService/src/appDelegate.go",
+            "program": "/Users/guominglong/Desktop/GMLP/src/appDelegate.go",
             "env": {},
             "args": [],
-            "showLog":true,
-            "trace": "log"
+            "showLog":false/*,
+            "trace": "log"*/
         }
     ]
 }

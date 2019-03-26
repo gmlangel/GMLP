@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/GMLClinet.iml" filepath="$PROJECT_DIR$/.idea/GMLClinet.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/rearClient.iml" filepath="$PROJECT_DIR$/.idea/rearClient.iml" />
     </modules>
   </component>
 </project>
