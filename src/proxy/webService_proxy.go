@@ -36,10 +36,12 @@ func (webs *WebServiceProxy)init(){
 }
 
 func (webs *WebServiceProxy)Start(){
-	frontProxy := front.LoginService{SqlPro:sqlpro};
-
-	//rearProxy := rear.LoginService{};
-	webs.app.Any("/",frontProxy.WelCome);
+	//开启前端服务监听
+	frontProxy := front.LoginService{SqlPro:sqlpro,App:webs.app};
+	frontProxy.Start();
+	//开启后端服务监听
+	// rearProxy := rear.LoginService{};
+	// webs.app.Any("/",frontProxy.WelCome);
 }
 
 
