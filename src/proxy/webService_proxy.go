@@ -10,7 +10,7 @@ var(
 	/*sql相关*/
 	sqlType = "mysql";
 	sqlFullURL = "gmlmaster:123456@tcp(39.106.135.11:32306)/GMLPlanDB?charset=utf8";
-	sqlpro SQLProxy;
+	sqlpro *SQLProxy;
 )
 
 type WebServiceProxy struct{
@@ -36,6 +36,7 @@ func (webs *WebServiceProxy)init(){
 }
 
 func (webs *WebServiceProxy)Start(){
+
 	//开启前端服务监听
 	frontProxy := front.LoginService{SqlPro:sqlpro,App:webs.app};
 	frontProxy.Start();

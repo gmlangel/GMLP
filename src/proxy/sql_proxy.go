@@ -11,8 +11,8 @@ import(
 /**
 新建SQL
 */
-func NewSQL(_SQLType,_DBFullURL string)SQLProxy  {
-	return SQLProxy{
+func NewSQL(_SQLType,_DBFullURL string)*SQLProxy  {
+	return &SQLProxy{
 		SQLType:_SQLType,
 		DBFullURL:_DBFullURL,
 		MaxIdleConns:50,
@@ -32,7 +32,7 @@ type SQLProxy struct{
 	isConnected bool//是否已经连接成功
 }
 
-func (sp SQLProxy)sqlHeart(){
+func (sp *SQLProxy)sqlHeart(){
 	for{
 		sp.sqlEngine.Ping();
 		time.Sleep(sp.SqlHeartOffset);
@@ -42,7 +42,7 @@ func (sp SQLProxy)sqlHeart(){
 /*
 启动sql链接数据库
 */
-func (sp SQLProxy)Start(){
+func (sp *SQLProxy)Start(){
 	//user:password@tcp(localhost:5555)/dbname?tls=skip-verify&autocommit=true
 	var sqlErr error;
 	sp.sqlEngine,sqlErr = xorm.NewEngine(sp.SQLType,sp.DBFullURL);
@@ -66,13 +66,13 @@ func (sp SQLProxy)Start(){
 /**
 关闭数据库连接
 */
-func (sp SQLProxy)Stop(){
+func (sp *SQLProxy)Stop(){
 	if sp.isConnected == true{
 		sp.sqlEngine.Close();
 	}
 }
 
-func (sp SQLProxy)Exec(str string) (res sql.Result, err error){
+func (sp *SQLProxy)Exec(str string) (res sql.Result, err error){
 	res,err = sp.sqlEngine.Exec(str);
 	if err != nil{
 		fmt.Println("sql语句执行错误:",str,"错误原因:",err);
@@ -80,7 +80,7 @@ func (sp SQLProxy)Exec(str string) (res sql.Result, err error){
 	return res,err;
 }
 
-func (sp SQLProxy)Query(str string)(res []map[string][]byte, err error){
+func (sp *SQLProxy)Query(str string)(res []map[string][]byte, err error){
 	res,err = sp.sqlEngine.Query(str);
 	if err != nil{
 		fmt.Println("sql查询语句执行失败:",str,"错误原因:",err);
@@ -88,7 +88,7 @@ func (sp SQLProxy)Query(str string)(res []map[string][]byte, err error){
 	return res,err;
 }
 
-func (sp SQLProxy)SetLogLevel(arg core.LogLevel){
+func (sp *SQLProxy)SetLogLevel(arg core.LogLevel){
 	sp.LogLevel = arg;
 	sp.sqlEngine.Logger().SetLevel(arg);
 }
