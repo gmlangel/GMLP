@@ -4,6 +4,8 @@ import(
 	"../GMLWebService/front"
 	_ "../GMLWebService/rear"
 	"github.com/kataras/iris"
+	"github.com/kataras/iris/sessions"
+	"time"
 )
 
 var(
@@ -11,6 +13,11 @@ var(
 	sqlType = "mysql";
 	sqlFullURL = "gmlmaster:123456@tcp(39.106.135.11:32306)/GMLPlanDB?charset=utf8";
 	sqlpro *SQLProxy;
+	/*sessionManager相关*/
+	sm *sessions.Sessions= sessions.New(
+		sessions.Config{
+			Cookie: "cookieNameForSessionID",
+			Expires:time.Duration(30) * time.Minute})
 )
 
 type WebServiceProxy struct{
@@ -38,7 +45,7 @@ func (webs *WebServiceProxy)init(){
 func (webs *WebServiceProxy)Start(){
 
 	//开启前端服务监听
-	frontProxy := front.LoginService{SqlPro:sqlpro,App:webs.app};
+	frontProxy := front.LoginService{SqlPro:sqlpro,App:webs.app,Sm:sm};
 	frontProxy.Start();
 	//开启后端服务监听
 	// rearProxy := rear.LoginService{};

@@ -3,6 +3,7 @@ package front;
 import(
 	"../../models"
 	"github.com/kataras/iris"
+	"github.com/kataras/iris/sessions"
 	"fmt"
 	"../../tools"
 	"github.com/satori/go.uuid"
@@ -22,6 +23,7 @@ var(
 type LoginService struct{
 	SqlPro models.SQLInterface;
 	App *iris.Application;
+	Sm *sessions.Sessions;
 }
 
 /**
@@ -32,6 +34,7 @@ func (ls *LoginService)Start(){
 	ls.App.Get("/front/signOut",ls.signOut);
 	ls.App.Get("/front/registerAccount",ls.registerAccount);
 	ls.App.Get("/front/changepwd",ls.changepwd);
+	ls.App.Get("/front/findpwd",ls.findpwd);
 	ls.App.Get("/front/getVerificationCode",ls.getVerificationCode);
 	
 }
@@ -40,7 +43,37 @@ func (ls *LoginService)Start(){
 通过账号密码登录
 */
 func (ls *LoginService)sign(ctx iris.Context){
-	ctx.Write([]byte("登录成功"));
+	//取参数
+	sc := tools.Pack(ctx);
+	loginName := sc.GetStr("ln");
+	loginPWD := sc.GetStr("pwd");
+	res,err := ls.SqlPro.Query(fmt.Sprintf("SELECT * FROM `BusinessUsers` WHERE `ln` = '%s';",loginName))
+	//PWDFaild = "3";//密码错误
+	resStruct := models.CurrentResponse{Code:InvalideLoginName};
+	if err == nil{
+		if len(res) > 0{
+			if pwd,gcontains:=res[0]["pwd"] ;gcontains==true && string(pwd) == loginPWD{
+				//存session到服务器，存cookie到用户本地
+
+				//返回成功登录结果
+				resLoginStruct := models.LoginStruct{};
+				resLoginStruct.Code = resOK;
+				resLoginStruct.BidStr = string(res[0]["bid_str"]);
+				resLoginStruct.Msg = "登录成功";
+				ctx.WriteString(tools.StructToJSONStr(resLoginStruct));
+			}else{
+				resStruct.Code = PWDFaild;
+				resStruct.Msg = "密码错误";
+				ctx.WriteString(tools.StructToJSONStr(resStruct));
+			}
+		}else{
+			resStruct.Msg = "账号不存在";
+			ctx.WriteString(tools.StructToJSONStr(resStruct));
+		}
+	}else{
+		resStruct.Msg = "账号不存在";
+		ctx.WriteString(tools.StructToJSONStr(resStruct));
+	}
 }
 
 /**
@@ -125,6 +158,13 @@ func (ls *LoginService)registerAccount(ctx iris.Context){
 修改密码
 */
 func (ls *LoginService)changepwd(ctx iris.Context){
+
+}
+
+/**
+找回密码
+*/
+func (ls *LoginService)findpwd(ctx iris.Context){
 
 }
 
