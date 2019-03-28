@@ -20,8 +20,8 @@ type WebServiceProxy struct{
 /*
 webService管理
 */
-func NewWebService(_app *iris.Application)WebServiceProxy{
-	pro := WebServiceProxy{app:_app};
+func NewWebService(_app *iris.Application)(*WebServiceProxy){
+	pro := &WebServiceProxy{app:_app};
 	pro.init();
 	return pro;
 }

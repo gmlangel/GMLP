@@ -27,7 +27,7 @@ type LoginService struct{
 /**
 开始监听前端服务接口的调用
 */
-func (ls LoginService)Start(){
+func (ls *LoginService)Start(){
 	ls.App.Get("/front/singByAccount",ls.sign);
 	ls.App.Get("/front/signOut",ls.signOut);
 	ls.App.Get("/front/registerAccount",ls.registerAccount);
@@ -39,26 +39,35 @@ func (ls LoginService)Start(){
 /**
 通过账号密码登录
 */
-func (ls LoginService)sign(ctx iris.Context){
+func (ls *LoginService)sign(ctx iris.Context){
 	ctx.Write([]byte("登录成功"));
 }
 
 /**
 登出
 */
-func (ls LoginService)signOut(ctx iris.Context){
+func (ls *LoginService)signOut(ctx iris.Context){
 	ctx.Write([]byte("登出成功"));
 }
 
 /**
 注册账号
 */
-func (ls LoginService)registerAccount(ctx iris.Context){
+func (ls *LoginService)registerAccount(ctx iris.Context){
 	//name := ctx.URLParam("ln");//gv(registerForm["ln"]);
 	sc := tools.Pack(ctx);
 	name := sc.GetStr("ln");
 	pwd := sc.GetStr("pwd");
- 	resStruct := models.CurrentResponse{Code:resFaild,Msg:"注册失败"};
+	resStruct := models.CurrentResponse{Code:resFaild,Msg:"注册失败"};
+	if len(name) < 5{
+		resStruct.Msg = "账号长度不能小于5";
+		ctx.WriteString(tools.StructToJSONStr(resStruct));
+		return;
+	}else if len(pwd) < 6{
+		resStruct.Msg = "密码长度不能小于6";
+		ctx.WriteString(tools.StructToJSONStr(resStruct));
+		return;
+	}
  	//检查同名用户是否存在
  	queryRes,queryErr := ls.SqlPro.Query(fmt.Sprintf("SELECT `ln` FROM `BusinessUsers` WHERE `ln` = '%s';",name));
 	if queryErr == nil{
@@ -66,7 +75,6 @@ func (ls LoginService)registerAccount(ctx iris.Context){
 			//数据中存在相同账号，注册失败
 			resStruct.Code = resFaild;
 			resStruct.Msg = "账号已存在，注册失败";
-			ctx.WriteString(tools.StructToJSONStr(resStruct))
 			ctx.WriteString(tools.StructToJSONStr(resStruct));
 			return;
 		}
@@ -116,13 +124,13 @@ func (ls LoginService)registerAccount(ctx iris.Context){
 /**
 修改密码
 */
-func (ls LoginService)changepwd(ctx iris.Context){
+func (ls *LoginService)changepwd(ctx iris.Context){
 
 }
 
 /**
 获取验证码
 */
-func (ls LoginService)getVerificationCode(ctx iris.Context){
+func (ls *LoginService)getVerificationCode(ctx iris.Context){
 
 }

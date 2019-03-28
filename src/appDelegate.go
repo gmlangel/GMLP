@@ -7,7 +7,7 @@ import(
 )
 var(
 	/*静态资源管理相关*/
-	staticPro proxy.StaticManagerProxy;
+	staticPro *proxy.StaticManagerProxy;
 	/*动态资源管理相关*/
 	/*webservice相关*/
 

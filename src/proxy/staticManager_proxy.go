@@ -6,8 +6,8 @@ import(
 /**
 静态资源管理
 */
-func NewStaticManager(_app *iris.Application) StaticManagerProxy{
-	sm := StaticManagerProxy{app:_app};
+func NewStaticManager(_app *iris.Application) *StaticManagerProxy{
+	sm := &StaticManagerProxy{app:_app};
 	return sm;
 }
 
