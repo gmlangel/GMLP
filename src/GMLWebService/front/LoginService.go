@@ -184,8 +184,22 @@ func (ls *LoginService)registerAccount(ctx iris.Context){
 修改密码
 */
 func (ls *LoginService)changepwd(ctx iris.Context){
-	fmt.Println("ok")
-	ctx.Next();
+	sc := tools.Pack(ctx);
+	oldp := sc.GetStr("oldp");
+	newp := sc.GetStr("newp");
+	bid_str := sc.GetStr("bidstr");
+	res,err := ls.SqlPro.Exec(fmt.Sprintf("update `BusinessUsers` set `pwd`='%s' where `bid_str`='%s' and `pwd`='%s';",newp,bid_str,oldp));
+	resObj := models.CurrentResponse{Code:resFaild,Msg:"修改密码失败"};
+	if err == nil{
+		if line,_ :=res.RowsAffected();line > 0{
+			resObj.Code = resOK;
+			resObj.Msg = "修改密码成功";
+			//更新session
+			sess := ls.Sm.Start(ctx);
+			sess.Set("pwd",newp);//更新session中存储的密码
+		}
+	}
+	ctx.WriteString(tools.StructToJSONStr(resObj));
 }
 
 /**
