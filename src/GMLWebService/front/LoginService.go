@@ -7,6 +7,8 @@ import(
 	"fmt"
 	"../../tools"
 	"github.com/satori/go.uuid"
+	"github.com/kataras/iris/core/router"
+	"strconv"
 )
 
 var(
@@ -14,6 +16,7 @@ var(
 	resOK = "1";
 	InvalideLoginName = "2";//账号不存在
 	PWDFaild = "3";//密码错误
+	UnSinged = "4";//登录时效已过期或未登录
 	InvalideMethod = "1001";//无效的method请求
 )
 
@@ -23,6 +26,7 @@ var(
 type LoginService struct{
 	SqlPro models.SQLInterface;
 	App *iris.Application;
+	SignGroup *router.Party;
 	Sm *sessions.Sessions;
 }
 
@@ -30,13 +34,26 @@ type LoginService struct{
 开始监听前端服务接口的调用
 */
 func (ls *LoginService)Start(){
-	ls.App.Get("/front/singByAccount",ls.sign);
+	ls.App.Get("/front/signByAccount",ls.sign);
 	ls.App.Get("/front/signOut",ls.signOut);
 	ls.App.Get("/front/registerAccount",ls.registerAccount);
-	ls.App.Get("/front/changepwd",ls.changepwd);
 	ls.App.Get("/front/findpwd",ls.findpwd);
-	ls.App.Get("/front/getVerificationCode",ls.getVerificationCode);
+	(*ls.SignGroup).Get("/changepwd",ls.changepwd);
+	(*ls.SignGroup).Get("/getVerificationCode",ls.getVerificationCode);
 	
+}
+
+/**
+检查是否登录成功
+*/
+func (ls *LoginService)MW_CheckSinged(ctx iris.Context){
+	sess := ls.Sm.Start(ctx);
+	if signed,err:= sess.GetBoolean("isSinged");err == nil && signed==true{
+		ctx.Next();//执行下一个处理环节
+	}else{
+		resStruct := models.CurrentResponse{Code:UnSinged,Msg:"登录已过期，请重新登录"};
+		ctx.WriteString(tools.StructToJSONStr(resStruct));
+	}
 }
 
 /**
@@ -54,7 +71,14 @@ func (ls *LoginService)sign(ctx iris.Context){
 		if len(res) > 0{
 			if pwd,gcontains:=res[0]["pwd"] ;gcontains==true && string(pwd) == loginPWD{
 				//存session到服务器，存cookie到用户本地
-
+				sess := ls.Sm.Start(ctx);//获取session，如果没有则自动创建，并且自动将sessionID存入cookie
+				//将用户信息存入session
+				sess.Set("ln",loginName);
+				sess.Set("pwd",loginPWD);
+				uid,_:= strconv.ParseUint(string(res[0]["bid"]),0,64);
+				sess.Set("uid",uid);
+				sess.Set("isSinged",true);
+				ls.Sm.ShiftExpiration(ctx);//更新session的失效时间
 				//返回成功登录结果
 				resLoginStruct := models.LoginStruct{};
 				resLoginStruct.Code = resOK;
@@ -80,6 +104,8 @@ func (ls *LoginService)sign(ctx iris.Context){
 登出
 */
 func (ls *LoginService)signOut(ctx iris.Context){
+	sess := ls.Sm.Start(ctx);
+	sess.Destroy();
 	ctx.Write([]byte("登出成功"));
 }
 
@@ -158,7 +184,8 @@ func (ls *LoginService)registerAccount(ctx iris.Context){
 修改密码
 */
 func (ls *LoginService)changepwd(ctx iris.Context){
-
+	fmt.Println("ok")
+	ctx.Next();
 }
 
 /**

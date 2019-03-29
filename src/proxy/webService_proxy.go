@@ -16,7 +16,7 @@ var(
 	/*sessionManager相关*/
 	sm *sessions.Sessions= sessions.New(
 		sessions.Config{
-			Cookie: "cookieNameForSessionID",
+			Cookie: "cookieNameForSessionIDAndUserInfo",
 			Expires:time.Duration(30) * time.Minute})
 )
 
@@ -43,11 +43,13 @@ func (webs *WebServiceProxy)init(){
 }
 
 func (webs *WebServiceProxy)Start(){
-
 	//开启前端服务监听
-	frontProxy := front.LoginService{SqlPro:sqlpro,App:webs.app,Sm:sm};
-	frontProxy.Start();
+	frontSignGroup := webs.app.Party("/front/sign");//前端需要验证签名的服务组
+	f_loginProxy := front.LoginService{SqlPro:sqlpro,App:webs.app,SignGroup:&frontSignGroup,Sm:sm};
+	frontSignGroup.Use(f_loginProxy.MW_CheckSinged);//添加登录校验
+	f_loginProxy.Start();//启动login相关服务
 	//开启后端服务监听
+	//signServiceGroup2 := webs.app.Party("/rear/sign");
 	// rearProxy := rear.LoginService{};
 	// webs.app.Any("/",frontProxy.WelCome);
 }
