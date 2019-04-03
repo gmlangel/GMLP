@@ -1,5 +1,9 @@
 {
-	"strategyName":"oneToOneLessonStrategy",
+	"strategyName":{
+		"type":"string",
+		"def_v":"1对1教室策略",
+		"des":"策略名称"
+	},
 	"canSendImg":{
 		"type":"bool",
 		"def_v":1,

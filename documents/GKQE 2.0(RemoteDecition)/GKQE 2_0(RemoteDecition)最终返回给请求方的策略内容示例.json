@@ -1,5 +1,5 @@
 {
-	"strategyName":"oneToOneLessonStrategy",
+	"strategyName":"1对1教室策略",
 	"canSendImg":1,
 	"sendCPUInfoTimeStep":1000,
 	"imgScale":0.50,
