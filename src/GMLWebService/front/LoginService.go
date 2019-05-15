@@ -110,7 +110,7 @@ func (ls *LoginService)signOut(ctx iris.Context){
 }
 
 /**
-注册账号
+注册账号 http://localhost:8080/front/registerAccount?ln=guominglong4&pwd=123456
 */
 func (ls *LoginService)registerAccount(ctx iris.Context){
 	//name := ctx.URLParam("ln");//gv(registerForm["ln"]);
