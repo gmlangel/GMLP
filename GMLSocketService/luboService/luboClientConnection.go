@@ -15,6 +15,7 @@ const(
 用于管理单个客户端的Socket连接
 */
 type LuBoClientConnection struct{
+	willCloseSocket bool;//是否需要延迟关闭socket
 	isConnected bool/*是否处于连接状态*/
 	writeChan chan int;/*socket写入操作，锁*/
 	waitSendMSGBuffer []interface{};/*即将发送给客户端的消息的队列*/
@@ -32,7 +33,7 @@ type LuBoClientConnection struct{
 创建新的socket管理工具
 */
 func NewLuBoClientConn(sid int64,conn net.Conn)(*LuBoClientConnection){
-	client := &LuBoClientConnection{SID:sid,UID:-1,RID:-1,Sock:conn,TimeoutSecond:socketTimeoutSecond,isConnected:true};
+	client := &LuBoClientConnection{willCloseSocket:false,SID:sid,UID:-1,RID:-1,Sock:conn,TimeoutSecond:socketTimeoutSecond,isConnected:true};
 	client.writeChan = make(chan int,1);//初始化 socket写入操作锁
 	go client.runLoopRead();//开socket read队列
 	//封装并回执给客户端“客户端接入”信令
@@ -49,15 +50,14 @@ func (lbc *LuBoClientConnection)DestroySocket(str string){
 		return;
 	}
 	lbc.isConnected = false;
-	lbc.Write(str);
-	lbc.Sock.Close();
 	lbc.OnTimeout = nil;
 	lbc.OnError = nil;
 	lbc.OnSocketCloseComplete = nil;
-	lbc.SID = -1;
 	lbc.UID = -1;
 	lbc.RID = -1;
-	lbc.Sock = nil;
+	lbc.willCloseSocket = true;
+	lbc.Write(str);
+	
 }
 func (lbc *LuBoClientConnection)Write(arg interface{}){
 	lbc.writeChan <- 1
@@ -66,11 +66,22 @@ func (lbc *LuBoClientConnection)Write(arg interface{}){
 	go lbc.writeToSocket();//调用消息发送函数
 }
 
+/*检查是否需要关闭客户端socket连接*/
+func (lbc *LuBoClientConnection)checkNeedCloseSocket(){
+	if lbc.willCloseSocket == true{
+		lbc.SID = -1;
+		lbc.Sock.Close();
+		lbc.Sock = nil;
+		close(lbc.writeChan)//关闭channel
+	}
+}
+
 func (lbc *LuBoClientConnection)writeToSocket(){
 	lbc.writeChan <- 1;
 	j := len(lbc.waitSendMSGBuffer);
 	if j <= 0{
 		<- lbc.writeChan;
+		lbc.checkNeedCloseSocket();
 		return;
 	}
 	//取一条被写数据
@@ -83,6 +94,7 @@ func (lbc *LuBoClientConnection)writeToSocket(){
 	if err != nil{
 		log.Println("sock:",lbc.SID,"数据转换出错:",err.Error())
 		<- lbc.writeChan
+		lbc.checkNeedCloseSocket();
 		return;
 	}
 	log.Println("sock:",lbc.SID," 准备写入socket的数据:",string(data));
@@ -99,10 +111,12 @@ func (lbc *LuBoClientConnection)writeToSocket(){
 		}else if lbc.OnError != nil{
 			lbc.OnError(lbc);//socket错误时， 通知管理器，进行处理
 		}
+		lbc.checkNeedCloseSocket();
 		return;
 	}
 	//log.Println("sock:",lbc.SID," 已发送的数据长度",n);
 	<- lbc.writeChan
+	lbc.checkNeedCloseSocket();
 }
 
 /**
@@ -131,7 +145,7 @@ func (lbc *LuBoClientConnection)runLoopRead(){
 		data := buffer[:n];//最终读取出的数据
 		if len(data) > 0{
 			//延长心跳超时时间
-			lbc.Sock.SetDeadline(time.Now().Add(socketTimeoutSecond));
+			sock.SetDeadline(time.Now().Add(socketTimeoutSecond));
 			//如果有数据则进行解析
 			
 			
