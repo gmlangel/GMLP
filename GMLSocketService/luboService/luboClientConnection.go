@@ -5,6 +5,7 @@ import(
 	"log"
 	model "../models"
 	"encoding/json"
+	_"fmt"
 )
 
 const(
@@ -86,6 +87,7 @@ func (lbc *LuBoClientConnection)writeToSocket(){
 	}
 	log.Println("sock:",lbc.SID," 准备写入socket的数据:",string(data));
 	n,err := sock.Write(data);
+	_ = n;
 	if err != nil{
 		<- lbc.writeChan
 		if operr,ok :=err.(*net.OpError);ok == true{
@@ -99,7 +101,7 @@ func (lbc *LuBoClientConnection)writeToSocket(){
 		}
 		return;
 	}
-	log.Println("sock:",lbc.SID," 已发送的数据长度",n);
+	//log.Println("sock:",lbc.SID," 已发送的数据长度",n);
 	<- lbc.writeChan
 }
 
