@@ -24,6 +24,7 @@ type LuboServer struct{
 	unOwnedConnect map[int64]*LuBoClientConnection;/*无主连接字典.用于记录未进入教室的用户的socket链接 {sid:socket}*/
 	ownedConnect map[int64]*LuBoClientConnection;/*有主连接字典{sid:socket}*/
 	ownedConnectUIDMap map[int64]*LuBoClientConnection;/*有主连接字典{uid:socket}*/
+	destroyChan chan int;/*client socket释放操作时的互斥锁*/
 }
 
 /**
@@ -44,6 +45,7 @@ func (sev *LuboServer)Init(conf *model.LoBoServerConfig){
 		sev.unOwnedConnect = map[int64]*LuBoClientConnection{};
 		sev.ownedConnect = map[int64]*LuBoClientConnection{};
 		sev.ownedConnectUIDMap = map[int64]*LuBoClientConnection{};
+		sev.destroyChan = make(chan int,1);//初始化 client socket释放操作时的互斥锁
 
 		fmt.Println("录播服务初始化成功");
 	}
@@ -131,6 +133,7 @@ func (sev *LuboServer)createConnectId()(int64,error){
 
 /*释放一个client Socket*/
 func (sev *LuboServer)destroySocket(cli * LuBoClientConnection){
+	sev.destroyChan <- 1
 	sid := cli.SID;
 	uid := cli.UID;
 	//rid := cli.RID;
@@ -148,5 +151,6 @@ func (sev *LuboServer)destroySocket(cli * LuBoClientConnection){
 	//返回socketID 到id池,以便之后的链接使用
 	sev.connectIdPool = append(sev.connectIdPool,sid);
 	cli.DestroySocket("你被删除了");
-	
+	fmt.Println(fmt.Sprintf("sev.unOwnedConnect = %v, sev.ownedConnect = %v, sev.ownedConnectUIDMap = %v",sev.unOwnedConnect,sev.ownedConnect,sev.ownedConnectUIDMap))
+	<- sev.destroyChan
 }
