@@ -178,7 +178,10 @@ func (sev *LuboServer)destroySocket(cli * LuBoClientConnection){
 	}
 	//返回socketID 到id池,以便之后的链接使用
 	sev.connectIdPool = append(sev.connectIdPool,sid);
-	cli.DestroySocket("你被删除了");
+	res := CreateProtocal(model.S_NOTIFY_C_OFFLINE).(*model.OfflineNotify_s2c);
+	res.Code = 259;
+	res.Reason = "您已经被踢";
+	cli.DestroySocket(res);
 	fmt.Println(fmt.Sprintf("sev.unOwnedConnect = %v, sev.ownedConnect = %v, sev.ownedConnectUIDMap = %v",sev.unOwnedConnect,sev.ownedConnect,sev.ownedConnectUIDMap))
 	<- sev.destroyChan
 }

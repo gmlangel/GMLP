@@ -45,7 +45,7 @@ func NewLuBoClientConn(sid int64,conn net.Conn)(*LuBoClientConnection){
 /**
 关闭并释放socket,支持在关闭socket之前，依然向原有socket中写入一条消息
 */
-func (lbc *LuBoClientConnection)DestroySocket(str string){
+func (lbc *LuBoClientConnection)DestroySocket(arg interface{}){
 	if lbc.isConnected == false{
 		return;
 	}
@@ -54,7 +54,7 @@ func (lbc *LuBoClientConnection)DestroySocket(str string){
 	lbc.OnError = nil;
 	lbc.UID = -1;
 	lbc.RID = -1;
-	go lbc.writeLastMsgAndCloseSock(str);//送最后一条消息后，关闭socket
+	go lbc.writeLastMsgAndCloseSock(arg);//送最后一条消息后，关闭socket
 	
 }
 
