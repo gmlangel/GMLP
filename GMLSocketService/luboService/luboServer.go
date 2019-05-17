@@ -55,7 +55,11 @@ func (sev *LuboServer)Init(conf *model.LoBoServerConfig){
 释放录播服务器
 */
 func (sev *LuboServer)DeInit(){
-
+	//关闭服务监听
+	sev.CloseServer();
+	//释放互斥锁
+	close(sev.destroyChan);
+	sev.destroyChan = nil;
 }
 
 /**
@@ -109,6 +113,30 @@ func (sev *LuboServer)CloseServer(){
 	fmt.Println("服务器停止");
 	sev.isStarted = false;
 	sev.sockListener.Close();
+	sev.sockListener = nil;
+
+	//停止所有socket
+	for key := range sev.unOwnedConnect{
+		if sock := sev.unOwnedConnect[key];sock != nil{
+			sev.destroySocket(sock);
+		}
+	}
+
+	for key := range sev.ownedConnect{
+		if sock := sev.ownedConnect[key];sock != nil{
+			sev.destroySocket(sock);
+		}
+	}
+
+	for key := range sev.ownedConnectUIDMap{
+		if sock := sev.ownedConnectUIDMap[key];sock != nil{
+			sev.destroySocket(sock);
+		}
+	}
+	//释放数组和集合
+	sev.unOwnedConnect = nil;
+	sev.ownedConnect = nil;
+	sev.ownedConnectUIDMap = nil;
 }
 
 /*生成socketID*/

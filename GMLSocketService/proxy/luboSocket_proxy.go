@@ -10,43 +10,39 @@ import(
 */
 type LoboSocketProxy struct{
 	serv *server.LuboServer;
-
+	isInited bool
 }
 
 func NewLoBoSocket()(* LoboSocketProxy){
 	ins := &LoboSocketProxy{};
-	ins.serv = &server.LuboServer{};//创建录播服务
-
-	conf := &model.LoBoServerConfig{Host:"0.0.0.0",Port:59999,ServerType:"tcp"};
-	ins.serv.Init(conf);
-	
+	ins.isInited = false;
 	return ins;
 }
 
 /**
-开始录播服务
+启动服务
 */
-func (pro *LoboSocketProxy)Start(){
-	if pro.serv != nil{
-		pro.serv.OpenServer();
+func (pro *LoboSocketProxy)GInit(){
+	if pro.isInited == true{
+		return;
 	}
+	pro.isInited = true;
+	conf := &model.LoBoServerConfig{Host:"0.0.0.0",Port:59999,ServerType:"tcp"};
+	pro.serv = &server.LuboServer{};//创建录播服务
+	pro.serv.Init(conf);
+	pro.serv.OpenServer();
 }
 
-/**
-停止录播服务
-*/
-func (pro *LoboSocketProxy)Stop(){
-	if pro.serv != nil{
-		pro.serv.CloseServer();
-	}
-}
 
 
 /**
 释放操作
 */
 func (pro *LoboSocketProxy)DeInit(){
-	pro.Stop();
+	if pro.isInited == false{
+		return;
+	}
+	pro.isInited = false;
 	if pro.serv != nil{
 		pro.serv.DeInit();
 		pro.serv = nil;
