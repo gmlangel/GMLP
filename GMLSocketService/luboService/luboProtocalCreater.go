@@ -10,7 +10,7 @@ func CreateProtocal(cmd uint32)interface{}{
 	case model.S_RES_C_HY:
 		result = createClientIn_s2c();
 		break;
-	case model.C_REQ_S_HEARTBEAT:
+	case model.S_RES_C_HEARTBEAT:
 		result = createHeartBeat_s2c()
 		break;
 	case model.S_RES_C_JOINROOM:
@@ -46,7 +46,7 @@ func createClientIn_s2c()interface{}{
 
 
 func createHeartBeat_s2c()interface{}{
-	result := &model.HeartBeat_s2c{Cmd:model.C_REQ_S_HEARTBEAT,Seq:0,C_Seq:0,Servertime:uint32(time.Now().Unix())};
+	result := &model.HeartBeat_s2c{Cmd:model.S_RES_C_HEARTBEAT,Seq:0,C_Seq:0,Servertime:uint32(time.Now().Unix())};
 	return result;
 }
 

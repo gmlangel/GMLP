@@ -5,11 +5,14 @@ import(
 	"log"
 	model "../models"
 	"encoding/json"
-	_"fmt"
+	"fmt"
+	"strings"
 )
 
 const(
 	 socketTimeoutSecond time.Duration= time.Second * 60;
+	 pkgHead = "<gmlb>";//包头
+	 pkgFoot = "<gmle>";//包尾
 )
 /**
 用于管理单个客户端的Socket连接
@@ -18,6 +21,8 @@ type LuBoClientConnection struct{
 	isConnected bool/*是否处于连接状态*/
 	writeChan chan int;/*socket写入操作，锁*/
 	waitSendMSGBuffer []interface{};/*即将发送给客户端的消息的队列*/
+	readChan chan int;/*数据读取锁*/
+	readBuffer []byte;/*数据读取队列*/
 	SID int64 /*socket id*/
 	UID int64 /*用户ID默认为-1*/
 	RID int64 /*教室ID 默认为-1*/
@@ -35,6 +40,7 @@ type LuBoClientConnection struct{
 func NewLuBoClientConn(sid int64,conn net.Conn)(*LuBoClientConnection){
 	client := &LuBoClientConnection{SID:sid,UID:-1,RID:-1,Sock:conn,TimeoutSecond:socketTimeoutSecond,isConnected:true};
 	client.writeChan = make(chan int,1);//初始化 socket写入操作锁
+	client.readChan = make(chan int,1);
 	go client.runLoopRead();//开socket read队列
 	//封装并回执给客户端“客户端接入”信令
 	pro := CreateProtocal(model.S_RES_C_HY);
@@ -103,6 +109,7 @@ func (lbc *LuBoClientConnection)checkNeedCloseSocket(){
 	lbc.Sock.Close();
 	lbc.Sock = nil;
 	close(lbc.writeChan)//关闭channel
+	close(lbc.readChan)
 	if lbc.OnSocketCloseComplete != nil{
 		if lbc.OnSocketCloseCompleteArgs != nil{
 			lbc.OnSocketCloseComplete(lbc.OnSocketCloseCompleteArgs ...);
@@ -182,9 +189,69 @@ func (lbc *LuBoClientConnection)runLoopRead(){
 		if len(data) > 0{
 			//延长心跳超时时间
 			sock.SetDeadline(time.Now().Add(socketTimeoutSecond));
-			//如果有数据则进行解析
-			
-			
+			//如果有数据则异步进行解析，这样可以利用sock.read时，处理数据包。而不会因为read后同步执行checkPage或者execPackage时间过长，无形中推迟下一次read的时间点
+			lbc.readChan <- 1;
+			lbc.readBuffer = append(lbc.readBuffer,data...);
+			<- lbc.readChan
+			go lbc.checkPackage(data);
 		}
+	}
+}
+
+/*在readbuffer中检索有用的数据包*/
+func (lbc *LuBoClientConnection)checkPackage(data []byte){
+	/*
+	以下的处理环节存在一个问题，即无法解决第一个包为 <gmlb>"cmd":10010,"mgs":"abc"<gmle><gmlb>"cmd":10010,"mgs":"abc"
+	第二个包为<gmlb>"cmd":10010,"mgs":"abc"<gmle>的丢包情况。 这种情况下只会处理第一个包，而第二个包会被丢弃，视作丢包
+	*/
+	lbc.readChan <- 1;
+	str := string(lbc.readBuffer);
+	//fmt.Println(str);
+	waitDelStr := "";
+	j := strings.Index(str,pkgHead);//取包头位置
+	pos := 0;
+	//解析并做粘包处理
+	for lbc.isConnected == true && j >= 0{
+		//删除包头前无用的字节
+		if j > 0{
+			waitDelStr = str[0:j];//取被删除的字符传
+			pos = len([]byte(waitDelStr));//取被删除的字符传所占字节的长度
+			lbc.readBuffer = lbc.readBuffer[pos:];//更新 “读缓存”,从“读缓存”的开头删除<gmlb>标识之前的无用字节
+			str = str[j:];//更新当前要处理的 "全量字符传"
+			j = 0;//更新当前J的位置
+		}
+		//取包尾标识，如果有则解析包，没有则跳出循环
+		j = strings.Index(str,pkgFoot);
+		if j > 0{
+			j += len(pkgFoot);
+			waitDelStr = str[0:j];//取被删除的字符传
+			pos = len([]byte(waitDelStr));//取被删除的字符传所占字节的长度
+			lbc.readBuffer = lbc.readBuffer[pos:];//更新 “读缓存”
+			str = str[j:];//更新当前要处理的 "全量字符传"
+			j = strings.Index(str,pkgHead);//更新当前J的位置到下一个包头的位置
+			lbc.execPackage(waitDelStr);//执行数据包
+			continue;
+		}
+		break;
+	}
+	<- lbc.readChan;
+}
+
+/*处理客户端发来的数据包*/
+func (lbc *LuBoClientConnection)execPackage(pkgStr string){
+	jsonStr := strings.Replace(pkgStr,pkgHead,"{",-1);
+	jsonStr = strings.Replace(jsonStr,pkgFoot,"}",-1);
+	var jsonObj map[string]interface{};
+	err := json.Unmarshal([]byte(jsonStr),&jsonObj);
+	if err == nil{
+		fmt.Println(fmt.Sprintf("sid:%d 收到数据包:%v",lbc.SID,jsonObj));
+		//取cmd，并决策执行
+		cmd := jsonObj["cmd"];
+		if temp,ok := cmd.(float64);ok == true{
+			command := uint32(temp);
+			fmt.Println("数据包的cmd:",command);
+		}
+	}else{
+		fmt.Println("报错了:",err.Error());
 	}
 }
