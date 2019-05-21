@@ -117,24 +117,24 @@ type HeartBeat_s2c struct{
 type JoinRoom_c2s struct{
     Cmd uint32 `json:"cmd"`
     Seq uint32 `json:"seq"`;//数据包的序号，可以为0
-    Rid uint32 `json:"rid"`;//教室ID
+    Rid int64 `json:"rid"`;//教室ID
     TeachScript uint32 `json:"tts"`;//课程教学脚本的ID
     StartTimeinterval uint32 `json:"sti"`;//课程开始时间的UTC时间戳秒值
-    Uid uint32 `json:"uid"`;//用户ID
+    Uid int64 `json:"uid"`;//用户ID
     NickName string `json:"nn"`;//用户昵称
 }
 
 type JoinRoom_s2c struct{
     Cmd uint32 `json:"cmd"`
     C_Seq uint32 `json:"c_seq"`;//数据包的序号，可以为0
-    Rid uint32 `json:"rid"`;//教室ID
+    Rid int64 `json:"rid"`;//教室ID
     Code uint32 `json:"code"`;//进入教室是否成功0 = 成功 ,262 = 进入room失败,uid无效,263 = 进入room失败,roomId小于0,无效
     FaildMsg string `json:"fe"`;//报错信息
     UserArr []CurrentUser `json:"ua"`;//用户列表
 }
 
 type CurrentUser struct{
-    Uid uint32 `json:"uid"`;//用户ID
+    Uid int64 `json:"uid"`;//用户ID
     NickName string `json:"nn"`;//用户昵称
     Type bool `json:"type"`;//用户进出教室状态 True = 进入教室,False = 离开教室
 }
@@ -159,7 +159,7 @@ type ScriptConfigDataMap struct{
 */
 type PushTeachScriptCache_s2c_notify struct{
     Cmd uint32 `json:"cmd"`
-    Rid uint32 `json:"rid"`;//教室ID
+    Rid int64 `json:"rid"`;//教室ID
     Code uint32 `json:"code"`;//暂时无意义 0 = 成功
     FaildMsg string `json:"fe"`;//报错信息
     PlayTimeInterval uint32 `json:"playTimeInterval"`;//本消息中的最后一条教学脚本已经执行了的时间，秒值
@@ -170,7 +170,7 @@ type PushTeachScriptCache_s2c_notify struct{
 /*上报答题结果*/
 type UploadAnswer_c2s struct{
     Cmd uint32 `json:"cmd"`
-    Uid uint32 `json:"uid"`;//用户ID
+    Uid int64 `json:"uid"`;//用户ID
     LocalTimeinterval uint32 `json:"lt"`;//客户端发送请求时的UTC时间的秒值
     Id uint32 `json:"id"`;//题号,对应0x00FF001D 消息datas消息中的id
     Data Answer `json:"data"`;//答案内容
@@ -196,13 +196,13 @@ type UploadAnswer_s2c struct{
 /*客户端请求课程学习报告*/
 type UserLessonResult_c2s struct{
     Cmd uint32 `json:"cmd"`
-    Rid uint32 `json:"rid"`;//教室ID
-    Uid uint32 `json:"uid"`;//用户ID
+    Rid int64 `json:"rid"`;//教室ID
+    Uid int64 `json:"uid"`;//用户ID
 }
 
 type UserLessonResult_s2c struct{
     Cmd uint32 `json:"cmd"`
-    Rid uint32 `json:"rid"`;//教室ID
+    Rid int64 `json:"rid"`;//教室ID
     Code uint32 `json:"code"`;//暂时无意义 0 = 成功
     FaildMsg string `json:"fe"`;//报错信息
     Seq uint32 `json:"seq"`;//数据包的序号，可以为0
@@ -212,28 +212,28 @@ type UserLessonResult_s2c struct{
 /*客户端数据上报*/
 type DataReport_c2s struct{
     Cmd uint32 `json:"cmd"`
-    Rid uint32 `json:"rid"`;//教室ID
-    Uid uint32 `json:"uid"`;//用户ID
+    Rid int64 `json:"rid"`;//教室ID
+    Uid int64 `json:"uid"`;//用户ID
     C_Code uint32 `json:"c_code"`;//状态码 1 = 听不到老师声音,2 = 看不到教材,3 = 教材画面卡住，不动
     Msg string `json:"msg"`;//具体数据
 }
 
 type DataReport_s2c struct{
     Cmd uint32 `json:"cmd"`
-    Rid uint32 `json:"rid"`;//教室ID
+    Rid int64 `json:"rid"`;//教室ID
 }
 
 /*客户端请求离开教室*/
 type LeaveRoom_c2s struct{
     Cmd uint32 `json:"cmd"`
-    Rid uint32 `json:"rid"`;//教室ID
-    Uid uint32 `json:"uid"`;//用户ID
+    Rid int64 `json:"rid"`;//教室ID
+    Uid int64 `json:"uid"`;//用户ID
 }
 
 type LeaveRoom_s2c struct{
     Cmd uint32 `json:"cmd"`
-    Rid uint32 `json:"rid"`;//教室ID
-    Uid uint32 `json:"uid"`;//用户ID
+    Rid int64 `json:"rid"`;//教室ID
+    Uid int64 `json:"uid"`;//用户ID
     Code uint32 `json:"code"`;// 0 = 成功
 }
 

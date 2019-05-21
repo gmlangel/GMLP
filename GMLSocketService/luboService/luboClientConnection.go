@@ -5,7 +5,7 @@ import(
 	"log"
 	model "../models"
 	"encoding/json"
-	"fmt"
+	_"fmt"
 	"strings"
 )
 
@@ -14,6 +14,7 @@ const(
 	 pkgHead = "<gmlb>";//包头
 	 pkgFoot = "<gmle>";//包尾
 )
+
 /**
 用于管理单个客户端的Socket连接
 */
@@ -241,17 +242,5 @@ func (lbc *LuBoClientConnection)checkPackage(data []byte){
 func (lbc *LuBoClientConnection)execPackage(pkgStr string){
 	jsonStr := strings.Replace(pkgStr,pkgHead,"{",-1);
 	jsonStr = strings.Replace(jsonStr,pkgFoot,"}",-1);
-	var jsonObj map[string]interface{};
-	err := json.Unmarshal([]byte(jsonStr),&jsonObj);
-	if err == nil{
-		fmt.Println(fmt.Sprintf("sid:%d 收到数据包:%v",lbc.SID,jsonObj));
-		//取cmd，并决策执行
-		cmd := jsonObj["cmd"];
-		if temp,ok := cmd.(float64);ok == true{
-			command := uint32(temp);
-			fmt.Println("数据包的cmd:",command);
-		}
-	}else{
-		fmt.Println("报错了:",err.Error());
-	}
+	ExecPackage(lbc,[]byte(jsonStr));//交给 数据包处理者进行处理
 }
