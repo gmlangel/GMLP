@@ -1,9 +1,37 @@
 package models;
 
+
+
+const(
+    RoomState_NotStart Enum_RoomState = "nostart";//课程状态   未开始
+    RoomState_Started Enum_RoomState = "started";//课程状态   已开始
+    RoomState_End Enum_RoomState = "end";//课程状态   已结束
+)
+
+type Enum_RoomState string;
+
 type LoBoServerConfig struct{
 	Host string;/*地址*/
 	Port uint32;/*端口*/
 	ServerType string;/*tcp or  udp*/
+}
+
+
+type RoomInfo struct{
+    Rid int64;
+    RoomState Enum_RoomState;//课程状态
+    CurrentTimeInterval int64;//某一段教学脚本已经执行了的时间，用于进行各种时间比对及计算
+    CompleteTime int64;//某一段教学脚本的预期完成时间
+    StartTimeInterval int64;//课程开始时间beginTime
+    TeachingTmaterialScriptID int64;//教学脚本ID
+    CurrentStepIdx int64;//教学脚本执行的进度
+    CurrentQuestionId int64;//当前等待应答的问题的ID
+    AllowNewScript bool;//是否允许下发新的教学脚本
+    WaitAnswerUids []int64;//等待做答的用户ID数组,它是一个触发器,当allowNewScript = false时，只有waitAnswerUids长度为0，才可以重置allowNewScript的状态为true
+    UserArr []CurrentUser;//当前频道中的人的信息数组
+    UserIdArr []int64;//用户ID数组
+    AnswerUIDQueue []int64;//用户答题序列数组
+    TongyongCMDArr []map[string]interface{};//通用教学命令
 }
 
 //协议ID定义-----------------------------
@@ -118,8 +146,8 @@ type JoinRoom_c2s struct{
     Cmd uint32 `json:"cmd"`
     Seq uint32 `json:"seq"`;//数据包的序号，可以为0
     Rid int64 `json:"rid"`;//教室ID
-    TeachScript uint32 `json:"tts"`;//课程教学脚本的ID
-    StartTimeinterval uint32 `json:"sti"`;//课程开始时间的UTC时间戳秒值
+    TeachScript int64 `json:"tts"`;//课程教学脚本的ID
+    StartTimeinterval int64 `json:"sti"`;//课程开始时间的UTC时间戳秒值
     Uid int64 `json:"uid"`;//用户ID
     NickName string `json:"nn"`;//用户昵称
 }
@@ -162,9 +190,9 @@ type PushTeachScriptCache_s2c_notify struct{
     Rid int64 `json:"rid"`;//教室ID
     Code uint32 `json:"code"`;//暂时无意义 0 = 成功
     FaildMsg string `json:"fe"`;//报错信息
-    PlayTimeInterval uint32 `json:"playTimeInterval"`;//本消息中的最后一条教学脚本已经执行了的时间，秒值
+    PlayTimeInterval int64 `json:"playTimeInterval"`;//本消息中的最后一条教学脚本已经执行了的时间，秒值
     Datas []map[string]interface{} `json:"datas"`;//教学脚本数组
-    AnswerUIDQueue []uint32;//学员uid列表。用于1对多课程场景，暂时无用。
+    AnswerUIDQueue []int64;//学员uid列表。用于1对多课程场景，暂时无用。
 }
 
 /*上报答题结果*/
