@@ -78,7 +78,7 @@ func (lbc *LuBoClientConnection)writeLastMsgAndCloseSock(arg interface{}){
 	if err != nil{
 		log.Println("sock:",lbc.SID,"数据转换出错:",err.Error())
 		<- lbc.writeChan
-		lbc.checkNeedCloseSocket();
+		lbc.closeSocket();
 		return;
 	}
 	log.Println("sock:",lbc.SID," 准备写入socket的数据:",string(data));
@@ -86,12 +86,12 @@ func (lbc *LuBoClientConnection)writeLastMsgAndCloseSock(arg interface{}){
 	_ = n;
 	if err != nil{
 		<- lbc.writeChan
-		lbc.checkNeedCloseSocket();
+		lbc.closeSocket();
 		return;
 	}
 	//log.Println("sock:",lbc.SID," 已发送的数据长度",n);
 	<- lbc.writeChan
-	lbc.checkNeedCloseSocket();
+	lbc.closeSocket();
 }
 
 /*
@@ -105,7 +105,7 @@ func (lbc *LuBoClientConnection)Write(arg interface{}){
 }
 
 /*检查是否需要关闭客户端socket连接*/
-func (lbc *LuBoClientConnection)checkNeedCloseSocket(){
+func (lbc *LuBoClientConnection)closeSocket(){
 	lbc.SID = -1;
 	lbc.Sock.Close();
 	lbc.Sock = nil;

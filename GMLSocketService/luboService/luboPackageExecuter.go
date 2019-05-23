@@ -62,44 +62,33 @@ func c2s_JoinRoom(client *LuBoClientConnection,jsonByte []byte){
 		preClient := OwnedConnectUIDMap_GetValue(req.Uid);//根据UID获取当前用户已经进入教室的socket连接，正常情况下应为nil
 		if preClient == nil{
 			//进入教室
-			if joinRoom(client,req) == true{
-				//全新的用户进入教室
-				NewUserClientJoinRoom(client.SID,req.Uid,client);
-			}
+			joinRoom(client,req);
 		}else{
-			// if preClient == client{
-			// 	//同一个socket，已经进入过教室，又重复的进教室
-			// 	var rid = dataObj.rid || -1;
-			// 	var roominfo = roomMap[rid];
-			// 	if(roominfo)
-			// 	{
-			// 		//先调用离开教室
-			// 		leaveRoom(sid,roominfo,uid);
-			// 		//后调用进入教室
-			// 		joinroom(sid,dataObj);
-			// 	}
-			// 	else{
-			// 		joinroom(sid,dataObj);
-			// 	}
-			// }else{
-			// 	//不同的socket，之前的socket已经存在于教室，则将其踢出
-			// 	closePreUserSocket
-			// }
+			if preClient == client{
+				//同一个socket，已经进入过教室，又重复的进教室
+				roominfo := RoomInfoMap_GetValue(req.Rid);
+				if roominfo != nil{
+					//先调用离开教室
+					leaveRoom(client,req.Uid,roominfo);
+					//后调用进入教室
+					joinRoom(client,req);
+				}else{
+					joinRoom(client,req);
+				}
+			}else{
+				// //不同的socket，之前的socket已经存在于教室，则将其踢出
+				// closePreUserSocket
+			}
 		}
-		// req.Rid;
-		// req.TeachScript;
-		// req.StartTimeinterval;
-		// req.Uid;
-		// req.NickName;
 	}
 }
 
 /**进入教室*/
-func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s)bool{
+func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 	result := false;
 	tempRes := CreateProtocal(model.S_RES_C_JOINROOM);
 	if tempRes == nil{
-		return result;
+		return ;
 	}
 
 	res,ok := tempRes.(*model.JoinRoom_s2c);
@@ -161,8 +150,10 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s)bool{
 			}
 		}
 	}
-	
-	return result;
+	if result == true{
+		//全新的用户进入教室
+		NewUserClientJoinRoom(client.SID,req.Uid,client);
+	}
 }
 
 
@@ -238,7 +229,7 @@ func loadTeachingTmaterialScript(client *LuBoClientConnection,req model.JoinRoom
 		return;
 	}
 	
-	teachScriptObj := map[string]interface{}{};
+	var teachScriptObj map[string]interface{};
 	err = json.Unmarshal(body,&teachScriptObj);
 	if err != nil{
 		log.Println("教材ID:",teachScriptID," 教材脚本资源转JSON出错:",err.Error());
@@ -249,4 +240,23 @@ func loadTeachingTmaterialScript(client *LuBoClientConnection,req model.JoinRoom
 	pushTeachingTmaterialScriptLoadEndNotify(client,teachScriptObj);
 	//向该用户推送正在执行的教学命令
 	sendTeachScriptNotify([]int64{req.Uid},req.Rid,roomInfo.TongyongCMDArr,roomInfo.CurrentTimeInterval,roomInfo.AnswerUIDQueue)
+}
+
+/**
+离开教室
+*/
+func leaveRoom(client *LuBoClientConnection,uid int64,roomInfo *model.RoomInfo){
+	UnOwnedConnect_SetValue(client.SID,client);
+	OwnedConnect_SetValue(client.SID,nil);
+	OwnedConnectUIDMap_SetValue(uid,nil);
+	temp := CreateProtocal(model.S_RES_C_LEAVEROOM);
+	if temp != nil{
+		if res,ok := temp.(*model.LeaveRoom_s2c);ok == true{
+			res.Rid = client.RID;
+			res.Uid = client.UID;
+			client.Write(res);
+		}
+	}
+	client.RID = -1;
+	client.UID = -1;
 }

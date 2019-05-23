@@ -113,7 +113,7 @@ func RoomInfoMap_Clear(){
 
 
 
-/*向unOwnedConnect 添加或者设置值*/
+//向unOwnedConnect 添加或者设置值
 func UnOwnedConnect_SetValue(key int64,value *LuBoClientConnection){
 	unOwnedConnectChan <- 1;
 	unOwnedConnect[key] = value;
