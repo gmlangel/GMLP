@@ -76,8 +76,15 @@ func c2s_JoinRoom(client *LuBoClientConnection,jsonByte []byte){
 					joinRoom(client,req);
 				}
 			}else{
-				// //不同的socket，之前的socket已经存在于教室，则将其踢出
+				//不同的socket，之前的socket已经存在于教室，则将其踢出
 				// closePreUserSocket
+				DestroySocket(client,func(v ...interface{}){
+					tClient,ok1 := v[0].(*LuBoClientConnection);
+					treq,ok2 := v[1].(model.JoinRoom_c2s);
+					if ok1 == true && ok2 == true{
+						joinRoom(tClient,treq);
+					}
+				},[]interface{}{client,req})
 			}
 		}
 	}

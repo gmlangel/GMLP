@@ -26,6 +26,9 @@ var(
 
 	teachScriptMap map[int64]map[string]interface{} = map[int64]map[string]interface{}{};//教学脚本数据集
 	teachScriptMapChan = make(chan int,1);
+
+	connectIdPool = []int64{};/*客户端连接ID池*/
+	destroyChan = make(chan int,1);/*client socket释放操作时的互斥锁*/
 )
 
 /*根据SID和UID获取 socket连接*/
@@ -38,6 +41,27 @@ func GetSocketByUIDAndSID(sid int64,uid int64)*LuBoClientConnection{
 		}
 	}
 	return sock;
+}
+
+/*释放一个client Socket*/
+func DestroySocket(cli * LuBoClientConnection,completeFunc func(...interface{}),completeFuncArgs []interface{}){
+	destroyChan <- 1
+	sid := cli.SID;
+	uid := cli.UID;
+	//rid := cli.RID;
+	UnOwnedConnect_SetValue(sid,nil);
+	OwnedConnect_SetValue(sid,nil);
+	OwnedConnectUIDMap_SetValue(uid,nil);
+	//返回socketID 到id池,以便之后的链接使用
+	connectIdPool = append(connectIdPool,sid);
+	res := CreateProtocal(model.S_NOTIFY_C_OFFLINE).(*model.OfflineNotify_s2c);
+	res.Code = 259;
+	res.Reason = "您已经被踢";
+	cli.OnSocketCloseComplete = completeFunc;//设置 cli完成关闭后的处理函数
+	cli.OnSocketCloseCompleteArgs = completeFuncArgs;//设置 cli完成关闭后的处理函数 对应的参数
+	cli.DestroySocket(res);
+	fmt.Println(fmt.Sprintf("sev.unOwnedConnect = %v, sev.ownedConnect = %v, sev.ownedConnectUIDMap = %v",unOwnedConnect,ownedConnect,ownedConnectUIDMap))
+	<- destroyChan
 }
 
 /*有一个新用户进入了教室，需要同步各sock缓存集合的记录*/
@@ -193,9 +217,6 @@ type LuboServer struct{
 	isStarted bool;
 	sockListener net.Listener;/*socket监听器*/
 	connectIdOffset int64;/*客户端连接的ID ,用于生成 '客户端连接ID池'*/
-	connectIdPool []int64;/*客户端连接ID池*/
-	
-	destroyChan chan int;/*client socket释放操作时的互斥锁*/
 }
 
 /**
@@ -213,8 +234,6 @@ func (sev *LuboServer)Init(conf *model.LoBoServerConfig){
 			return;
 		}
 		sev.sockListener = tempListen;//获取socket服务的引用
-		
-		sev.destroyChan = make(chan int,1);//初始化 client socket释放操作时的互斥锁
 
 		fmt.Println("录播服务初始化成功");
 	}
@@ -226,9 +245,6 @@ func (sev *LuboServer)Init(conf *model.LoBoServerConfig){
 func (sev *LuboServer)DeInit(){
 	//关闭服务监听
 	sev.CloseServer();
-	//释放互斥锁
-	close(sev.destroyChan);
-	sev.destroyChan = nil;
 }
 
 /**
@@ -260,10 +276,10 @@ func (sev *LuboServer)_openServer(){
 		//生成socket的管理器
 		luboclient := NewLuBoClientConn(sid,newClient);
 		luboclient.OnTimeout = func(cli * LuBoClientConnection){
-			sev.destroySocket(cli);//释放socket
+			DestroySocket(cli,nil,nil);//释放socket
 		}
 		luboclient.OnError = func(cli * LuBoClientConnection){
-			sev.destroySocket(cli);//释放socket
+			DestroySocket(cli,nil,nil);//释放socket
 		}
 		//塞入无主socket记录集
 		UnOwnedConnect_SetValue(sid,luboclient);
@@ -287,19 +303,19 @@ func (sev *LuboServer)CloseServer(){
 	//停止所有socket
 	for key := range unOwnedConnect{
 		if sock := unOwnedConnect[key];sock != nil{
-			sev.destroySocket(sock);
+			DestroySocket(sock,nil,nil);
 		}
 	}
 
 	for key := range ownedConnect{
 		if sock := ownedConnect[key];sock != nil{
-			sev.destroySocket(sock);
+			DestroySocket(sock,nil,nil);
 		}
 	}
 
 	for key := range ownedConnectUIDMap{
 		if sock := ownedConnectUIDMap[key];sock != nil{
-			sev.destroySocket(sock);
+			DestroySocket(sock,nil,nil);
 		}
 	}
 	//释放数组和集合
@@ -313,39 +329,21 @@ func (sev *LuboServer)CloseServer(){
 
 /*生成socketID*/
 func (sev *LuboServer)createConnectId()(int64,error){
-	if len(sev.connectIdPool) == 0{
+	if len(connectIdPool) == 0{
 		if sev.connectIdOffset < 0xfffffffffffffe - 10000{
 			for i := 1;i<=10000;i++{
-				sev.connectIdPool = append(sev.connectIdPool,sev.connectIdOffset + int64(i));
+				connectIdPool = append(connectIdPool,sev.connectIdOffset + int64(i));
             }
             sev.connectIdOffset += 10000;
 		}else{
 			return 0,&LuboServerError{msg:"无法继续生成connectId,因为ID超出最大限制"};
 		}
 	}
-	j := len(sev.connectIdPool);
-	currentArr := sev.connectIdPool[:j-1];
-	popArr := sev.connectIdPool[j-1:];
+	j := len(connectIdPool);
+	currentArr := connectIdPool[:j-1];
+	popArr := connectIdPool[j-1:];
 	result := popArr[0];
-	sev.connectIdPool = currentArr;
+	connectIdPool = currentArr;
 	return result,nil;
 }
 
-/*释放一个client Socket*/
-func (sev *LuboServer)destroySocket(cli * LuBoClientConnection){
-	sev.destroyChan <- 1
-	sid := cli.SID;
-	uid := cli.UID;
-	//rid := cli.RID;
-	UnOwnedConnect_SetValue(sid,nil);
-	OwnedConnect_SetValue(sid,nil);
-	OwnedConnectUIDMap_SetValue(uid,nil);
-	//返回socketID 到id池,以便之后的链接使用
-	sev.connectIdPool = append(sev.connectIdPool,sid);
-	res := CreateProtocal(model.S_NOTIFY_C_OFFLINE).(*model.OfflineNotify_s2c);
-	res.Code = 259;
-	res.Reason = "您已经被踢";
-	cli.DestroySocket(res);
-	fmt.Println(fmt.Sprintf("sev.unOwnedConnect = %v, sev.ownedConnect = %v, sev.ownedConnectUIDMap = %v",unOwnedConnect,ownedConnect,ownedConnectUIDMap))
-	<- sev.destroyChan
-}

@@ -31,7 +31,7 @@ type LuBoClientConnection struct{
 	TimeoutSecond time.Duration;/*超时时长*/
 	OnTimeout func (*LuBoClientConnection);/*当当前socket超时时触发*/
 	OnError func (*LuBoClientConnection);/*当当前socket 发生除了Timeout错误以外，如EOF时触发*/
-	OnSocketCloseComplete func(v ...interface{});//当当前socket连接被close完毕后触发的处理函数。
+	OnSocketCloseComplete func(...interface{});//当当前socket连接被close完毕后触发的处理函数。
 	OnSocketCloseCompleteArgs []interface{};//OnSocketCloseComplete函数的参数
 }
 
