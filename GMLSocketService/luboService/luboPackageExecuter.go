@@ -3,6 +3,14 @@ import(
 	"fmt"
 	model "../models"
 	"encoding/json"
+	"net/http"
+	"time"
+	"io/ioutil"
+	"log"
+)
+
+const (
+	TeachScriptUrlFormat = "https://www.juliaol.cn/%d.cof?timeInterval=%d"
 )
 /**
 数据包处理者
@@ -109,7 +117,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s)bool{
 				roomInfo = &model.RoomInfo{};
 				roomInfo.Rid = req.Rid;
 				roomInfo.RoomState = model.RoomState_NotStart;
-				roomInfo.TeachingTmaterialScriptID = req.TeachScript;
+				roomInfo.TeachingTmaterialScriptID = req.TeachScriptID;
 				roomInfo.CurrentQuestionId = -1;
 				roomInfo.AllowNewScript = true;
 				RoomInfoMap_SetValue(req.Rid,roomInfo);//存入教室信息集合
@@ -143,12 +151,13 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s)bool{
 			//向该用户推送管理员操作命令通知
 
 			//如果教材脚本加载完毕，则下推教材脚本
-			if tsObj := TeachScriptMap_GetValue(req.TeachScript);tsObj != nil{
+			if tsObj := TeachScriptMap_GetValue(req.TeachScriptID);tsObj != nil{
 				pushTeachingTmaterialScriptLoadEndNotify(client,tsObj);
 				//向该用户推送正在执行的教学命令
 				sendTeachScriptNotify([]int64{req.Uid},req.Rid,roomInfo.TongyongCMDArr,roomInfo.CurrentTimeInterval,roomInfo.AnswerUIDQueue)
 			}else{
 				//加载教学脚本
+				go loadTeachingTmaterialScript(client,req,roomInfo);
 			}
 		}
 	}
@@ -206,4 +215,38 @@ func sendTeachScriptNotify(uidArr []int64,rid int64,tongyongCMDArr []map[string]
 			}
 		}
 	}
+}
+
+/**
+加载教学脚本
+*/
+func loadTeachingTmaterialScript(client *LuBoClientConnection,req model.JoinRoom_c2s,roomInfo *model.RoomInfo){
+	teachScriptID := req.TeachScriptID;
+	url := fmt.Sprintf(TeachScriptUrlFormat,teachScriptID,time.Now().Unix());
+	resp,err :=  http.Get(url)//请求 教材脚本资源
+    if err != nil {
+		// handle error
+		log.Println("教材ID:",teachScriptID," 请求教材脚本资源出错:",err.Error())
+		return;
+    }
+
+    defer resp.Body.Close()
+    body, err := ioutil.ReadAll(resp.Body)
+    if err != nil {
+		// handle error
+		log.Println("教材ID:",teachScriptID," 教材脚本资源内容有问题:",err.Error())
+		return;
+	}
+	
+	teachScriptObj := map[string]interface{}{};
+	err = json.Unmarshal(body,&teachScriptObj);
+	if err != nil{
+		log.Println("教材ID:",teachScriptID," 教材脚本资源转JSON出错:",err.Error());
+		return;
+	}
+	fmt.Println("教材ID:",teachScriptID," 加载完毕");
+	TeachScriptMap_SetValue(teachScriptID,teachScriptObj);//将教学脚本添加至脚本集合
+	pushTeachingTmaterialScriptLoadEndNotify(client,teachScriptObj);
+	//向该用户推送正在执行的教学命令
+	sendTeachScriptNotify([]int64{req.Uid},req.Rid,roomInfo.TongyongCMDArr,roomInfo.CurrentTimeInterval,roomInfo.AnswerUIDQueue)
 }

@@ -146,7 +146,7 @@ type JoinRoom_c2s struct{
     Cmd uint32 `json:"cmd"`
     Seq uint32 `json:"seq"`;//数据包的序号，可以为0
     Rid int64 `json:"rid"`;//教室ID
-    TeachScript int64 `json:"tts"`;//课程教学脚本的ID
+    TeachScriptID int64 `json:"tts"`;//课程教学脚本的ID
     StartTimeinterval int64 `json:"sti"`;//课程开始时间的UTC时间戳秒值
     Uid int64 `json:"uid"`;//用户ID
     NickName string `json:"nn"`;//用户昵称
