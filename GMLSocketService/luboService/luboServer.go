@@ -44,7 +44,7 @@ func GetSocketByUIDAndSID(sid int64,uid int64)*LuBoClientConnection{
 }
 
 /*释放一个client Socket*/
-func DestroySocket(cli * LuBoClientConnection,completeFunc func(...interface{}),completeFuncArgs []interface{}){
+func DestroySocket(cli * LuBoClientConnection,completeFunc func()){
 	destroyChan <- 1
 	sid := cli.SID;
 	uid := cli.UID;
@@ -58,7 +58,6 @@ func DestroySocket(cli * LuBoClientConnection,completeFunc func(...interface{}),
 	res.Code = 259;
 	res.Reason = "您已经被踢";
 	cli.OnSocketCloseComplete = completeFunc;//设置 cli完成关闭后的处理函数
-	cli.OnSocketCloseCompleteArgs = completeFuncArgs;//设置 cli完成关闭后的处理函数 对应的参数
 	cli.DestroySocket(res);
 	fmt.Println(fmt.Sprintf("sev.unOwnedConnect = %v, sev.ownedConnect = %v, sev.ownedConnectUIDMap = %v",unOwnedConnect,ownedConnect,ownedConnectUIDMap))
 	<- destroyChan
@@ -276,10 +275,10 @@ func (sev *LuboServer)_openServer(){
 		//生成socket的管理器
 		luboclient := NewLuBoClientConn(sid,newClient);
 		luboclient.OnTimeout = func(cli * LuBoClientConnection){
-			DestroySocket(cli,nil,nil);//释放socket
+			DestroySocket(cli,nil);//释放socket
 		}
 		luboclient.OnError = func(cli * LuBoClientConnection){
-			DestroySocket(cli,nil,nil);//释放socket
+			DestroySocket(cli,nil);//释放socket
 		}
 		//塞入无主socket记录集
 		UnOwnedConnect_SetValue(sid,luboclient);
@@ -303,19 +302,19 @@ func (sev *LuboServer)CloseServer(){
 	//停止所有socket
 	for key := range unOwnedConnect{
 		if sock := unOwnedConnect[key];sock != nil{
-			DestroySocket(sock,nil,nil);
+			DestroySocket(sock,nil);
 		}
 	}
 
 	for key := range ownedConnect{
 		if sock := ownedConnect[key];sock != nil{
-			DestroySocket(sock,nil,nil);
+			DestroySocket(sock,nil);
 		}
 	}
 
 	for key := range ownedConnectUIDMap{
 		if sock := ownedConnectUIDMap[key];sock != nil{
-			DestroySocket(sock,nil,nil);
+			DestroySocket(sock,nil);
 		}
 	}
 	//释放数组和集合

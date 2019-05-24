@@ -25,7 +25,7 @@ func CreateProtocal(cmd uint32)interface{}{
 	case model.S_RES_C_USERLESSONRESULT:
 		result = createUserLessonResult_s2c();
 		break;
-	case model.S_RES_C_UPLOADDATA:
+	case model.S_RES_C_UPLOADREPORTDATA:
 		result = createDataReport_s2c();
 		break;
 	case model.S_RES_C_LEAVEROOM:
@@ -71,7 +71,7 @@ func createUserLessonResult_s2c()interface{}{
 }
 
 func createDataReport_s2c()interface{}{
-	result := &model.DataReport_s2c{Cmd:model.S_RES_C_UPLOADDATA,Rid:0};
+	result := &model.DataReport_s2c{Cmd:model.S_RES_C_UPLOADREPORTDATA,Rid:0};
 	return result;
 }
 

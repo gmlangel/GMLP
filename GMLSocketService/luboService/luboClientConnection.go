@@ -31,8 +31,7 @@ type LuBoClientConnection struct{
 	TimeoutSecond time.Duration;/*超时时长*/
 	OnTimeout func (*LuBoClientConnection);/*当当前socket超时时触发*/
 	OnError func (*LuBoClientConnection);/*当当前socket 发生除了Timeout错误以外，如EOF时触发*/
-	OnSocketCloseComplete func(...interface{});//当当前socket连接被close完毕后触发的处理函数。
-	OnSocketCloseCompleteArgs []interface{};//OnSocketCloseComplete函数的参数
+	OnSocketCloseComplete func();//当当前socket连接被close完毕后触发的处理函数。
 }
 
 /**
@@ -112,11 +111,7 @@ func (lbc *LuBoClientConnection)closeSocket(){
 	close(lbc.writeChan)//关闭channel
 	close(lbc.readChan)
 	if lbc.OnSocketCloseComplete != nil{
-		if lbc.OnSocketCloseCompleteArgs != nil{
-			lbc.OnSocketCloseComplete(lbc.OnSocketCloseCompleteArgs ...);
-		}else{
-			lbc.OnSocketCloseComplete();
-		}
+		lbc.OnSocketCloseComplete();
 		lbc.OnSocketCloseComplete = nil;
 	}
 }

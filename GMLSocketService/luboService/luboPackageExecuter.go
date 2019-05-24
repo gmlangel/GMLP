@@ -36,12 +36,20 @@ func ExecPackage(client *LuBoClientConnection,jsonByte []byte){
 			case model.C_REQ_S_JOINROOM:
 				c2s_JoinRoom(client,jsonByte);
 				break;
-			case model.C_REQ_S_LEAVEROOM:break;
+			case model.C_REQ_S_LEAVEROOM:
+				c2s_LeaveRoom(client,jsonByte);
+				break;
 			case model.C_REQ_S_SENDCHAT:break;
 			case model.C_REQ_S_SENDADMINCMD:break;
-			case model.C_REQ_S_UPLOADANSWERCMD:break;
-			case model.C_REQ_S_USERLESSONRESULT:break;
-			case model.C_REQ_S_UPLOADDATA:break;
+			case model.C_REQ_S_UPLOADANSWERCMD:
+				c2s_UploadAnswerCMD(client,jsonByte);
+				break;
+			case model.C_REQ_S_USERLESSONRESULT:
+				c2s_GetLessonResult(client,jsonByte);
+				break;
+			case model.C_REQ_S_UPLOADREPORTDATA:
+				c2s_UploadReportData(client,jsonByte);
+				break;
 			default:
 				break;
 			}
@@ -50,6 +58,118 @@ func ExecPackage(client *LuBoClientConnection,jsonByte []byte){
 		fmt.Println("sid:",client.SID," 数据包解析错误:",err.Error());
 	}
 	
+}
+
+func c2s_GetLessonResult(client *LuBoClientConnection,jsonByte []byte){
+	var req model.UserLessonResult_c2s;
+	err := json.Unmarshal(jsonByte,&req);
+	var res *model.UserLessonResult_s2c = nil;
+	tmp := CreateProtocal(model.S_RES_C_UPLOADREPORTDATA)
+	if tmp != nil{
+		if t,ok := tmp.(*model.UserLessonResult_s2c);ok == true{
+			res = t;
+			res.Code = 1
+			res.FaildMsg = "未找到课程报告"
+		}
+	}
+	if err == nil{
+		rid := req.Rid;
+		uid := req.Uid;
+		resultKey := fmt.Sprintf("%d_%d",uid,rid);
+		if lessArr := LessonResultMap_GetValue(resultKey);lessArr != nil && len(lessArr) > 0{
+			if res != nil{
+				res.Rid = rid;
+				res.Datas = lessArr;
+				res.Code = 0
+				res.FaildMsg = ""
+			}
+		}
+	}else{
+		res.Code = 2
+		res.FaildMsg = "课程报告的请求数据的格式有问题，Unmarshal失败"
+	}
+
+	if res != nil{
+		client.Write(res);
+	}
+}
+
+/*
+处理 用户上报的数据
+*/
+func c2s_UploadReportData(client *LuBoClientConnection,jsonByte []byte){
+	var req model.DataReport_c2s;
+	err := json.Unmarshal(jsonByte,&req);
+	if err == nil{
+		tmp := CreateProtocal(model.S_RES_C_UPLOADREPORTDATA);
+		if tmp != nil{
+			if res,ok := tmp.(*model.DataReport_s2c);ok == true{
+				res.Rid = client.RID;
+				client.Write(res)
+			}
+		}
+	}
+}
+
+/**
+处理用户上报的“做题答案”
+*/
+func c2s_UploadAnswerCMD(client *LuBoClientConnection,jsonByte []byte){
+	var req model.UploadAnswer_c2s;
+	err := json.Unmarshal(jsonByte,&req);
+	if err == nil{
+		roomInfo := RoomInfoMap_GetValue(client.RID);
+		if roomInfo != nil{
+			if roomInfo.CurrentQuestionId != req.Id{
+				return;//如果学生上报的答案，不是当前的问题的答案，则不作数
+			}
+			tempUid := req.Uid;
+			tempArr := roomInfo.WaitAnswerUids
+			for i,v := range tempArr{
+				if v == tempUid{
+					//从等待答题的用户列表中移除改用户
+					roomInfo.WaitAnswerUids = append(roomInfo.WaitAnswerUids[0:i],roomInfo.WaitAnswerUids[i+1:]...);
+					//每一个用户提交答案后进行判断，脚本执行时间不足5秒的，补充至5秒
+					if roomInfo.CompleteTime - roomInfo.CurrentTimeInterval < 5{
+						roomInfo.CompleteTime = roomInfo.CurrentTimeInterval + 5
+					}
+					//记录用户相关的课程报告
+					resultKey := fmt.Sprintf("%d_%d",client.UID,client.RID);
+					resultArr := LessonResultMap_GetValue(resultKey)
+					ans_c2s := model.Answer_c2s{Id:req.Id,Data:req.Data};
+					if resultArr == nil{
+						resultArr = append([]model.Answer_c2s{},ans_c2s)
+					}else{
+						resultArr = append(resultArr,ans_c2s);
+					}
+					LessonResultMap_SetValue(resultKey,resultArr);
+					break;
+				}
+			}
+			//通过判断是否所有的用户都已经答题完毕，5秒后更新allowNewScript（“是否下发下一个教学脚本”）的状态，  5秒的时间是留给客户端播放奖励声音和动画
+			if len(roomInfo.WaitAnswerUids) == 0{
+				roomInfo.CompleteTime = roomInfo.CurrentTimeInterval + 5
+			}
+
+			//发送客户端回执
+			res := &model.UploadAnswer_s2c{Cmd:model.S_RES_C_UPLOADANSWERCMD,Code:0,FaildMsg:""};
+			client.Write(res);
+		}
+	}
+}
+
+/**
+处理离开教室
+*/
+func c2s_LeaveRoom(client *LuBoClientConnection,jsonByte []byte){
+	var req model.LeaveRoom_c2s;
+	err := json.Unmarshal(jsonByte,&req);
+	if err == nil{
+		roomInfo := RoomInfoMap_GetValue(req.Rid);
+		if roomInfo != nil{
+			leaveRoom(client,req.Uid,roomInfo)
+		}
+	}
 }
 
 /**
@@ -77,14 +197,9 @@ func c2s_JoinRoom(client *LuBoClientConnection,jsonByte []byte){
 				}
 			}else{
 				//不同的socket，之前的socket已经存在于教室，则将其踢出
-				// closePreUserSocket
-				DestroySocket(client,func(v ...interface{}){
-					tClient,ok1 := v[0].(*LuBoClientConnection);
-					treq,ok2 := v[1].(model.JoinRoom_c2s);
-					if ok1 == true && ok2 == true{
-						joinRoom(tClient,treq);
-					}
-				},[]interface{}{client,req})
+				DestroySocket(client,func(){
+					joinRoom(client,req);
+				})
 			}
 		}
 	}
@@ -181,11 +296,19 @@ func pushTeachingTmaterialScriptLoadEndNotify(client *LuBoClientConnection,tsObj
 		if courseIDObj := tsObj["courseId"];courseIDObj != nil{
 			courseID = courseIDObj.(uint32);
 		}
-		resource := map[string]interface{}{};
+		isOk := false;
 		if resourceObj := tsObj["resource"];resourceObj != nil{
-			resource = resourceObj.(map[string]interface{});
+			resource,ok:= resourceObj.(map[string]interface{});
+			if ok == true{
+				tsRes.ScriptConfigData = model.ScriptConfigDataMap{CourseId:courseID,Resource:resource};
+				isOk = true;
+			}
 		}
-		tsRes.ScriptConfigData = model.ScriptConfigDataMap{CourseId:courseID,Resource:resource};
+		if isOk == false{
+			tsRes.Code = 1;
+			tsRes.FaildMsg = "数据格式转换失败"
+		}
+		
 		//下推教材脚本的资源相关配置
 		client.Write(tsRes);
 	}

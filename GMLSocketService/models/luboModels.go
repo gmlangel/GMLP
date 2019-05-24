@@ -117,8 +117,8 @@ const(
 	S_NOTIFY_C_TEACHSCRIPTLOADEND = 0x00FF0020;
 	
 	//客户端数据上报
-    C_REQ_S_UPLOADDATA = 0x00FF003A;
-    S_RES_C_UPLOADDATA = 0x00FF003B;
+    C_REQ_S_UPLOADREPORTDATA = 0x00FF003A;
+    S_RES_C_UPLOADREPORTDATA = 0x00FF003B;
 )
 
 /*新客户端socket介入后的 欢迎消息反馈*/
@@ -200,7 +200,7 @@ type UploadAnswer_c2s struct{
     Cmd uint32 `json:"cmd"`
     Uid int64 `json:"uid"`;//用户ID
     LocalTimeinterval uint32 `json:"lt"`;//客户端发送请求时的UTC时间的秒值
-    Id uint32 `json:"id"`;//题号,对应0x00FF001D 消息datas消息中的id
+    Id int64 `json:"id"`;//题号,对应0x00FF001D 消息datas消息中的id
     Data Answer `json:"data"`;//答案内容
 }
 
@@ -211,7 +211,7 @@ type Answer struct{
 }
 
 type Answer_c2s struct{
-    Id uint32 `json:"id"`;//题号,对应0x00FF001D 消息datas消息中的id
+    Id int64 `json:"id"`;//题号,对应0x00FF001D 消息datas消息中的id
     Data Answer `json:"data"`;//答案内容
 }
 
