@@ -243,6 +243,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			//将各种ID绑定到当前的socket上
 			client.UID = req.Uid;
 			client.RID = req.Rid;
+			client.RoomInfo = roomInfo;
 
 			//加入到教室用户的列表
 			user := model.CurrentUser{Uid:req.Uid,NickName:req.NickName,Type:true};
@@ -265,7 +266,13 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			if tsObj := TeachScriptMap_GetValue(req.TeachScriptID);tsObj != nil{
 				pushTeachingTmaterialScriptLoadEndNotify(client,tsObj);
 				//向该用户推送正在执行的教学命令
-				sendTeachScriptNotify([]int64{req.Uid},req.Rid,roomInfo.TongyongCMDArr,roomInfo.CurrentTimeInterval,roomInfo.AnswerUIDQueue)
+				sendTeachScriptToUser(client,req.Rid,roomInfo.TongyongCMDArr,roomInfo.CurrentTimeInterval,roomInfo.AnswerUIDQueue)
+				if temStepDataArr := tsObj["stepData"];temStepDataArr != nil{
+					if sdArr,ok:= temStepDataArr.([]map[string]interface{});ok == true{
+						client.TeachScriptStepDataArr = sdArr
+					}
+				}
+				go loopSendTeachScript(client);//定时下发教学脚本
 			}else{
 				//加载教学脚本
 				go loadTeachingTmaterialScript(client,req,roomInfo);
@@ -314,10 +321,35 @@ func pushTeachingTmaterialScriptLoadEndNotify(client *LuBoClientConnection,tsObj
 	}
 }
 
+// /**
+//  * 下发教学脚本
+//  * */
+// func sendTeachScriptNotify(uidArr []int64,rid int64,tongyongCMDArr []map[string]interface{},playTimeInterval int64,answerUIDQueue []int64){
+// 	tempRes := CreateProtocal(model.S_NOTIFY_C_TEACHSCRIPTCMD);
+// 	if tempRes == nil{
+// 		return;
+// 	}
+// 	res,ok := tempRes.(*model.PushTeachScriptCache_s2c_notify);
+// 	if ok{
+// 		res.Code = 0;
+// 		res.Rid = rid;
+// 		res.Datas = tongyongCMDArr;
+// 		res.AnswerUIDQueue = answerUIDQueue;
+// 		res.PlayTimeInterval = playTimeInterval;
+// 		for _,v:= range uidArr{
+// 			sock := OwnedConnectUIDMap_GetValue(v)
+// 			if sock != nil{
+// 				sock.Write(res);
+// 			}
+// 		}
+// 	}
+// }
+
+
 /**
  * 下发教学脚本
  * */
-func sendTeachScriptNotify(uidArr []int64,rid int64,tongyongCMDArr []map[string]interface{},playTimeInterval int64,answerUIDQueue []int64){
+ func sendTeachScriptToUser(sock *LuBoClientConnection,rid int64,tongyongCMDArr []map[string]interface{},playTimeInterval int64,answerUIDQueue []int64){
 	tempRes := CreateProtocal(model.S_NOTIFY_C_TEACHSCRIPTCMD);
 	if tempRes == nil{
 		return;
@@ -329,12 +361,7 @@ func sendTeachScriptNotify(uidArr []int64,rid int64,tongyongCMDArr []map[string]
 		res.Datas = tongyongCMDArr;
 		res.AnswerUIDQueue = answerUIDQueue;
 		res.PlayTimeInterval = playTimeInterval;
-		for _,v:= range uidArr{
-			sock := OwnedConnectUIDMap_GetValue(v)
-			if sock != nil{
-				sock.Write(res);
-			}
-		}
+		sock.Write(res);
 	}
 }
 
@@ -369,8 +396,17 @@ func loadTeachingTmaterialScript(client *LuBoClientConnection,req model.JoinRoom
 	TeachScriptMap_SetValue(teachScriptID,teachScriptObj);//将教学脚本添加至脚本集合
 	pushTeachingTmaterialScriptLoadEndNotify(client,teachScriptObj);
 	//向该用户推送正在执行的教学命令
-	sendTeachScriptNotify([]int64{req.Uid},req.Rid,roomInfo.TongyongCMDArr,roomInfo.CurrentTimeInterval,roomInfo.AnswerUIDQueue)
+	sendTeachScriptToUser(client,req.Rid,roomInfo.TongyongCMDArr,roomInfo.CurrentTimeInterval,roomInfo.AnswerUIDQueue)
+
+	if temStepDataArr := teachScriptObj["stepData"];temStepDataArr != nil{
+		if sdArr,ok:= temStepDataArr.([]map[string]interface{});ok == true{
+			client.TeachScriptStepDataArr = sdArr
+		}
+	}
+	go loopSendTeachScript(client);//定时下发教学脚本
 }
+
+
 
 /**
 离开教室
@@ -389,4 +425,133 @@ func leaveRoom(client *LuBoClientConnection,uid int64,roomInfo *model.RoomInfo){
 	}
 	client.RID = -1;
 	client.UID = -1;
+}
+
+//定时下发教学脚本
+func loopSendTeachScript(client *LuBoClientConnection){
+	client.GTimerInterval = time.Now().Unix();//获取当前服务器时间
+	var curTime int64 = 0;
+	for client.SID != -1{
+		rid := client.RID;
+		roomInfo := client.RoomInfo;
+		stepDataArr := client.TeachScriptStepDataArr;
+		if nil == roomInfo || nil == stepDataArr{
+			break;
+		}
+		if roomInfo.RoomState == model.RoomState_End{
+			break;//如果课程已经停止，则停止下发数据
+		}
+		curTime = time.Now().Unix();
+		if roomInfo.RoomState == model.RoomState_Started{
+			//课程已开始， 计时下发指定教材
+			roomInfo.CurrentTimeInterval += curTime - client.GTimerInterval;
+			if roomInfo.CurrentTimeInterval >= roomInfo.CompleteTime{
+				//已经达到超时时间，为了不影响之后的脚本运行，则应该直接执行下个脚本
+				roomInfo.CurrentTimeInterval = 0;
+				roomInfo.AllowNewScript = true;
+			}
+
+			if roomInfo.AllowNewScript == false{
+				continue;
+			}
+			cmdArr := []map[string]interface{}{};//要下发的教学脚本数组
+			j := int64(len(stepDataArr));
+			for roomInfo.CurrentStepIdx < j{
+				scriptItem := stepDataArr[roomInfo.CurrentStepIdx];//获取一条教学命令
+				roomInfo.CurrentStepIdx += 1;//更新教学命令的 索引游标
+				roomInfo.CurrentQuestionId = getInt64(scriptItem["id"],-1);//设置当前正在提问的问题ID
+				//将服务端脚本转换为客户端可以执行的脚本命令
+				clientScriptItem := map[string]interface{}{"suid":0,"st":curTime,"data":scriptItem};
+				cmdArr = append(cmdArr,clientScriptItem);//将脚本塞入 下发列表
+				sType := getString(scriptItem["type"],"");
+				switch sType{
+				case "changePage":
+					//移除之前的批处理教学命令缓存,添加新的教学命令缓存
+					roomInfo.TongyongCMDArr = []map[string]interface{}{clientScriptItem};
+					break;
+				case "onWall":
+					//添加新的教学命令缓存
+					roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,clientScriptItem);
+					break;
+				case "delay":
+					//延迟一定时间后，下发下一条命令
+					roomInfo.CompleteTime = getInt64(getMap(scriptItem["value"],map[string]interface{}{})["timeLength"],0);
+					roomInfo.AllowNewScript = false;
+					cmdArr = cmdArr[0:len(cmdArr)-1];//从下发命令集合中删除delay命令
+					break;
+				case "classEnd":
+					roomInfo.TongyongCMDArr = roomInfo.TongyongCMDArr[0:1];//除第一条换页命令外，移除其余的命令
+					roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,clientScriptItem);//添加新的教学命令缓存
+					roomInfo.RoomState = model.RoomState_End;//更新教室状态
+					//测试用， 重置教室，反复使用教室
+					RoomInfoMap_SetValue(rid,nil);
+					break;
+				} 
+			}
+
+			if len(cmdArr) > 0{
+				//下发教学命令到客户端
+				sendTeachScriptToUser(client,rid,roomInfo.TongyongCMDArr,roomInfo.CurrentTimeInterval,roomInfo.AnswerUIDQueue);
+			}
+		}else{
+			//计时，实时更新课程状态
+			if curTime > roomInfo.StartTimeInterval{
+				roomInfo.RoomState = model.RoomState_Started
+			}
+		}
+		client.GTimerInterval = curTime;//更新上一次处理脚本时的时间记录.
+		time.Sleep(model.TeachScriptTimeInterval);//每隔一定时间，计算要下发的教材脚本
+	}
+}
+
+/*object转字符传*/
+func getString(val interface{},def string)string{
+	if nil == val{
+		return def
+	}
+	result,ok := val.(string);
+	if ok{
+		return result;
+	}else{
+		return def;
+	}
+}
+
+/*object转int64*/
+func getInt64(val interface{},def int64)int64{
+	if nil == val{
+		return def;
+	}
+	result,ok := val.(int64);
+	if ok{
+		return result;
+	}else{
+		return def;
+	}
+}
+
+/*object转bool*/
+func getBool(val interface{},def bool)bool{
+	if nil == val{
+		return def;
+	}
+	result,ok := val.(bool);
+	if ok{
+		return result;
+	}else{
+		return def;
+	}
+}
+
+/*object转map*/
+func getMap(val interface{},def map[string]interface{})map[string]interface{}{
+	if nil == val{
+		return def;
+	}
+	result,ok := val.(map[string]interface{});
+	if ok{
+		return result;
+	}else{
+		return def;
+	}
 }

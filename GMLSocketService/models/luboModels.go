@@ -1,11 +1,14 @@
 package models;
-
+import(
+    "time"
+)
 
 
 const(
     RoomState_NotStart Enum_RoomState = "nostart";//课程状态   未开始
     RoomState_Started Enum_RoomState = "started";//课程状态   已开始
     RoomState_End Enum_RoomState = "end";//课程状态   已结束
+    TeachScriptTimeInterval = time.Second * time.Duration(1);//教材脚本下发的时间间隔
 )
 
 type Enum_RoomState string;
