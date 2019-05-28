@@ -82,12 +82,14 @@ func (lbc *LuBoClientConnection)writeLastMsgAndCloseSock(arg interface{}){
 	//执行写入
 	sock.SetDeadline(time.Now().Add(socketTimeoutSecond));//延长超时时间
 	data,err := json.Marshal(arg);
-	if err != nil{
+	tj := len(data);
+	if err != nil || tj <= 2{
 		log.Println("sock:",lbc.SID,"数据转换出错:",err.Error())
 		<- lbc.writeChan
-		lbc.closeSocket();
 		return;
 	}
+	data = append([]byte(pkgHead),data...);
+	data = append(data,[]byte(pkgFoot)...);
 	log.Println("sock:",lbc.SID," 准备写入socket的数据:",string(data));
 	n,err := sock.Write(data);
 	_ = n;
@@ -141,11 +143,14 @@ func (lbc *LuBoClientConnection)writeToSocket(){
 	//执行写入
 	sock.SetDeadline(time.Now().Add(socketTimeoutSecond));//延长超时时间
 	data,err := json.Marshal(arg);
-	if err != nil{
+	tj := len(data);
+	if err != nil || tj <= 2{
 		log.Println("sock:",lbc.SID,"数据转换出错:",err.Error())
 		<- lbc.writeChan
 		return;
 	}
+	data = append([]byte(pkgHead),data...);
+	data = append(data,[]byte(pkgFoot)...);
 	log.Println("sock:",lbc.SID," 准备写入socket的数据:",string(data));
 	n,err := sock.Write(data);
 	_ = n;
@@ -243,7 +248,7 @@ func (lbc *LuBoClientConnection)checkPackage(data []byte){
 
 /*处理客户端发来的数据包*/
 func (lbc *LuBoClientConnection)execPackage(pkgStr string){
-	jsonStr := strings.Replace(pkgStr,pkgHead,"{",-1);
-	jsonStr = strings.Replace(jsonStr,pkgFoot,"}",-1);
+	jsonStr := strings.Replace(pkgStr,pkgHead,"",-1);
+	jsonStr = strings.Replace(jsonStr,pkgFoot,"",-1);
 	ExecPackage(lbc,[]byte(jsonStr));//交给 数据包处理者进行处理
 }

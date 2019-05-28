@@ -267,11 +267,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 				pushTeachingTmaterialScriptLoadEndNotify(client,tsObj);
 				//向该用户推送正在执行的教学命令
 				sendTeachScriptToUser(client,req.Rid,roomInfo.TongyongCMDArr,roomInfo.CurrentTimeInterval,roomInfo.AnswerUIDQueue)
-				if temStepDataArr := tsObj["stepData"];temStepDataArr != nil{
-					if sdArr,ok:= temStepDataArr.([]map[string]interface{});ok == true{
-						client.TeachScriptStepDataArr = sdArr
-					}
-				}
+				client.TeachScriptStepDataArr = getObjArray(tsObj["stepData"],nil);
 				go loopSendTeachScript(client);//定时下发教学脚本
 			}else{
 				//加载教学脚本
@@ -299,23 +295,26 @@ func pushTeachingTmaterialScriptLoadEndNotify(client *LuBoClientConnection,tsObj
 	if ok{
 		tsRes.Code = 0;
 		tsRes.FaildMsg = "";
-		courseID := uint32(0);
-		if courseIDObj := tsObj["courseId"];courseIDObj != nil{
-			courseID = courseIDObj.(uint32);
-		}
-		isOk := false;
-		if resourceObj := tsObj["resource"];resourceObj != nil{
-			resource,ok:= resourceObj.(map[string]interface{});
-			if ok == true{
-				tsRes.ScriptConfigData = model.ScriptConfigDataMap{CourseId:courseID,Resource:resource};
-				isOk = true;
+		tempCouseID := getInt64(tsObj["courseId"],-1)
+		if tempCouseID > -1{
+			courseID := uint32(tempCouseID);
+			isOk := false;
+			if resourceObj := tsObj["resource"];resourceObj != nil{
+				resource,ok:= resourceObj.(map[string]interface{});
+				if ok == true{
+					tsRes.ScriptConfigData = model.ScriptConfigDataMap{CourseId:courseID,Resource:resource};
+					isOk = true;
+				}
 			}
-		}
-		if isOk == false{
+			if isOk == false{
+				tsRes.Code = 1;
+				tsRes.FaildMsg = "数据格式转换失败"
+			}
+		}else{
 			tsRes.Code = 1;
 			tsRes.FaildMsg = "数据格式转换失败"
 		}
-		
+	
 		//下推教材脚本的资源相关配置
 		client.Write(tsRes);
 	}
@@ -398,11 +397,7 @@ func loadTeachingTmaterialScript(client *LuBoClientConnection,req model.JoinRoom
 	//向该用户推送正在执行的教学命令
 	sendTeachScriptToUser(client,req.Rid,roomInfo.TongyongCMDArr,roomInfo.CurrentTimeInterval,roomInfo.AnswerUIDQueue)
 
-	if temStepDataArr := teachScriptObj["stepData"];temStepDataArr != nil{
-		if sdArr,ok:= temStepDataArr.([]map[string]interface{});ok == true{
-			client.TeachScriptStepDataArr = sdArr
-		}
-	}
+	client.TeachScriptStepDataArr = getObjArray(teachScriptObj["stepData"],nil);
 	go loopSendTeachScript(client);//定时下发教学脚本
 }
 
@@ -432,6 +427,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 	client.GTimerInterval = time.Now().Unix();//获取当前服务器时间
 	var curTime int64 = 0;
 	for client.SID != -1{
+		time.Sleep(model.TeachScriptTimeInterval);//每隔一定时间，计算要下发的教材脚本
 		rid := client.RID;
 		roomInfo := client.RoomInfo;
 		stepDataArr := client.TeachScriptStepDataArr;
@@ -445,7 +441,10 @@ func loopSendTeachScript(client *LuBoClientConnection){
 		if roomInfo.RoomState == model.RoomState_Started{
 			//课程已开始， 计时下发指定教材
 			roomInfo.CurrentTimeInterval += curTime - client.GTimerInterval;
+			client.GTimerInterval = curTime;//更新上一次处理脚本时的时间记录.
+		//	fmt.Println("进入前======>roomInfo.CurrentTimeInterval:",roomInfo.CurrentTimeInterval,"  roomInfo.CompleteTime:",roomInfo.CompleteTime)
 			if roomInfo.CurrentTimeInterval >= roomInfo.CompleteTime{
+		//		fmt.Println("执行了======>roomInfo.CurrentTimeInterval:",roomInfo.CurrentTimeInterval,"  roomInfo.CompleteTime:",roomInfo.CompleteTime)
 				//已经达到超时时间，为了不影响之后的脚本运行，则应该直接执行下个脚本
 				roomInfo.CurrentTimeInterval = 0;
 				roomInfo.AllowNewScript = true;
@@ -541,7 +540,6 @@ func loopSendTeachScript(client *LuBoClientConnection){
 			}
 		}
 		client.GTimerInterval = curTime;//更新上一次处理脚本时的时间记录.
-		time.Sleep(model.TeachScriptTimeInterval);//每隔一定时间，计算要下发的教材脚本
 	}
 }
 
@@ -563,9 +561,9 @@ func getInt64(val interface{},def int64)int64{
 	if nil == val{
 		return def;
 	}
-	result,ok := val.(int64);
+	result,ok := val.(float64);
 	if ok{
-		return result;
+		return int64(result);
 	}else{
 		return def;
 	}
@@ -591,6 +589,26 @@ func getMap(val interface{},def map[string]interface{})map[string]interface{}{
 	}
 	result,ok := val.(map[string]interface{});
 	if ok{
+		return result;
+	}else{
+		return def;
+	}
+}
+
+/*object转[]map[string]interface{}*/
+func getObjArray(val interface{},def []map[string]interface{})[]map[string]interface{}{
+	if nil == val{
+		return def;
+	}
+	tem,ok := val.([]interface{});
+	if ok{
+		result := []map[string]interface{}{};
+		for _,v := range tem{
+			resultV := getMap(v,nil);
+			if nil != resultV{
+				result = append(result,resultV)
+			}
+		}
 		return result;
 	}else{
 		return def;
