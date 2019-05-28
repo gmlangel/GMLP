@@ -457,6 +457,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 			cmdArr := []map[string]interface{}{};//要下发的教学脚本数组
 			j := int64(len(stepDataArr));
 			for roomInfo.CurrentStepIdx < j{
+				needBread := false;//是否需要跳出循环
 				scriptItem := stepDataArr[roomInfo.CurrentStepIdx];//获取一条教学命令
 				roomInfo.CurrentStepIdx += 1;//更新教学命令的 索引游标
 				roomInfo.CurrentQuestionId = getInt64(scriptItem["id"],-1);//设置当前正在提问的问题ID
@@ -465,28 +466,68 @@ func loopSendTeachScript(client *LuBoClientConnection){
 				cmdArr = append(cmdArr,clientScriptItem);//将脚本塞入 下发列表
 				sType := getString(scriptItem["type"],"");
 				switch sType{
-				case "changePage":
-					//移除之前的批处理教学命令缓存,添加新的教学命令缓存
-					roomInfo.TongyongCMDArr = []map[string]interface{}{clientScriptItem};
-					break;
-				case "onWall":
-					//添加新的教学命令缓存
-					roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,clientScriptItem);
-					break;
-				case "delay":
-					//延迟一定时间后，下发下一条命令
-					roomInfo.CompleteTime = getInt64(getMap(scriptItem["value"],map[string]interface{}{})["timeLength"],0);
-					roomInfo.AllowNewScript = false;
-					cmdArr = cmdArr[0:len(cmdArr)-1];//从下发命令集合中删除delay命令
-					break;
-				case "classEnd":
-					roomInfo.TongyongCMDArr = roomInfo.TongyongCMDArr[0:1];//除第一条换页命令外，移除其余的命令
-					roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,clientScriptItem);//添加新的教学命令缓存
-					roomInfo.RoomState = model.RoomState_End;//更新教室状态
-					//测试用， 重置教室，反复使用教室
-					RoomInfoMap_SetValue(rid,nil);
-					break;
+					case "changePage":
+						//移除之前的批处理教学命令缓存,添加新的教学命令缓存
+						roomInfo.TongyongCMDArr = []map[string]interface{}{clientScriptItem};
+						break;
+					case "onWall":
+						//添加新的教学命令缓存
+						roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,clientScriptItem);
+						break;
+					case "delay":
+						//延迟一定时间后，下发下一条命令
+						roomInfo.CompleteTime = getInt64(getMap(scriptItem["value"],map[string]interface{}{})["timeLength"],0);
+						roomInfo.AllowNewScript = false;
+						cmdArr = cmdArr[0:len(cmdArr)-1];//从下发命令集合中删除delay命令
+						needBread = true;
+						break;
+					case "classEnd":
+						roomInfo.TongyongCMDArr = roomInfo.TongyongCMDArr[0:1];//除第一条换页命令外，移除其余的命令
+						roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,clientScriptItem);//添加新的教学命令缓存
+						roomInfo.RoomState = model.RoomState_End;//更新教室状态
+						//测试用， 重置教室，反复使用教室
+						RoomInfoMap_SetValue(rid,nil);
+						break;
+					case "templateCMD":
+						roomInfo.WaitAnswerUids = roomInfo.UserIdArr;//设置应答序列
+						//设置超时等待时间和等待回答响应的用户数组
+						roomInfo.CompleteTime = getInt64(getMap(scriptItem["value"],map[string]interface{}{})["timeout"],30);
+						roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,clientScriptItem);//添加新的教学d命令到缓存
+						roomInfo.AllowNewScript = false;
+						needBread = true;
+						break;
+					case "audio":
+						roomInfo.WaitAnswerUids = roomInfo.UserIdArr;//设置应答序列
+						//设置应答超时时间
+						item := getMap(scriptItem["value"],nil);
+						if nil != item{
+							roomInfo.CompleteTime = getInt64(item["endSecond"],1) - getInt64(item["beginSecond"],1) + 3;
+						}else{
+							roomInfo.CompleteTime = 5;
+						}
+						roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,clientScriptItem);//添加新的教学d命令到缓存
+						roomInfo.AllowNewScript = false;
+						needBread = true;
+						break;
+					case "video":
+						roomInfo.WaitAnswerUids = roomInfo.UserIdArr;//设置应答序列
+						//设置应答超时时间
+						item := getMap(scriptItem["value"],nil);
+						if nil != item{
+							roomInfo.CompleteTime = getInt64(item["endSecond"],1) - getInt64(item["beginSecond"],1) + 3;
+						}else{
+							roomInfo.CompleteTime = 5;
+						}
+						roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,clientScriptItem);//添加新的教学d命令到缓存
+						roomInfo.AllowNewScript = false;
+						needBread = true;
+						break;
+					default:break;
 				} 
+
+				if needBread == true{
+					break;//跳出循环
+				}
 			}
 
 			if len(cmdArr) > 0{
