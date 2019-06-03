@@ -5,7 +5,7 @@ import(
 	"log"
 	model "../models"
 	"encoding/json"
-	_"fmt"
+	"fmt"
 	"strings"
 )
 
@@ -90,7 +90,7 @@ func (lbc *LuBoClientConnection)writeLastMsgAndCloseSock(arg interface{}){
 	}
 	data = append([]byte(pkgHead),data...);
 	data = append(data,[]byte(pkgFoot)...);
-	log.Println("sock:",lbc.SID," 准备写入socket的数据:",string(data));
+	fmt.Println("sock:",lbc.SID," 准备写入socket的数据:",string(data));
 	n,err := sock.Write(data);
 	_ = n;
 	if err != nil{
@@ -98,7 +98,6 @@ func (lbc *LuBoClientConnection)writeLastMsgAndCloseSock(arg interface{}){
 		lbc.closeSocket();
 		return;
 	}
-	//log.Println("sock:",lbc.SID," 已发送的数据长度",n);
 	<- lbc.writeChan
 	lbc.closeSocket();
 }
@@ -151,7 +150,7 @@ func (lbc *LuBoClientConnection)writeToSocket(){
 	}
 	data = append([]byte(pkgHead),data...);
 	data = append(data,[]byte(pkgFoot)...);
-	log.Println("sock:",lbc.SID," 准备写入socket的数据:",string(data));
+	fmt.Println("sock:",lbc.SID," 准备写入socket的数据:",string(data));
 	n,err := sock.Write(data);
 	_ = n;
 	if err != nil{
@@ -167,7 +166,6 @@ func (lbc *LuBoClientConnection)writeToSocket(){
 		}
 		return;
 	}
-	//log.Println("sock:",lbc.SID," 已发送的数据长度",n);
 	<- lbc.writeChan
 }
 
@@ -215,7 +213,6 @@ func (lbc *LuBoClientConnection)checkPackage(data []byte){
 	*/
 	lbc.readChan <- 1;
 	str := string(lbc.readBuffer);
-	//fmt.Println(str);
 	waitDelStr := "";
 	j := strings.Index(str,pkgHead);//取包头位置
 	pos := 0;
