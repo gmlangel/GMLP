@@ -20,12 +20,11 @@ func ExecPackage(client *LuBoClientConnection,jsonByte []byte){
 	var jsonObj map[string]interface{};
 	err := json.Unmarshal(jsonByte,&jsonObj);
 	if err == nil{
-		fmt.Println(fmt.Sprintf("sid:%d 收到数据包:%v",client.SID,jsonObj));
 		//取cmd，并决策执行
 		cmd := jsonObj["cmd"];
 		if temp,ok := cmd.(float64);ok == true{
 			command := uint32(temp);
-			fmt.Println("数据包的cmd:",command);
+			fmt.Println("sid:",client.SID," 收到数据包的cmd:",command);
 			switch command{
 			case model.C_REQ_S_HEARTBEAT:
 				//返回服务端心跳
@@ -55,7 +54,7 @@ func ExecPackage(client *LuBoClientConnection,jsonByte []byte){
 			}
 		}
 	}else{
-		fmt.Println("sid:",client.SID," 数据包解析错误:",err.Error());
+		log.Println("sid:",client.SID," 数据包解析错误:",err.Error());
 	}
 	
 }
@@ -442,9 +441,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 			//课程已开始， 计时下发指定教材
 			roomInfo.CurrentTimeInterval += curTime - client.GTimerInterval;
 			client.GTimerInterval = curTime;//更新上一次处理脚本时的时间记录.
-		//	fmt.Println("进入前======>roomInfo.CurrentTimeInterval:",roomInfo.CurrentTimeInterval,"  roomInfo.CompleteTime:",roomInfo.CompleteTime)
 			if roomInfo.CurrentTimeInterval >= roomInfo.CompleteTime{
-		//		fmt.Println("执行了======>roomInfo.CurrentTimeInterval:",roomInfo.CurrentTimeInterval,"  roomInfo.CompleteTime:",roomInfo.CompleteTime)
 				//已经达到超时时间，为了不影响之后的脚本运行，则应该直接执行下个脚本
 				roomInfo.CurrentTimeInterval = 0;
 				roomInfo.AllowNewScript = true;

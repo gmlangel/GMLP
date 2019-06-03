@@ -283,7 +283,7 @@ func (sev *LuboServer)_openServer(){
 		//塞入无主socket记录集
 		UnOwnedConnect_SetValue(sid,luboclient);
 		//打印客户端信息
-		log.Println("new Client join,Address:",newClient.RemoteAddr().String(), " discription:",luboclient);
+		fmt.Println("new Client join,Address:",newClient.RemoteAddr().String(), " discription:",luboclient);
 	}
 }
 
