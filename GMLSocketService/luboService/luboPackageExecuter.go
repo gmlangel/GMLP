@@ -528,7 +528,8 @@ func loopSendTeachScript(client *LuBoClientConnection){
 
 			if len(cmdArr) > 0{
 				//下发教学命令到客户端
-				sendTeachScriptToUser(client,rid,roomInfo.TongyongCMDArr,roomInfo.CurrentTimeInterval,roomInfo.AnswerUIDQueue);
+				sendTeachScriptToUser(client,rid,cmdArr,roomInfo.CurrentTimeInterval,roomInfo.AnswerUIDQueue);
+				cmdArr = []map[string]interface{}{};//清空已发的命令集合
 			}
 		}else{
 			//计时，实时更新课程状态
