@@ -44,6 +44,8 @@ func NewLuBoClientConn(sid int64,conn net.Conn)(*LuBoClientConnection){
 	client := &LuBoClientConnection{SID:sid,UID:-1,RID:-1,Sock:conn,TimeoutSecond:socketTimeoutSecond,isConnected:true};
 	client.writeChan = make(chan int,1);//初始化 socket写入操作锁
 	client.readChan = make(chan int,1);
+	client.writeChan <- 1;
+	client.readChan <- 1;
 	client.UID = -1;
 	client.RID = -1;
 	client.TeachScriptStepDataArr = nil;
@@ -78,14 +80,17 @@ func (lbc *LuBoClientConnection)writeLastMsgAndCloseSock(arg interface{}){
 	if sock == nil{
 		return;
 	}
-	lbc.writeChan <- 1;
+	_,isOk := <- lbc.writeChan;
+	if false == isOk{
+		return;
+	}
 	//执行写入
 	sock.SetDeadline(time.Now().Add(socketTimeoutSecond));//延长超时时间
 	data,err := json.Marshal(arg);
 	tj := len(data);
 	if err != nil || tj <= 2{
 		log.Println("sock:",lbc.SID,"数据转换出错:",err.Error())
-		<- lbc.writeChan
+		lbc.writeChan <- 1;
 		return;
 	}
 	data = append([]byte(pkgHead),data...);
@@ -94,11 +99,11 @@ func (lbc *LuBoClientConnection)writeLastMsgAndCloseSock(arg interface{}){
 	n,err := sock.Write(data);
 	_ = n;
 	if err != nil{
-		<- lbc.writeChan
+		lbc.writeChan <- 1;
 		lbc.closeSocket();
 		return;
 	}
-	<- lbc.writeChan
+	lbc.writeChan <- 1;
 	lbc.closeSocket();
 }
 
@@ -106,9 +111,12 @@ func (lbc *LuBoClientConnection)writeLastMsgAndCloseSock(arg interface{}){
 发送数据给客户端
 */
 func (lbc *LuBoClientConnection)Write(arg interface{}){
-	lbc.writeChan <- 1
+	_,isOk := <- lbc.writeChan;
+	if false == isOk{
+		return;
+	}
 	lbc.waitSendMSGBuffer = append(lbc.waitSendMSGBuffer,arg);//向 “等待发送的消息队列中”添加一条消息
-	<- lbc.writeChan
+	lbc.writeChan <- 1;
 	go lbc.writeToSocket();//调用消息发送函数
 }
 
@@ -117,7 +125,9 @@ func (lbc *LuBoClientConnection)closeSocket(){
 	lbc.SID = -1;
 	lbc.Sock.Close();
 	lbc.Sock = nil;
+	<- lbc.writeChan
 	close(lbc.writeChan)//关闭channel
+	<- lbc.readChan
 	close(lbc.readChan)
 	if lbc.OnSocketCloseComplete != nil{
 		lbc.OnSocketCloseComplete();
@@ -130,10 +140,13 @@ func (lbc *LuBoClientConnection)writeToSocket(){
 	if sock == nil{
 		return;
 	}
-	lbc.writeChan <- 1;
+	_,isOk := <- lbc.writeChan;
+	if false == isOk{
+		return;
+	}
 	j := len(lbc.waitSendMSGBuffer);
 	if j <= 0{
-		<- lbc.writeChan;
+		lbc.writeChan <- 1;
 		return;
 	}
 	//取一条被写数据
@@ -145,7 +158,7 @@ func (lbc *LuBoClientConnection)writeToSocket(){
 	tj := len(data);
 	if err != nil || tj <= 2{
 		log.Println("sock:",lbc.SID,"数据转换出错:",err.Error())
-		<- lbc.writeChan
+		lbc.writeChan <- 1
 		return;
 	}
 	data = append([]byte(pkgHead),data...);
@@ -154,7 +167,7 @@ func (lbc *LuBoClientConnection)writeToSocket(){
 	n,err := sock.Write(data);
 	_ = n;
 	if err != nil{
-		<- lbc.writeChan
+		lbc.writeChan <- 1;
 		if operr,ok :=err.(*net.OpError);ok == true{
 			if operr.Timeout() == true && lbc.OnTimeout != nil{
 				lbc.OnTimeout(lbc);//socket超时， 通知管理器，进行处理
@@ -166,7 +179,7 @@ func (lbc *LuBoClientConnection)writeToSocket(){
 		}
 		return;
 	}
-	<- lbc.writeChan
+	lbc.writeChan <- 1;
 }
 
 /**
@@ -197,9 +210,12 @@ func (lbc *LuBoClientConnection)runLoopRead(){
 			//延长心跳超时时间
 			sock.SetDeadline(time.Now().Add(socketTimeoutSecond));
 			//如果有数据则异步进行解析，这样可以利用sock.read时，处理数据包。而不会因为read后同步执行checkPage或者execPackage时间过长，无形中推迟下一次read的时间点
-			lbc.readChan <- 1;
+			_,isOk := <- lbc.readChan;
+			if false == isOk{
+				break;
+			}
 			lbc.readBuffer = append(lbc.readBuffer,data...);
-			<- lbc.readChan
+			lbc.readChan <- 1
 			go lbc.checkPackage(data);
 		}
 	}
@@ -211,7 +227,10 @@ func (lbc *LuBoClientConnection)checkPackage(data []byte){
 	以下的处理环节存在一个问题，即无法解决第一个包为 <gmlb>"cmd":10010,"mgs":"abc"<gmle><gmlb>"cmd":10010,"mgs":"abc"
 	第二个包为<gmlb>"cmd":10010,"mgs":"abc"<gmle>的丢包情况。 这种情况下只会处理第一个包，而第二个包会被丢弃，视作丢包
 	*/
-	lbc.readChan <- 1;
+	_,isOk := <- lbc.readChan;
+	if false == isOk{
+		return;
+	}
 	str := string(lbc.readBuffer);
 	waitDelStr := "";
 	j := strings.Index(str,pkgHead);//取包头位置
@@ -240,7 +259,7 @@ func (lbc *LuBoClientConnection)checkPackage(data []byte){
 		}
 		break;
 	}
-	<- lbc.readChan;
+	lbc.readChan <- 1
 }
 
 /*处理客户端发来的数据包*/
