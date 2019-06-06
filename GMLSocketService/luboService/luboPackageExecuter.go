@@ -178,7 +178,8 @@ func c2s_JoinRoom(client *LuBoClientConnection,jsonByte []byte){
 	var req model.JoinRoom_c2s;
 	err := json.Unmarshal(jsonByte,&req);
 	if err == nil{
-		preClient := OwnedConnectUIDMap_GetValue(req.Uid);//根据UID获取当前用户已经进入教室的socket连接，正常情况下应为nil
+		uid := req.Uid;
+		preClient := OwnedConnectUIDMap_GetValue(uid);//根据UID获取当前用户已经进入教室的socket连接，正常情况下应为nil
 		if preClient == nil{
 			//进入教室
 			joinRoom(client,req);
@@ -188,7 +189,7 @@ func c2s_JoinRoom(client *LuBoClientConnection,jsonByte []byte){
 				roominfo := RoomInfoMap_GetValue(req.Rid);
 				if roominfo != nil{
 					//先调用离开教室
-					leaveRoom(client,req.Uid,roominfo);
+					leaveRoom(client,uid,roominfo);
 					//后调用进入教室
 					joinRoom(client,req);
 				}else{
@@ -420,6 +421,46 @@ func leaveRoom(client *LuBoClientConnection,uid int64,roomInfo *model.RoomInfo){
 	}
 	client.RID = -1;
 	client.UID = -1;
+	ClearUIDByRoomInfo(roomInfo,uid);
+}
+
+//清空各种数组中现存的UID
+func ClearUIDByRoomInfo(roomInfo *model.RoomInfo,uid int64){
+	if nil == roomInfo{
+		return;
+	}
+	
+	uidArr := roomInfo.UserIdArr;
+	userArr := roomInfo.UserArr;
+	ansArr := roomInfo.AnswerUIDQueue;
+	waitArr := roomInfo.WaitAnswerUids;
+	for i,v := range uidArr{
+		if v == uid{
+			roomInfo.UserIdArr = append(roomInfo.UserIdArr[0:i],roomInfo.UserIdArr[i+1:]...);
+			break;
+		}
+	}
+
+	for i,v := range userArr{
+		if v.Uid == uid{
+			roomInfo.UserArr = append(roomInfo.UserArr[0:i],roomInfo.UserArr[i+1:]...);
+			break;
+		}
+	}
+
+	for i,v := range ansArr{
+		if v == uid{
+			roomInfo.AnswerUIDQueue = append(roomInfo.AnswerUIDQueue[0:i],roomInfo.AnswerUIDQueue[i+1:]...);
+			break;
+		}
+	}
+
+	for i,v := range waitArr{
+		if v == uid{
+			roomInfo.WaitAnswerUids = append(roomInfo.WaitAnswerUids[0:i],roomInfo.WaitAnswerUids[i+1:]...);
+			break;
+		}
+	}
 }
 
 //定时下发教学脚本

@@ -48,10 +48,12 @@ func DestroySocket(cli * LuBoClientConnection,completeFunc func()){
 	destroyChan <- 1
 	sid := cli.SID;
 	uid := cli.UID;
+	rid := cli.RID;
 	//rid := cli.RID;
 	UnOwnedConnect_SetValue(sid,nil);
 	OwnedConnect_SetValue(sid,nil);
 	OwnedConnectUIDMap_SetValue(uid,nil);
+	ClearUIDByRoomInfo(RoomInfoMap_GetValue(rid),uid);
 	//返回socketID 到id池,以便之后的链接使用
 	connectIdPool = append(connectIdPool,sid);
 	res := CreateProtocal(model.S_NOTIFY_C_OFFLINE).(*model.OfflineNotify_s2c);
