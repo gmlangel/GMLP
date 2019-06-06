@@ -230,6 +230,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 				roomInfo.TeachingTmaterialScriptID = req.TeachScriptID;
 				roomInfo.CurrentQuestionId = -1;
 				roomInfo.AllowNewScript = true;
+				roomInfo.TongyongCMDArr = []map[string]interface{}{};
 				RoomInfoMap_SetValue(req.Rid,roomInfo);//存入教室信息集合
 			}
 
