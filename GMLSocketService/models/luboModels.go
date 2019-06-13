@@ -29,7 +29,9 @@ type RoomInfo struct{
     TeachingTmaterialScriptID int64;//教学脚本ID
     CurrentStepIdx int64;//教学脚本执行的进度
     CurrentQuestionId int64;//当前等待应答的问题的ID
-    AllowNewScript bool;//是否允许下发新的教学脚本
+    AllowNewScript bool;//是否允许下发新的媒体教学脚本
+    AllowStepScript bool;//是否允许下发媒体关键帧对应的脚本
+    CurrentQuesionTimeOut int64;//关键帧对应的脚本执行所需的超时时间他和CurrentTimeInterval可以直接进行计算
     WaitAnswerUids []int64;//等待做答的用户ID数组,它是一个触发器,当allowNewScript = false时，只有waitAnswerUids长度为0，才可以重置allowNewScript的状态为true
     UserArr []CurrentUser;//当前频道中的人的信息数组
     UserIdArr []int64;//用户ID数组

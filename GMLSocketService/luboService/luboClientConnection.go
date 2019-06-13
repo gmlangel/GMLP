@@ -33,6 +33,7 @@ type LuBoClientConnection struct{
 	OnError func (*LuBoClientConnection);/*当当前socket 发生除了Timeout错误以外，如EOF时触发*/
 	OnSocketCloseComplete func();//当当前socket连接被close完毕后触发的处理函数。
 	TeachScriptStepDataArr []map[string]interface{};//教材数据集
+	MediaStepDataArr []map[string]interface{};//教材数据集
 	GTimerInterval int64;//教材相关的当前时间utc 秒值.
 	RoomInfo *model.RoomInfo;//教室信息
 }
@@ -49,6 +50,7 @@ func NewLuBoClientConn(sid int64,conn net.Conn)(*LuBoClientConnection){
 	client.UID = -1;
 	client.RID = -1;
 	client.TeachScriptStepDataArr = nil;
+	client.MediaStepDataArr = nil;
 	client.RoomInfo = nil;
 	go client.runLoopRead();//开socket read队列
 	//封装并回执给客户端“客户端接入”信令
@@ -70,6 +72,7 @@ func (lbc *LuBoClientConnection)DestroySocket(arg interface{}){
 	lbc.UID = -1;
 	lbc.RID = -1;
 	lbc.TeachScriptStepDataArr = nil;
+	lbc.MediaStepDataArr = nil;
 	go lbc.writeLastMsgAndCloseSock(arg);//送最后一条消息后，关闭socket
 	
 }
