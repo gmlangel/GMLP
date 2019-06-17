@@ -592,33 +592,31 @@ func execStepDataByMainFrames(mediaData []map[string]interface{},stData []map[st
 			ct := getInt64(item["t"],currentPlayTime + 1);
 			if ct <= currentPlayTime{
 				//找到满足条件的关键帧，则取出对应的stepData命令
-				sids,ok:= item["sid"].([]float64);
-				if ok == true{
-					for _,subit := range sids{
-						item := stData[int(subit)];
-						if nil != item{
-							itemType := getString(item["type"],"");
-							if itemType == "changePage"{
-								hasChangePage = true;
+				sids := getfloat64Array(item["sid"],nil);
+				for _,subit := range sids{
+					item := stData[int(subit)];
+					if nil != item{
+						itemType := getString(item["type"],"");
+						if itemType == "changePage"{
+							hasChangePage = true;
+						}
+						result = append(result,map[string]interface{}{"suid":0,"st":curTime,"data":item});//添加到返回数组
+						//重新计算脚本结束时间
+						if itemType == "templateCMD" || itemType == "video" || itemType == "audio"{
+							rinfo.WaitAnswerUids = rinfo.UserIdArr;//设置应答序列
+							var timeLength int64;
+							if itemType == "templateCMD"{
+								timeLength = getInt64(item["timeout"],5);
+							}else{
+								timeLength = getInt64(item["endSecond"],0) - getInt64(item["beginSecond"],0) + 5;
 							}
-							result = append(result,map[string]interface{}{"suid":0,"st":curTime,"data":item});//添加到返回数组
-							//重新计算脚本结束时间
-							if itemType == "templateCMD" || itemType == "video" || itemType == "audio"{
-								rinfo.WaitAnswerUids = rinfo.UserIdArr;//设置应答序列
-								var timeLength int64;
-								if itemType == "templateCMD"{
-									timeLength = getInt64(item["timeout"],5);
-								}else{
-									timeLength = getInt64(item["endSecond"],0) - getInt64(item["beginSecond"],0) + 5;
-								}
-								rinfo.AllowStepScript = false;//禁用关键帧脚本的执行
-								rinfo.CurrentQuesionTimeOut = currentPlayTime + timeLength + 5
-								if currentPlayTime + timeLength > rinfo.CompleteTime{
-									//如果媒体播放的所剩时间小于 答题剩余时间时（剩余时间不足），则补齐时间
-									rinfo.CompleteTime = rinfo.CurrentQuesionTimeOut;
-								}
-								break;
+							rinfo.AllowStepScript = false;//禁用关键帧脚本的执行
+							rinfo.CurrentQuesionTimeOut = currentPlayTime + timeLength + 5
+							if currentPlayTime + timeLength > rinfo.CompleteTime{
+								//如果媒体播放的所剩时间小于 答题剩余时间时（剩余时间不足），则补齐时间
+								rinfo.CompleteTime = rinfo.CurrentQuesionTimeOut;
 							}
+							break;
 						}
 					}
 				}
@@ -627,7 +625,7 @@ func execStepDataByMainFrames(mediaData []map[string]interface{},stData []map[st
 		}
 	}
 	idx = currentFrameStepIdx;
-	return nil,0,hasChangePage;
+	return result,idx,hasChangePage;
 }
 
 /**
@@ -701,6 +699,26 @@ func getObjArray(val interface{},def []map[string]interface{})[]map[string]inter
 		for _,v := range tem{
 			resultV := getMap(v,nil);
 			if nil != resultV{
+				result = append(result,resultV)
+			}
+		}
+		return result;
+	}else{
+		return def;
+	}
+}
+
+/*object转[]map[string]interface{}*/
+func getfloat64Array(val interface{},def []float64)[]float64{
+	if nil == val{
+		return def;
+	}
+	tem,ok := val.([]interface{});
+	if ok{
+		result := []float64{};
+		for _,v := range tem{
+			resultV,ok:= v.(float64);
+			if ok == true{
 				result = append(result,resultV)
 			}
 		}
