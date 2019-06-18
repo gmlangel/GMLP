@@ -596,6 +596,7 @@ func execStepDataByMainFrames(mediaData []map[string]interface{},stData []map[st
 				for _,subit := range sids{
 					item := stData[int(subit)];
 					if nil != item{
+						rinfo.CurrentQuestionId = getInt64(item["id"],-1)
 						itemType := getString(item["type"],"");
 						if itemType == "changePage"{
 							hasChangePage = true;
