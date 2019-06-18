@@ -37,6 +37,7 @@ type RoomInfo struct{
     UserIdArr []int64;//用户ID数组
     AnswerUIDQueue []int64;//用户答题序列数组
     TongyongCMDArr []map[string]interface{};//通用教学命令
+    MainFrames []map[string]interface{};//主媒体播放轴
 }
 
 //协议ID定义-----------------------------

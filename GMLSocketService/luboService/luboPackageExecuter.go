@@ -479,7 +479,6 @@ func ClearUIDByRoomInfo(roomInfo *model.RoomInfo,uid int64){
 func loopSendTeachScript(client *LuBoClientConnection){
 	client.GTimerInterval = time.Now().Unix();//获取当前服务器时间
 	var curTime int64 = 0;
-	var mainFrames []map[string]interface{} = nil;
 	var clientScriptItem map[string]interface{} = nil;
 	currentFrameStepIdx := 0;
 	for client.SID != -1{
@@ -515,8 +514,8 @@ func loopSendTeachScript(client *LuBoClientConnection){
 			if roomInfo.AllowNewScript == false{
 				//判断是否允许执行关键帧命令
 				if roomInfo.AllowStepScript == true{
-					if nil != mainFrames{
-						tempCmdArr,frameStepIdx,hasChangePage := execStepDataByMainFrames(mainFrames,stepDataArr,roomInfo,currentFrameStepIdx,curTime);
+					if nil != roomInfo.MainFrames{
+						tempCmdArr,frameStepIdx,hasChangePage := execStepDataByMainFrames(roomInfo.MainFrames,stepDataArr,roomInfo,currentFrameStepIdx,curTime);
 						currentFrameStepIdx = frameStepIdx;
 						if len(tempCmdArr) > 0 && len(roomInfo.TongyongCMDArr) > 0{
 							if true == hasChangePage{
@@ -552,9 +551,9 @@ func loopSendTeachScript(client *LuBoClientConnection){
 				switch sType{
 					case "video":
 						roomInfo.TongyongCMDArr = []map[string]interface{}{clientScriptItem};//添加新的教学d命令到缓存
-						mainFrames = getObjArray(mediaItem["mainFrames"],nil);
+						roomInfo.MainFrames = getObjArray(mediaItem["mainFrames"],nil);
 						//根据mainFrames时间轴，解析stepData,并获取要执行的命令数组
-						tempCmdArr,frameStepIdx,_ := execStepDataByMainFrames(mainFrames,stepDataArr,roomInfo,currentFrameStepIdx,curTime)
+						tempCmdArr,frameStepIdx,_ := execStepDataByMainFrames(roomInfo.MainFrames,stepDataArr,roomInfo,currentFrameStepIdx,curTime)
 						currentFrameStepIdx = frameStepIdx;
 						if len(tempCmdArr) > 0{
 							roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,tempCmdArr...);//添加新的教学d命令到缓存
@@ -566,14 +565,18 @@ func loopSendTeachScript(client *LuBoClientConnection){
 					default:break;
 				} 
 			}else{
-				// roomInfo.RoomState = model.RoomState_End;//设置课程结束
-				// tempScript := map[string]interface{}{"id":j,"type":"classEnd","value":map[string]interface{}{}};
-				// clientScriptItem = map[string]interface{}{"suid":0,"st":curTime,"data":tempScript};
-				// cmdArr = append(cmdArr,clientScriptItem);//将脚本塞入 下发列表
-				// break;
+				// // roomInfo.RoomState = model.RoomState_End;//设置课程结束
+				// // tempScript := map[string]interface{}{"id":j,"type":"classEnd","value":map[string]interface{}{}};
+				// // clientScriptItem = map[string]interface{}{"suid":0,"st":curTime,"data":tempScript};
+				// // cmdArr = append(cmdArr,clientScriptItem);//将脚本塞入 下发列表
+				// // break;
+				roomInfo.AllowNewScript = true;
+				roomInfo.AllowStepScript = true;
+				roomInfo.MainFrames = nil;
 
 				//测试用
 				roomInfo.CurrentStepIdx = 0;//用于重复测试脚本
+				currentFrameStepIdx = 0;
 				continue;
 			}
 
