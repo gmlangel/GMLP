@@ -184,6 +184,8 @@ type TeachScriptLoadEnd_s2c_notify struct{
 
 type ScriptConfigDataMap struct{
     CourseId uint32 `json:"courseId"`;//教材ID
+    Width uint32 `json:"width"`;//教材原始宽度
+    Height uint32 `json:"height"`;//教材原始高度
     Resource map[string]interface{} `json:"resource"`;//课程脚本中的resource config部分
 }
 

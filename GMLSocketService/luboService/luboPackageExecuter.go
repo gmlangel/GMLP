@@ -306,13 +306,15 @@ func pushTeachingTmaterialScriptLoadEndNotify(client *LuBoClientConnection,tsObj
 		tsRes.Code = 0;
 		tsRes.FaildMsg = "";
 		tempCouseID := getInt64(tsObj["courseId"],-1)
+		tempWidth := uint32(getInt64(tsObj["width"],0));
+		tempHeigth := uint32(getInt64(tsObj["height"],0));
 		if tempCouseID > -1{
 			courseID := uint32(tempCouseID);
 			isOk := false;
 			if resourceObj := tsObj["resource"];resourceObj != nil{
 				resource,ok:= resourceObj.(map[string]interface{});
 				if ok == true{
-					tsRes.ScriptConfigData = model.ScriptConfigDataMap{CourseId:courseID,Resource:resource};
+					tsRes.ScriptConfigData = model.ScriptConfigDataMap{CourseId:courseID,Resource:resource,Width:tempWidth,Height:tempHeigth};
 					isOk = true;
 				}
 			}
