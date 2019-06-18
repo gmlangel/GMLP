@@ -565,6 +565,16 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						break;
 					default:break;
 				} 
+			}else{
+				// roomInfo.RoomState = model.RoomState_End;//设置课程结束
+				// tempScript := map[string]interface{}{"id":j,"type":"classEnd","value":map[string]interface{}{}};
+				// clientScriptItem = map[string]interface{}{"suid":0,"st":curTime,"data":tempScript};
+				// cmdArr = append(cmdArr,clientScriptItem);//将脚本塞入 下发列表
+				// break;
+
+				//测试用
+				roomInfo.CurrentStepIdx = 0;//用于重复测试脚本
+				continue;
 			}
 
 			if len(cmdArr) > 0{
