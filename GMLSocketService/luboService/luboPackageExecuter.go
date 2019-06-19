@@ -480,7 +480,6 @@ func loopSendTeachScript(client *LuBoClientConnection){
 	client.GTimerInterval = time.Now().Unix();//获取当前服务器时间
 	var curTime int64 = 0;
 	var clientScriptItem map[string]interface{} = nil;
-	currentFrameStepIdx := 0;
 	for client.SID != -1{
 		time.Sleep(model.TeachScriptTimeInterval);//每隔一定时间，计算要下发的教材脚本
 		rid := client.RID;
@@ -515,8 +514,8 @@ func loopSendTeachScript(client *LuBoClientConnection){
 				//判断是否允许执行关键帧命令
 				if roomInfo.AllowStepScript == true{
 					if nil != roomInfo.MainFrames{
-						tempCmdArr,frameStepIdx,hasChangePage := execStepDataByMainFrames(roomInfo.MainFrames,stepDataArr,roomInfo,currentFrameStepIdx,curTime);
-						currentFrameStepIdx = frameStepIdx;
+						tempCmdArr,frameStepIdx,hasChangePage := execStepDataByMainFrames(roomInfo.MainFrames,stepDataArr,roomInfo,roomInfo.CurrentFrameStepIdx,curTime);
+						roomInfo.CurrentFrameStepIdx = frameStepIdx;
 						if len(tempCmdArr) > 0 && len(roomInfo.TongyongCMDArr) > 0{
 							if true == hasChangePage{
 								//如果tempCmdArr中存在翻页命令，则删除TongyongCMDArr中除第一条命令以外的所有命令后，再追加。
@@ -540,9 +539,9 @@ func loopSendTeachScript(client *LuBoClientConnection){
 			}
 			//遍历媒体播放数组
 			j := int64(len(mediaDataArr));
-			if roomInfo.CurrentStepIdx < j{
-				mediaItem := mediaDataArr[roomInfo.CurrentStepIdx];//获取一条教学命令
-				roomInfo.CurrentStepIdx += 1;//更新教学命令的 索引游标
+			if roomInfo.CurrentMediaIndex < j{
+				mediaItem := mediaDataArr[roomInfo.CurrentMediaIndex];//获取一条教学命令
+				roomInfo.CurrentMediaIndex += 1;//更新教学命令的 索引游标
 				//将服务端脚本转换为客户端可以执行的脚本命令
 				clientScriptItem = map[string]interface{}{"suid":0,"st":curTime,"data":mediaConverScript(mediaItem)};
 				cmdArr = append(cmdArr,clientScriptItem);//将脚本塞入 下发列表
@@ -553,8 +552,8 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						roomInfo.TongyongCMDArr = []map[string]interface{}{clientScriptItem};//添加新的教学d命令到缓存
 						roomInfo.MainFrames = getObjArray(mediaItem["mainFrames"],nil);
 						//根据mainFrames时间轴，解析stepData,并获取要执行的命令数组
-						tempCmdArr,frameStepIdx,_ := execStepDataByMainFrames(roomInfo.MainFrames,stepDataArr,roomInfo,currentFrameStepIdx,curTime)
-						currentFrameStepIdx = frameStepIdx;
+						tempCmdArr,frameStepIdx,_ := execStepDataByMainFrames(roomInfo.MainFrames,stepDataArr,roomInfo,roomInfo.CurrentFrameStepIdx,curTime)
+						roomInfo.CurrentFrameStepIdx = frameStepIdx;
 						if len(tempCmdArr) > 0{
 							roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,tempCmdArr...);//添加新的教学d命令到缓存
 							cmdArr = append(cmdArr,tempCmdArr...);//将脚本塞入 下发列表
@@ -575,8 +574,8 @@ func loopSendTeachScript(client *LuBoClientConnection){
 				roomInfo.MainFrames = nil;
 
 				//测试用
-				roomInfo.CurrentStepIdx = 0;//用于重复测试脚本
-				currentFrameStepIdx = 0;
+				roomInfo.CurrentMediaIndex = 0;//用于重复测试脚本
+				roomInfo.CurrentFrameStepIdx = 0;
 				continue;
 			}
 
@@ -596,12 +595,12 @@ func loopSendTeachScript(client *LuBoClientConnection){
 	}
 }
 
-func execStepDataByMainFrames(mediaData []map[string]interface{},stData []map[string]interface{},rinfo *model.RoomInfo,currentFrameStepIdx int,curTime int64)(result []map[string]interface{},idx int,hasChangePage bool){
+func execStepDataByMainFrames(mainFrames []map[string]interface{},stData []map[string]interface{},rinfo *model.RoomInfo,currentFrameStepIdx int64,curTime int64)(result []map[string]interface{},idx int64,hasChangePage bool){
 	currentPlayTime := rinfo.CurrentTimeInterval;
 	hasChangePage = false;
-	j := len(mediaData);
+	j := int64(len(mainFrames));
 	if currentFrameStepIdx < j{
-		arr := mediaData[currentFrameStepIdx:j];//取出还未执行的媒体关键帧
+		arr := mainFrames[currentFrameStepIdx:j];//取出还未执行的媒体关键帧
 		//遍历关键帧时间 <= currentPlayTime 出来进行播放
 		for _,item := range arr{
 			ct := getInt64(item["t"],currentPlayTime + 1);

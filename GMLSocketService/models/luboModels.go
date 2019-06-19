@@ -27,7 +27,8 @@ type RoomInfo struct{
     CompleteTime int64;//某一段教学脚本的预期完成时间
     StartTimeInterval int64;//课程开始时间beginTime
     TeachingTmaterialScriptID int64;//教学脚本ID
-    CurrentStepIdx int64;//教学脚本执行的进度
+    CurrentMediaIndex int64;//教学脚本执行的进度
+    CurrentFrameStepIdx int64;//教学脚本的执行进度
     CurrentQuestionId int64;//当前等待应答的问题的ID
     AllowNewScript bool;//是否允许下发新的媒体教学脚本
     AllowStepScript bool;//是否允许下发媒体关键帧对应的脚本
