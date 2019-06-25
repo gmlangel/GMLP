@@ -260,6 +260,8 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 
 			//加入到教室用户的列表
 			user := model.CurrentUser{Uid:req.Uid,NickName:req.NickName,Type:true};
+			ClearUIDByRoomInfo(roomInfo,user.Uid);//清楚已经存在的相同的UID数据
+			//添加新的UID到各种数组中
 			roomInfo.UserArr = append(roomInfo.UserArr,user);
 			roomInfo.UserIdArr = append(roomInfo.UserIdArr,user.Uid);
 			roomInfo.AnswerUIDQueue = append(roomInfo.AnswerUIDQueue,user.Uid);
