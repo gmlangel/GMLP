@@ -123,28 +123,36 @@ func c2s_UploadAnswerCMD(client *LuBoClientConnection,jsonByte []byte){
 				return;//如果学生上报的答案，不是当前的问题的答案，则不作数
 			}
 			tempUid := req.Uid;
-			tempArr := roomInfo.SWaitAnswerUids
-			for i,v := range tempArr{
-				if v == tempUid{
+			j := len(roomInfo.SWaitAnswerUids);
+			needRecordAnswerReport := false;//是否要记录用户上传上来的答案，用于生成报告
+			for i:=0;i<j;{
+				if roomInfo.SWaitAnswerUids[i] == tempUid{
 					//从等待答题的用户列表中移除该用户
 					roomInfo.SWaitAnswerUids = append(roomInfo.SWaitAnswerUids[0:i],roomInfo.SWaitAnswerUids[i+1:]...);
-					//每一个用户提交答案后进行判断，脚本执行时间不足3秒的，补充至3秒
-					if roomInfo.SCurrentQuesionTimeOut - roomInfo.SCurrentTimeInterval < 3{
-						roomInfo.SCurrentQuesionTimeOut = roomInfo.SCurrentTimeInterval + 3//更新关键帧脚本的时间
-					}
-					//记录用户相关的课程报告
-					resultKey := fmt.Sprintf("%d_%d",client.UID,client.RID);
-					resultArr := LessonResultMap_GetValue(resultKey)
-					ans_c2s := model.Answer_c2s{Id:req.Id,Data:req.Data};
-					if resultArr == nil{
-						resultArr = append([]model.Answer_c2s{},ans_c2s)
-					}else{
-						resultArr = append(resultArr,ans_c2s);
-					}
-					LessonResultMap_SetValue(resultKey,resultArr);
-					break;
+					needRecordAnswerReport = true;
+					j -= 1;
+				}else{
+					i += 1;
 				}
 			}
+
+			if true == needRecordAnswerReport{
+				//每一个用户提交答案后进行判断，脚本执行时间不足3秒的，补充至3秒
+				if roomInfo.SCurrentQuesionTimeOut - roomInfo.SCurrentTimeInterval < 3{
+					roomInfo.SCurrentQuesionTimeOut = roomInfo.SCurrentTimeInterval + 3//更新关键帧脚本的时间
+				}
+				//记录用户相关的课程报告
+				resultKey := fmt.Sprintf("%d_%d",client.UID,client.RID);
+				resultArr := LessonResultMap_GetValue(resultKey)
+				ans_c2s := model.Answer_c2s{Id:req.Id,Data:req.Data};
+				if resultArr == nil{
+					resultArr = append([]model.Answer_c2s{},ans_c2s)
+				}else{
+					resultArr = append(resultArr,ans_c2s);
+				}
+				LessonResultMap_SetValue(resultKey,resultArr);
+			}
+
 			//通过判断是否所有的用户都已经答题完毕，3秒后更新allowNewScript（“是否下发下一个教学脚本”）的状态，  3秒的时间是留给客户端播放奖励声音和动画
 			if len(roomInfo.SWaitAnswerUids) == 0{
 				roomInfo.SCurrentQuesionTimeOut = roomInfo.SCurrentTimeInterval + 3
