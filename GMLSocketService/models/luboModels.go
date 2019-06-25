@@ -21,24 +21,60 @@ type LoBoServerConfig struct{
 
 
 type RoomInfo struct{
+    //通用---begin
     Rid int64;
     RoomState Enum_RoomState;//课程状态
-    CurrentTimeInterval int64;//某一段教学脚本已经执行了的时间，用于进行各种时间比对及计算
-    CompleteTime int64;//某一段教学脚本的预期完成时间
     StartTimeInterval int64;//课程开始时间beginTime
     TeachingTmaterialScriptID int64;//教学脚本ID
-    CurrentMediaIndex int64;//教学脚本执行的进度
-    CurrentFrameStepIdx int64;//教学脚本的执行进度
-    CurrentQuestionId int64;//当前等待应答的问题的ID
-    AllowNewScript bool;//是否允许下发新的媒体教学脚本
-    AllowStepScript bool;//是否允许下发媒体关键帧对应的脚本
-    CurrentQuesionTimeOut int64;//关键帧对应的脚本执行所需的超时时间他和CurrentTimeInterval可以直接进行计算
-    WaitAnswerUids []int64;//等待做答的用户ID数组,它是一个触发器,当allowNewScript = false时，只有waitAnswerUids长度为0，才可以重置allowNewScript的状态为true
     UserArr []CurrentUser;//当前频道中的人的信息数组
     UserIdArr []int64;//用户ID数组
     AnswerUIDQueue []int64;//用户答题序列数组
     TongyongCMDArr []map[string]interface{};//通用教学命令
-    MainFrames []map[string]interface{};//主媒体播放轴
+    MainFrames []MediaMainFrame;//主媒体播放轴
+    //通用---end
+
+    //媒体播放相关---begin
+    MCurrent *MediaData;//当前正在执行的媒体脚本
+    MAllowNew bool;//是否允许下发新的媒体脚本
+    MCompleteTime int64;//当前媒体脚本的播放结束时间，应与MCurrentTimeInterval进行比对
+    MCurrentTimeInterval int64;//某一段媒体脚本已经执行了的时间，用于进行各种时间比对及计算
+    MCurrentMainFrameIdx int64;//当前播放视频对应的关键帧数组中 当前正在播放的关键帧的索引
+    //媒体播放相关---end
+
+    //教学脚本相关---begin
+    SCurrentTimeInterval int64;//某一段教学脚本已经执行了的时间，用于进行各种时间比对及计算
+    SAllowNew bool;//是否允许下发新的教学脚本
+    SCurrent *ScriptStepData;//当前正在执行的教学脚本
+    SCurrentQuestionId int64;//当前等待应答的问题的ID
+    SCurrentQuesionTimeOut int64;//关键帧对应的脚本执行所需的超时时间他和SCurrentTimeInterval可以直接进行计算
+    SWaitAnswerUids []int64;//等待做答的用户ID数组,只有swaitAnswerUids长度为0，才可以执行SCurrent对应的下一个教学脚本或者重置MAllowNew为true
+    //教学脚本相关---end
+    
+}
+
+/**媒体脚本*/
+type MediaData struct{
+    Id int64 `json:"id"`;//唯一标识
+    Type string `json:"type"`;//脚本类型
+    Next int64 `json:"n"`;//下一个执行的脚本,-1代表不存在
+    Pre int64 `json:"p"`;//上一个执行的脚本,-1代表不存在
+    Value map[string]interface{} `json:"value"`;//详细数据
+    MainFrames []MediaMainFrame `json:"mainFrames"`;//媒体关键帧数组
+}
+
+type MediaMainFrame struct{
+    MediaTime int64 `json:"mt"`;//当前脚本关键帧时间戳对应的媒体关键帧时间戳，用于退出教室后重新进入教室续播
+    StepTime int64 `json:"st"`;//脚本关键帧时间戳
+    StepId int64 `json:"sid"`;//对应的教学脚本id
+}
+
+/*教学脚本*/
+type ScriptStepData struct{
+    Id int64 `json:"id"`;//唯一标识
+    Type string `json:"type"`;//脚本类型
+    Next int64 `json:"n"`;//下一个执行的脚本,-1代表不存在
+    Pre int64 `json:"p"`;//上一个执行的脚本,-1代表不存在
+    Value map[string]interface{} `json:"value"`;//详细数据
 }
 
 //协议ID定义-----------------------------
