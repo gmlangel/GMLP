@@ -31,6 +31,7 @@ type RoomInfo struct{
     AnswerUIDQueue []int64;//用户答题序列数组
     TongyongCMDArr []map[string]interface{};//通用教学命令
     MainFrames []MediaMainFrame;//主媒体播放轴
+    CurrentAnswerState string;//当前问题的用户答题结果 faild success timeouterr
     //通用---end
 
     //媒体播放相关---begin

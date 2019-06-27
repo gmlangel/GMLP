@@ -145,6 +145,12 @@ func c2s_UploadAnswerCMD(client *LuBoClientConnection,jsonByte []byte){
 				resultKey := fmt.Sprintf("%d_%d",client.UID,client.RID);
 				resultArr := LessonResultMap_GetValue(resultKey)
 				ans_c2s := model.Answer_c2s{Id:req.Id,Data:req.Data};
+				if true == req.Data.IsRight{
+					roomInfo.CurrentAnswerState = "success";
+				}else{
+					roomInfo.CurrentAnswerState = "faild";
+				}
+				
 				if resultArr == nil{
 					resultArr = append([]model.Answer_c2s{},ans_c2s)
 				}else{
@@ -153,9 +159,9 @@ func c2s_UploadAnswerCMD(client *LuBoClientConnection,jsonByte []byte){
 				LessonResultMap_SetValue(resultKey,resultArr);
 			}
 
-			//通过判断是否所有的用户都已经答题完毕，3秒后更新allowNewScript（“是否下发下一个教学脚本”）的状态，  3秒的时间是留给客户端播放奖励声音和动画
+			//通过判断是否所有的用户都已经答题完毕，更新allowNewScript,一遍处理接下来的决策树
 			if len(roomInfo.SWaitAnswerUids) == 0{
-				roomInfo.SCurrentQuesionTimeOut = roomInfo.SCurrentTimeInterval + 3
+				roomInfo.SAllowNew = true;
 			}
 
 			//发送客户端回执
@@ -244,6 +250,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 				roomInfo.SCurrent = nil;
 				roomInfo.MCurrent = nil;
 				roomInfo.TongyongCMDArr = []map[string]interface{}{};
+				roomInfo.CurrentAnswerState = "";
 				RoomInfoMap_SetValue(req.Rid,roomInfo);//存入教室信息集合
 			}
 
@@ -548,6 +555,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 					//关键帧脚本已经达到超时时间，为了不影响之后的脚本运行，则应该直接执行下个关键帧
 					roomInfo.SCurrentQuesionTimeOut = 0;
 					roomInfo.SAllowNew = true;
+					roomInfo.CurrentAnswerState = "timeouterr";//设置答题结果为'超时'
 				}
 			}else{
 				//处理媒体脚本
@@ -629,35 +637,47 @@ func loopSendTeachScript(client *LuBoClientConnection){
 	}
 }
 
+func tempFunc(stepItem * model.ScriptStepData,stData []model.ScriptStepData,rinfo *model.RoomInfo,source []map[string]interface{},curTime int64)(result []map[string]interface{},hasChangePage bool){
+	tempI := 0;
+	tresult,hasChangePageCount,templateItem := foreachScriptItem(stepItem,stData,rinfo,source,curTime,tempI);//通过递归获取最终要执行教学脚本数组
+	if hasChangePageCount > 0{
+		hasChangePage = true;
+	}
+	if nil != templateItem{
+		//如果存在特殊教学脚本，则进行特殊处理
+		itemType := templateItem.Type;
+		itemValue := templateItem.Value;
+		//重新计算脚本结束时间
+		rinfo.SWaitAnswerUids = rinfo.UserIdArr;//设置应答序列
+		var timeLength int64;
+		if itemType == "templateCMD"{
+			timeLength = getInt64(itemValue["timeout"],3);
+		}else{
+			timeLength = getInt64(itemValue["endSecond"],0) - getInt64(itemValue["beginSecond"],0) + 3;
+		}
+		rinfo.SAllowNew = false;//禁用关键帧脚本的执行
+		rinfo.SCurrentQuesionTimeOut = rinfo.SCurrentTimeInterval + timeLength;
+	}
+	return tresult,hasChangePage;
+}
+
 func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.ScriptStepData,rinfo *model.RoomInfo,currentFrameStepIdx int64,curTime int64)(result []map[string]interface{},idx int64,hasChangePage bool){
 	hasChangePageCount := 0;
 	hasChangePage = false;
+	stDataLength := len(stData);
 	var templateItem *model.ScriptStepData = nil;//教学脚本中 需要特殊处理的项
 	if nil != rinfo.SCurrent{
-		//如果存在已经执行完的教学脚本， 则尝试执行这个教学脚本的下一个脚本
-		if rinfo.SCurrent.Next > -1 && int(rinfo.SCurrent.Next) < len(stData){
-			item := stData[rinfo.SCurrent.Next];
-			result,hasChangePageCount,templateItem = foreachScriptItem(&item,stData,rinfo,result,curTime,hasChangePageCount);//通过递归获取最终要执行教学脚本数组
-			if hasChangePageCount > 0{
-				hasChangePage = true;
-			}
-			if nil != templateItem{
-				//如果存在特殊教学脚本，则进行特殊处理
-				itemType := templateItem.Type;
-				itemValue := templateItem.Value;
-				//重新计算脚本结束时间
-				rinfo.SWaitAnswerUids = rinfo.UserIdArr;//设置应答序列
-				var timeLength int64;
-				if itemType == "templateCMD"{
-					timeLength = getInt64(itemValue["timeout"],3);
-				}else{
-					timeLength = getInt64(itemValue["endSecond"],0) - getInt64(itemValue["beginSecond"],0) + 3;
-				}
-				rinfo.SAllowNew = false;//禁用关键帧脚本的执行
-				rinfo.SCurrentQuesionTimeOut = rinfo.SCurrentTimeInterval + timeLength;
-			}
-
-			return result,currentFrameStepIdx,hasChangePage;//返回要执行的脚本和不变的媒体关键帧播放进度，以及是否有翻页命令存在
+		callBackFuncID := getInt64(rinfo.SCurrent.Value[rinfo.CurrentAnswerState],-1);//取当前处理脚本对应用户操作的争取处理命令
+		if callBackFuncID <= -1{
+			callBackFuncID = rinfo.SCurrent.Next;
+		}
+		
+		if callBackFuncID > -1 && int(callBackFuncID) < stDataLength{
+			//如果存在已经执行完的教学脚本， 则尝试执行这个教学脚本的下一个脚本
+			item := &stData[callBackFuncID];
+			result,hasChangePage = tempFunc(item,stData,rinfo,result,curTime);
+			//返回要执行的脚本和不变的媒体关键帧播放进度，以及是否有翻页命令存在
+			return result,currentFrameStepIdx,hasChangePage;
 		}else{
 			//如果这个脚本没有next脚本，则改变currentFrameStepIdx， 执行下一批脚本
 			currentFrameStepIdx += 1;
@@ -681,7 +701,7 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 				//将媒体播放命令的已播放时间，更新至当前关键帧对应的媒体播放时间， 用于断线重连后的续播
 				rinfo.TongyongCMDArr[0]["playInterval"] = frame.MediaTime;
 				//处理可执行的教学脚本
-				if sid > -1 && int(sid) < len(stData){
+				if sid > -1 && int(sid) < stDataLength{
 					item := stData[int(sid)];
 					result,hasChangePageCount,templateItem = foreachScriptItem(&item,stData,rinfo,result,curTime,hasChangePageCount);//通过递归获取最终要执行教学脚本数组
 					if hasChangePageCount > 0{
@@ -717,6 +737,7 @@ func foreachScriptItem(item *model.ScriptStepData,stData []model.ScriptStepData,
 	itemType := item.Type;
 	rinfo.SCurrentTimeInterval = 0;//重置教学脚本计时时间
 	rinfo.SCurrent = item;//设置当前正在执行的教学脚本
+	rinfo.CurrentAnswerState = "";
 	result = append(result,map[string]interface{}{"suid":0,"playInterval":0,"st":curTime,"data":item});//添加到返回数组
 	if itemType == "templateCMD" || itemType == "video" || itemType == "audio"{
 		//如遇关键脚本，则直接返回数据
