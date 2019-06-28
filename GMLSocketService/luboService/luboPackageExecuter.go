@@ -251,6 +251,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 				roomInfo.MCurrent = nil;
 				roomInfo.TongyongCMDArr = []map[string]interface{}{};
 				roomInfo.CurrentAnswerState = "";
+				roomInfo.CurrentProcess = 0;
 				RoomInfoMap_SetValue(req.Rid,roomInfo);//存入教室信息集合
 			}
 
@@ -288,6 +289,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			if tsObj := TeachScriptMap_GetValue(req.TeachScriptID);tsObj != nil{
 				pushTeachingTmaterialScriptLoadEndNotify(client,tsObj);
 				//向该用户推送正在执行的教学命令
+				log.Println(roomInfo.TongyongCMDArr);
 				sendTeachScriptToUser(client,req.Rid,roomInfo.TongyongCMDArr,roomInfo.AnswerUIDQueue)
 				client.TeachScriptStepDataArr = objArrToStepDataArr(getObjArray(tsObj["stepData"],nil));
 				client.MediaStepDataArr = objArrToMediaDataArr(getObjArray(tsObj["mediaData"], nil))
@@ -375,7 +377,7 @@ func pushTeachingTmaterialScriptLoadEndNotify(client *LuBoClientConnection,tsObj
  * */
  func sendTeachScriptToUser(sock *LuBoClientConnection,rid int64,tongyongCMDArr []map[string]interface{},answerUIDQueue []int64){
 	tempRes := CreateProtocal(model.S_NOTIFY_C_TEACHSCRIPTCMD);
-	if tempRes == nil{
+	if tempRes == nil || len(tongyongCMDArr) == 0{
 		return;
 	}
 	res,ok := tempRes.(*model.PushTeachScriptCache_s2c_notify);
@@ -419,6 +421,7 @@ func loadTeachingTmaterialScript(client *LuBoClientConnection,req model.JoinRoom
 	TeachScriptMap_SetValue(teachScriptID,teachScriptObj);//将教学脚本添加至脚本集合
 	pushTeachingTmaterialScriptLoadEndNotify(client,teachScriptObj);
 	//向该用户推送正在执行的教学命令
+	log.Println(roomInfo.TongyongCMDArr);
 	sendTeachScriptToUser(client,req.Rid,roomInfo.TongyongCMDArr,roomInfo.AnswerUIDQueue)
 
 	client.TeachScriptStepDataArr = objArrToStepDataArr(getObjArray(teachScriptObj["stepData"],nil));
@@ -489,6 +492,10 @@ func ClearUIDByRoomInfo(roomInfo *model.RoomInfo,uid int64){
 
 //定时下发教学脚本
 func loopSendTeachScript(client *LuBoClientConnection){
+	_,chanOK := <- client.runLoopExecChan;
+	if false == chanOK{
+		return;
+	}
 	client.GTimerInterval = time.Now().Unix();//获取当前服务器时间
 	var curTime int64 = 0;
 	var clientScriptItem map[string]interface{} = nil;
@@ -509,7 +516,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 			cmdArr := []map[string]interface{}{};//要下发的教学脚本数组
 			offsetTime := curTime - client.GTimerInterval;
 			//课中处理逻辑
-			if nil != roomInfo.SCurrent{
+			if 1 == roomInfo.CurrentProcess{
 				//处理教学脚本
 				//如果允许执行下一个教学脚本，则执行
 				if true == roomInfo.SAllowNew{
@@ -532,13 +539,17 @@ func loopSendTeachScript(client *LuBoClientConnection){
 							//下发教学命令到客户端
 							sendTeachScriptToUser(client,rid,cmdArr,roomInfo.AnswerUIDQueue);
 							cmdArr = []map[string]interface{}{};//清空已发的命令集合
-						}else{
-							//否则，播放继续播放媒体脚本
+						}
+
+						if int(roomInfo.MCurrentMainFrameIdx) >= len(roomInfo.MainFrames) && len(cmdArr) == 0{
+							//没有可执行的关键帧时，继续播放媒体脚本
 							roomInfo.SCurrent = nil;
+							roomInfo.CurrentProcess = 0;
 						}
 					}else{
 						//如果没有对应的关键帧序列，则继续播放媒体脚本
 						roomInfo.SCurrent = nil;
+						roomInfo.CurrentProcess = 0;
 					}
 				}
 				//更新脚本计时时间
@@ -607,6 +618,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						roomInfo.SCurrent = nil;
 						roomInfo.SCurrentTimeInterval = 0;
 						roomInfo.SCurrentQuesionTimeOut = 0;
+						roomInfo.CurrentProcess = 0;//重置播放状态。使其播放媒体命令
 						// // break;
 						
 						//测试用
@@ -635,6 +647,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 		}
 		client.GTimerInterval = curTime;//更新上一次处理脚本时的时间记录.
 	}
+	client.runLoopExecChan <- 1;
 }
 
 func tempFunc(stepItem * model.ScriptStepData,stData []model.ScriptStepData,rinfo *model.RoomInfo,source []map[string]interface{},curTime int64)(result []map[string]interface{},hasChangePage bool){
@@ -737,6 +750,7 @@ func foreachScriptItem(item *model.ScriptStepData,stData []model.ScriptStepData,
 	itemType := item.Type;
 	rinfo.SCurrentTimeInterval = 0;//重置教学脚本计时时间
 	rinfo.SCurrent = item;//设置当前正在执行的教学脚本
+	rinfo.CurrentProcess = 1;
 	rinfo.CurrentAnswerState = "";
 	result = append(result,map[string]interface{}{"suid":0,"playInterval":0,"st":curTime,"data":item});//添加到返回数组
 	if itemType == "templateCMD" || itemType == "video" || itemType == "audio"{

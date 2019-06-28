@@ -20,6 +20,7 @@ const(
 */
 type LuBoClientConnection struct{
 	isConnected bool/*是否处于连接状态*/
+	runLoopExecChan chan int;/*脚本循环处理锁*/
 	writeChan chan int;/*socket写入操作，锁*/
 	waitSendMSGBuffer []interface{};/*即将发送给客户端的消息的队列*/
 	readChan chan int;/*数据读取锁*/
@@ -45,8 +46,10 @@ func NewLuBoClientConn(sid int64,conn net.Conn)(*LuBoClientConnection){
 	client := &LuBoClientConnection{SID:sid,UID:-1,RID:-1,Sock:conn,TimeoutSecond:socketTimeoutSecond,isConnected:true};
 	client.writeChan = make(chan int,1);//初始化 socket写入操作锁
 	client.readChan = make(chan int,1);
+	client.runLoopExecChan = make(chan int,1);
 	client.writeChan <- 1;
 	client.readChan <- 1;
+	client.runLoopExecChan <- 1;
 	client.UID = -1;
 	client.RID = -1;
 	client.TeachScriptStepDataArr = nil;
@@ -132,6 +135,8 @@ func (lbc *LuBoClientConnection)closeSocket(){
 	close(lbc.writeChan)//关闭channel
 	<- lbc.readChan
 	close(lbc.readChan)
+	<- lbc.runLoopExecChan
+	close(lbc.runLoopExecChan);
 	if lbc.OnSocketCloseComplete != nil{
 		lbc.OnSocketCloseComplete();
 		lbc.OnSocketCloseComplete = nil;

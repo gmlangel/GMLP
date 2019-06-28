@@ -32,6 +32,7 @@ type RoomInfo struct{
     TongyongCMDArr []map[string]interface{};//通用教学命令
     MainFrames []MediaMainFrame;//主媒体播放轴
     CurrentAnswerState string;//当前问题的用户答题结果 faild success timeouterr
+    CurrentProcess int ;//当前正在处理哪个流程 。  0 代表 正在处理媒体播放流程   1代表正在处理关键帧处理流程
     //通用---end
 
     //媒体播放相关---begin
