@@ -191,6 +191,9 @@ func (lbc *LuBoClientConnection)writeToSocket(){
 func (lbc *LuBoClientConnection)runLoopRead(){
 	buffer := make([]byte,1024);//每次读取1024个字节的数据
 	sock := lbc.Sock
+	if nil == sock{
+		return;
+	}
 	sock.SetDeadline(time.Now().Add(socketTimeoutSecond));//延长超时时间
 	for lbc.isConnected{
 		n,err := sock.Read(buffer);//调用这行代码后，当前read 携程会默认阻塞，直到读取到数据或者timeout或者err之后才会执行下面的代码
