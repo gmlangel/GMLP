@@ -289,7 +289,6 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			if tsObj := TeachScriptMap_GetValue(req.TeachScriptID);tsObj != nil{
 				pushTeachingTmaterialScriptLoadEndNotify(client,tsObj);
 				//向该用户推送正在执行的教学命令
-				log.Println(roomInfo.TongyongCMDArr);
 				sendTeachScriptToUser(client,req.Rid,roomInfo.TongyongCMDArr,roomInfo.AnswerUIDQueue)
 				client.TeachScriptStepDataArr = objArrToStepDataArr(getObjArray(tsObj["stepData"],nil));
 				client.MediaStepDataArr = objArrToMediaDataArr(getObjArray(tsObj["mediaData"], nil))
@@ -421,7 +420,6 @@ func loadTeachingTmaterialScript(client *LuBoClientConnection,req model.JoinRoom
 	TeachScriptMap_SetValue(teachScriptID,teachScriptObj);//将教学脚本添加至脚本集合
 	pushTeachingTmaterialScriptLoadEndNotify(client,teachScriptObj);
 	//向该用户推送正在执行的教学命令
-	log.Println(roomInfo.TongyongCMDArr);
 	sendTeachScriptToUser(client,req.Rid,roomInfo.TongyongCMDArr,roomInfo.AnswerUIDQueue)
 
 	client.TeachScriptStepDataArr = objArrToStepDataArr(getObjArray(teachScriptObj["stepData"],nil));
@@ -526,6 +524,8 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						roomInfo.MCurrentMainFrameIdx = frameStepIdx;//更新关键帧执行进度
 						if len(tempCmdArr) > 0 && len(roomInfo.TongyongCMDArr) > 0{
 							if true == hasChangePage{
+								data,_ := json.Marshal(tempCmdArr);
+								log.Println(hasChangePage,"==<>==",string(data));
 								//如果tempCmdArr中存在翻页命令，则删除TongyongCMDArr中除第一条命令以外的所有命令后，再追加。
 								roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr[0:1],tempCmdArr...);//更新缓存的教学命令
 							}else{
@@ -577,7 +577,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 					if nil != roomInfo.MCurrent{
 						idx = roomInfo.MCurrent.Next;//如果存在当前播放列，则取当前播放项的下一条进行播放
 					}
-					if idx < j{
+					if idx > -1 && idx < j{
 						mediaItem := &mediaDataArr[idx];//获取一条教学命令
 						roomInfo.MCurrentMainFrameIdx = 0;
 						roomInfo.MCurrent = mediaItem;
@@ -588,13 +588,27 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						sType := mediaItem.Type;
 						switch sType{
 							case "video":
-								roomInfo.TongyongCMDArr = []map[string]interface{}{clientScriptItem};//添加新的教学d命令到缓存
+								if len(roomInfo.TongyongCMDArr) == 0{
+									roomInfo.TongyongCMDArr = []map[string]interface{}{clientScriptItem};//添加新的教学d命令到缓存
+								}else{
+									roomInfo.TongyongCMDArr[0] = clientScriptItem;//替换掉第一条命令
+								}
 								roomInfo.MainFrames = mediaItem.MainFrames;
 								//根据mainFrames时间轴，解析stepData,并获取要执行的命令数组
-								tempCmdArr,frameStepIdx,_ := execStepDataByMainFrames(roomInfo.MainFrames,stepDataArr,roomInfo,roomInfo.MCurrentMainFrameIdx,curTime)
+								tempCmdArr,frameStepIdx,hasChangePage := execStepDataByMainFrames(roomInfo.MainFrames,stepDataArr,roomInfo,roomInfo.MCurrentMainFrameIdx,curTime)
 								roomInfo.MCurrentMainFrameIdx = frameStepIdx;
+								// if len(tempCmdArr) > 0{
+								// 	roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,tempCmdArr...);//添加新的教学d命令到缓存
+								// 	cmdArr = append(cmdArr,tempCmdArr...);//将脚本塞入 下发列表
+								// }
 								if len(tempCmdArr) > 0{
-									roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,tempCmdArr...);//添加新的教学d命令到缓存
+									if true == hasChangePage{
+										//如果tempCmdArr中存在翻页命令，则删除TongyongCMDArr中除第一条命令以外的所有命令后，再追加。
+										roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr[0:1],tempCmdArr...);//更新缓存的教学命令
+									}else{
+										//否则直接追加
+										roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,tempCmdArr...);
+									}
 									cmdArr = append(cmdArr,tempCmdArr...);//将脚本塞入 下发列表
 								}
 								roomInfo.MAllowNew = false;
@@ -680,7 +694,7 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 	stDataLength := len(stData);
 	var templateItem *model.ScriptStepData = nil;//教学脚本中 需要特殊处理的项
 	if nil != rinfo.SCurrent{
-		callBackFuncID := getInt64(rinfo.SCurrent.Value[rinfo.CurrentAnswerState],-1);//取当前处理脚本对应用户操作的争取处理命令
+		callBackFuncID := getInt64(rinfo.SCurrent.Value[rinfo.CurrentAnswerState],-1);//取当前处理脚本对应用户操作的正确处理命令
 		if callBackFuncID <= -1{
 			callBackFuncID = rinfo.SCurrent.Next;
 		}
@@ -692,8 +706,7 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 			//返回要执行的脚本和不变的媒体关键帧播放进度，以及是否有翻页命令存在
 			return result,currentFrameStepIdx,hasChangePage;
 		}else{
-			//如果这个脚本没有next脚本，则改变currentFrameStepIdx， 执行下一批脚本
-			currentFrameStepIdx += 1;
+			//如果这个脚本没有next脚本，则执行下一批脚本
 			rinfo.SCurrent = nil;
 		}
 	}
@@ -702,6 +715,7 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 	j := int64(len(mainFrames));
 	if currentFrameStepIdx < j{
 		arr := mainFrames[currentFrameStepIdx:j];//取出还未执行的媒体关键帧
+		currentFrameStepIdx += 1;//关键帧向后移动一位
 		//遍历关键帧时间 <= currentPlayTime 出来进行播放
 		for _,frame := range arr{
 			ct := frame.StepTime
@@ -716,6 +730,7 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 				//处理可执行的教学脚本
 				if sid > -1 && int(sid) < stDataLength{
 					item := stData[int(sid)];
+					log.Println("处理,id=",sid," type=",item.Type," ct=",ct," currentPlayTime=",currentPlayTime);
 					result,hasChangePageCount,templateItem = foreachScriptItem(&item,stData,rinfo,result,curTime,hasChangePageCount);//通过递归获取最终要执行教学脚本数组
 					if hasChangePageCount > 0{
 						hasChangePage = true;
@@ -737,13 +752,10 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 						break;
 					}
 				}
-				
-				currentFrameStepIdx += 1;//游标向后移动1位
 			}
 		}
 	}
-	idx = currentFrameStepIdx;
-	return result,idx,hasChangePage;
+	return result,currentFrameStepIdx,hasChangePage;
 }
 
 func foreachScriptItem(item *model.ScriptStepData,stData []model.ScriptStepData,rinfo *model.RoomInfo,source []map[string]interface{},curTime int64,hasChangePageCount int)(result []map[string]interface{},pageCount int,template *model.ScriptStepData){
