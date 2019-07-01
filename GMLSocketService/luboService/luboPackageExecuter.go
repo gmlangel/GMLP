@@ -524,8 +524,8 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						roomInfo.MCurrentMainFrameIdx = frameStepIdx;//更新关键帧执行进度
 						if len(tempCmdArr) > 0 && len(roomInfo.TongyongCMDArr) > 0{
 							if true == hasChangePage{
-								data,_ := json.Marshal(tempCmdArr);
-								log.Println(hasChangePage,"==<>==",string(data));
+								// data,_ := json.Marshal(tempCmdArr);
+								// log.Println(hasChangePage,"==<>==",string(data));
 								//如果tempCmdArr中存在翻页命令，则删除TongyongCMDArr中除第一条命令以外的所有命令后，再追加。
 								roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr[0:1],tempCmdArr...);//更新缓存的教学命令
 							}else{
@@ -715,7 +715,6 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 	j := int64(len(mainFrames));
 	if currentFrameStepIdx < j{
 		arr := mainFrames[currentFrameStepIdx:j];//取出还未执行的媒体关键帧
-		currentFrameStepIdx += 1;//关键帧向后移动一位
 		//遍历关键帧时间 <= currentPlayTime 出来进行播放
 		for _,frame := range arr{
 			ct := frame.StepTime
@@ -723,6 +722,7 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 				ct = currentPlayTime + 1;
 			}
 			if ct <= currentPlayTime{
+				currentFrameStepIdx += 1;//关键帧向后移动一位
 				//找到满足条件的关键帧，则取出对应的stepData命令
 				sid := frame.StepId;
 				//将媒体播放命令的已播放时间，更新至当前关键帧对应的媒体播放时间， 用于断线重连后的续播
@@ -730,7 +730,7 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 				//处理可执行的教学脚本
 				if sid > -1 && int(sid) < stDataLength{
 					item := stData[int(sid)];
-					log.Println("处理,id=",sid," type=",item.Type," ct=",ct," currentPlayTime=",currentPlayTime);
+					//log.Println("处理,id=",sid," type=",item.Type," ct=",ct," currentPlayTime=",currentPlayTime);
 					result,hasChangePageCount,templateItem = foreachScriptItem(&item,stData,rinfo,result,curTime,hasChangePageCount);//通过递归获取最终要执行教学脚本数组
 					if hasChangePageCount > 0{
 						hasChangePage = true;
