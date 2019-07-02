@@ -497,7 +497,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 	client.GTimerInterval = time.Now().Unix();//获取当前服务器时间
 	var curTime int64 = 0;
 	var clientScriptItem map[string]interface{} = nil;
-	for client.RID != -1{
+	for client.RID != -1 && client.SID != -1{
 		time.Sleep(model.TeachScriptTimeInterval);//每隔一定时间，计算要下发的教材脚本
 		rid := client.RID;
 		roomInfo := client.RoomInfo;
