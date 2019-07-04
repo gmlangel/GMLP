@@ -764,7 +764,7 @@ func foreachScriptItem(item *model.ScriptStepData,stData []model.ScriptStepData,
 	rinfo.SCurrent = item;//设置当前正在执行的教学脚本
 	rinfo.CurrentProcess = 1;
 	rinfo.CurrentAnswerState = "";
-	result = append(result,map[string]interface{}{"suid":0,"playInterval":0,"st":curTime,"data":item});//添加到返回数组
+	result = append(source,map[string]interface{}{"suid":0,"playInterval":0,"st":curTime,"data":item});//添加到返回数组
 	if itemType == "templateCMD" || itemType == "video" || itemType == "audio"{
 		//如遇关键脚本，则直接返回数据
 		return result,hasChangePageCount,item;			
@@ -775,7 +775,7 @@ func foreachScriptItem(item *model.ScriptStepData,stData []model.ScriptStepData,
 		if item.Next > -1 && int(item.Next) < len(stData){
 			//如果当前脚本存在下一个脚本，则递归下一个脚本
 			newItem := stData[item.Next];
-			return foreachScriptItem(&newItem,stData,rinfo,source,curTime,hasChangePageCount);
+			return foreachScriptItem(&newItem,stData,rinfo,result,curTime,hasChangePageCount);
 		}else{
 			return result,hasChangePageCount,nil;
 		}
