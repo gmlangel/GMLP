@@ -254,7 +254,7 @@ type UploadAnswer_c2s struct{
 type Answer struct{
     Tplate string `json:"tplate"`;//知识标签,因教材中目前还没有“知识标签”的预埋，所以暂时先传空字符串
     ReAnswerCount uint32 `json:"reAnswerCount"`;//学员重复作答次数。
-    Score uint32 `json:"score"`;//本题得分,0=错误   100=正确，其它得分用于语音模板等特殊模板
+    Score int64 `json:"score"`;//本题得分,0=错误   100=正确，其它得分用于语音模板等特殊模板
 }
 
 type Answer_c2s struct{

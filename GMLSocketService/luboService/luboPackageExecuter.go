@@ -145,10 +145,12 @@ func c2s_UploadAnswerCMD(client *LuBoClientConnection,jsonByte []byte){
 				resultKey := fmt.Sprintf("%d_%d",client.UID,client.RID);
 				resultArr := LessonResultMap_GetValue(resultKey)
 				ans_c2s := model.Answer_c2s{Id:req.Id,Data:req.Data};
-				if 0 != req.Data.Score{
+				if req.Data.Score > 0{
 					roomInfo.CurrentAnswerState = "success";
-				}else{
+				}else if 0 == req.Data.Score{
 					roomInfo.CurrentAnswerState = "faild";
+				}else{
+					roomInfo.CurrentAnswerState = "timeouterr";
 				}
 				
 				if resultArr == nil{
@@ -539,12 +541,12 @@ func loopSendTeachScript(client *LuBoClientConnection){
 							//下发教学命令到客户端
 							sendTeachScriptToUser(client,rid,cmdArr,roomInfo.AnswerUIDQueue);
 							cmdArr = []map[string]interface{}{};//清空已发的命令集合
-						}
-
-						if int(roomInfo.MCurrentMainFrameIdx) >= len(roomInfo.MainFrames) && len(cmdArr) == 0{
-							//没有可执行的关键帧时，继续播放媒体脚本
-							roomInfo.SCurrent = nil;
-							roomInfo.CurrentProcess = 0;
+						}else{
+							if int(roomInfo.MCurrentMainFrameIdx) >= len(roomInfo.MainFrames){
+								//没有可执行的关键帧时，继续播放媒体脚本
+								roomInfo.SCurrent = nil;
+								roomInfo.CurrentProcess = 0;
+							}
 						}
 					}else{
 						//如果没有对应的关键帧序列，则继续播放媒体脚本
@@ -766,6 +768,7 @@ func foreachScriptItem(item *model.ScriptStepData,stData []model.ScriptStepData,
 	rinfo.CurrentAnswerState = "";
 	result = append(source,map[string]interface{}{"suid":0,"playInterval":0,"st":curTime,"data":item});//添加到返回数组
 	if itemType == "templateCMD" || itemType == "video" || itemType == "audio"{
+		rinfo.SCurrentQuestionId = item.Id;//设置题号,用于答题匹配
 		//如遇关键脚本，则直接返回数据
 		return result,hasChangePageCount,item;			
 	}else{
