@@ -82,6 +82,8 @@ type ScriptStepData struct{
 //协议ID定义-----------------------------
 //MARK:Socket 通讯 数据包命令ID定义
 const(
+    /**用于测试的接口*/
+    C_REQ_S_Test = 0xf0000000;
 	/**服务器返回'欢迎'信令*/
     S_RES_C_HY = 0x00FF0000;
     //心跳服务
@@ -318,4 +320,13 @@ type OfflineNotify_s2c struct{
     Seq uint32 `json:"seq"`;//数据包的序号，可以为0
     Code uint32 `json:"code"`;
     Reason string `json:"reason"`;//掉线原因
+}
+
+
+/*服务器调试接口*/
+type ToTest_c2s struct{
+    Cmd uint32 `json:"cmd"`
+    Rid int64 `json:"rid"`;//教室ID
+    Uid int64 `json:"uid"`;//用户ID
+    Msg ScriptStepData `json:"msg"`;//具体数据
 }

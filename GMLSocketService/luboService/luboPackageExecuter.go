@@ -49,6 +49,9 @@ func ExecPackage(client *LuBoClientConnection,jsonByte []byte){
 			case model.C_REQ_S_UPLOADREPORTDATA:
 				c2s_UploadReportData(client,jsonByte);
 				break;
+			case model.C_REQ_S_Test:
+				c2s_Test(client,jsonByte);
+				break;
 			default:
 				break;
 			}
@@ -109,6 +112,27 @@ func c2s_UploadReportData(client *LuBoClientConnection,jsonByte []byte){
 		}
 	}
 }
+
+/**
+快捷测试接口
+*/
+func c2s_Test(client *LuBoClientConnection,jsonByte []byte){
+	var req model.ToTest_c2s;
+	err := json.Unmarshal(jsonByte,&req);
+	if err == nil{
+		//拼接要下发的消息
+		clientScriptItem := map[string]interface{}{"suid":0,"st":0,"playInterval":0,"data":&req.Msg};
+		cmdArr := append([]map[string]interface{}{},clientScriptItem);//将脚本塞入 下发列表
+		beControlClient := OwnedConnectUIDMap_GetValue(req.Uid);
+		if nil != beControlClient{
+			//停用客户端socket原有的教室loop教学脚本下发
+			beControlClient.MediaStepDataArr = nil;
+			//向指定客户端socket连接下发消息
+			sendTeachScriptToUser(beControlClient,req.Rid,cmdArr,[]int64{});
+		}
+	}
+}
+	
 
 /**
 处理用户上报的“做题答案”
