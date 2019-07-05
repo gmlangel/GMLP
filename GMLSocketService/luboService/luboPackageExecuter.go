@@ -659,6 +659,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						roomInfo.SCurrentTimeInterval = 0;
 						roomInfo.SCurrentQuesionTimeOut = 0;
 						roomInfo.CurrentProcess = 0;//重置播放状态。使其播放媒体命令
+						roomInfo.Credit = 0;
 						// // break;
 						
 						//测试用
@@ -798,6 +799,8 @@ func foreachScriptItem(item *model.ScriptStepData,stData []model.ScriptStepData,
 	}else{
 		if itemType == "changePage"{
 			hasChangePageCount += 1;//记录有无 翻页命令存在
+		}else if itemType == "star"{
+			rinfo.Credit += 1;//递增星星数量
 		}
 		if item.Next > -1 && int(item.Next) < len(stData){
 			//如果当前脚本存在下一个脚本，则递归下一个脚本

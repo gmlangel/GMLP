@@ -33,6 +33,7 @@ type RoomInfo struct{
     MainFrames []MediaMainFrame;//主媒体播放轴
     CurrentAnswerState string;//当前问题的用户答题结果 faild success timeouterr
     CurrentProcess int ;//当前正在处理哪个流程 。  0 代表 正在处理媒体播放流程   1代表正在处理关键帧处理流程
+    Credit int;//当前用户所获得的奖励数,临时记录,之后采用单独开发接口的方式实现
     //通用---end
 
     //媒体播放相关---begin
