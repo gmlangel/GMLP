@@ -305,6 +305,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			res.FaildMsg = "";
 			res.Rid = req.Rid;
 			res.UserArr = roomInfo.UserArr;
+			res.Credit = roomInfo.Credit;
 			client.Write(res);
 			result = true;
 			//向教室内的其它用户发送 用户状态变更通知
@@ -314,6 +315,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			//如果教材脚本加载完毕，则下推教材脚本
 			if tsObj := TeachScriptMap_GetValue(req.TeachScriptID);tsObj != nil{
 				pushTeachingTmaterialScriptLoadEndNotify(client,tsObj);
+				roomInfo.TongyongCMDArr = delateCredit(roomInfo.TongyongCMDArr);//学豆星星处理的临时方案，删除缓存中的学豆星星记录, 防止用户进入教室后收到重复的星星
 				//向该用户推送正在执行的教学命令
 				sendTeachScriptToUser(client,req.Rid,roomInfo.TongyongCMDArr,roomInfo.AnswerUIDQueue)
 				client.TeachScriptStepDataArr = objArrToStepDataArr(getObjArray(tsObj["stepData"],nil));
@@ -331,6 +333,21 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 	}
 }
 
+func delateCredit(arr []map[string]interface{})[]map[string]interface{}{
+	j:=len(arr);
+	for i:=0;i<j;{
+		item := arr[i];
+		canCache := getBool(item["canCache"],true);
+		if canCache == false{
+			//从等待答题的用户列表中移除该用户
+			arr = append(arr[0:i],arr[i+1:]...);
+			j -= 1;
+		}else{
+			i += 1;
+		}
+	}
+	return arr;
+}
 
 /**
 下推教材脚本中的资源相关配置
@@ -446,6 +463,7 @@ func loadTeachingTmaterialScript(client *LuBoClientConnection,req model.JoinRoom
 	TeachScriptMap_SetValue(teachScriptID,teachScriptObj);//将教学脚本添加至脚本集合
 	pushTeachingTmaterialScriptLoadEndNotify(client,teachScriptObj);
 	//向该用户推送正在执行的教学命令
+	roomInfo.TongyongCMDArr = delateCredit(roomInfo.TongyongCMDArr);//学豆星星处理的临时方案，删除缓存中的学豆星星记录, 防止用户进入教室后收到重复的星星
 	sendTeachScriptToUser(client,req.Rid,roomInfo.TongyongCMDArr,roomInfo.AnswerUIDQueue)
 
 	client.TeachScriptStepDataArr = objArrToStepDataArr(getObjArray(teachScriptObj["stepData"],nil));
@@ -791,7 +809,8 @@ func foreachScriptItem(item *model.ScriptStepData,stData []model.ScriptStepData,
 	rinfo.SCurrent = item;//设置当前正在执行的教学脚本
 	rinfo.CurrentProcess = 1;
 	rinfo.CurrentAnswerState = "";
-	result = append(source,map[string]interface{}{"suid":0,"playInterval":0,"st":curTime,"data":item});//添加到返回数组
+	subItem := map[string]interface{}{"suid":0,"playInterval":0,"st":curTime,"data":item};
+	result = append(source,subItem);//添加到返回数组
 	if itemType == "templateCMD" || itemType == "video" || itemType == "audio"{
 		rinfo.SCurrentQuestionId = item.Id;//设置题号,用于答题匹配
 		//如遇关键脚本，则直接返回数据
@@ -801,6 +820,7 @@ func foreachScriptItem(item *model.ScriptStepData,stData []model.ScriptStepData,
 			hasChangePageCount += 1;//记录有无 翻页命令存在
 		}else if itemType == "star"{
 			rinfo.Credit += 1;//递增星星数量
+			subItem["canCache"] = false;
 		}
 		if item.Next > -1 && int(item.Next) < len(stData){
 			//如果当前脚本存在下一个脚本，则递归下一个脚本
