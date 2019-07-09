@@ -242,7 +242,6 @@ type PushTeachScriptCache_s2c_notify struct{
     Rid int64 `json:"rid"`;//教室ID
     Code uint32 `json:"code"`;//暂时无意义 0 = 成功
     FaildMsg string `json:"fe"`;//报错信息
-    PlayTimeInterval int64 `json:"playTimeInterval"`;//本消息中的最后一条教学脚本已经执行了的时间，秒值
     Datas []map[string]interface{} `json:"datas"`;//教学脚本数组
     AnswerUIDQueue []int64;//学员uid列表。用于1对多课程场景，暂时无用。
 }

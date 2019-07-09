@@ -313,6 +313,14 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			//向该用户推送教室内缓存的文本消息通知
 			//向该用户推送管理员操作命令通知
 
+			//每次重新进入教室后，重置教室内各脚本的执行进度，使每个脚本都从第0秒重新播放
+			if len(roomInfo.TongyongCMDArr) > 0{
+				val, ok := roomInfo.TongyongCMDArr[0]["playInterval"].(int64);
+				if true == ok{
+					roomInfo.MCurrentTimeInterval = val;
+				}
+			}
+			roomInfo.SCurrentTimeInterval = 0;
 			//如果教材脚本加载完毕，则下推教材脚本
 			if tsObj := TeachScriptMap_GetValue(req.TeachScriptID);tsObj != nil{
 				pushTeachingTmaterialScriptLoadEndNotify(client,tsObj);
@@ -405,7 +413,6 @@ func pushTeachingTmaterialScriptLoadEndNotify(client *LuBoClientConnection,tsObj
 // 		res.Rid = rid;
 // 		res.Datas = tongyongCMDArr;
 // 		res.AnswerUIDQueue = answerUIDQueue;
-// 		res.PlayTimeInterval = playTimeInterval;
 // 		for _,v:= range uidArr{
 // 			sock := OwnedConnectUIDMap_GetValue(v)
 // 			if sock != nil{
@@ -554,6 +561,10 @@ func loopSendTeachScript(client *LuBoClientConnection){
 			break;
 		}
 		if roomInfo.RoomState == model.RoomState_End{
+			tempScript := map[string]interface{}{"id":len(mediaDataArr),"type":"classEnd","value":map[string]interface{}{}};
+			clientScriptItem = map[string]interface{}{"suid":0,"playInterval":0,"st":curTime,"data":tempScript};
+			cmdArr := []map[string]interface{}{clientScriptItem};//将脚本塞入 下发列表
+			sendTeachScriptToUser(client,rid,cmdArr,roomInfo.AnswerUIDQueue);
 			break;//如果课程已经停止，则停止下发数据
 		}
 		curTime = time.Now().Unix();
@@ -603,12 +614,12 @@ func loopSendTeachScript(client *LuBoClientConnection){
 				roomInfo.MCurrentTimeInterval += offsetTime;//无论是否正在执行教学脚本， 都要更新媒体脚本的计时，防止教学脚本执行完毕后，要过很久才能迎来新的媒体脚本播放时机
 				roomInfo.SCurrentTimeInterval += offsetTime;
 				client.GTimerInterval = curTime;//更新上一次处理脚本时的时间记录.
-				//更新除媒体脚本以外的缓存命令的已执行时间，便于断线重连后的续播
-				for i,v := range roomInfo.TongyongCMDArr{
-					if i > 0{
-						v["playInterval"] = roomInfo.SCurrentTimeInterval;
-					}
-				}
+				// //更新除媒体脚本以外的缓存命令的已执行时间，便于断线重连后的续播
+				// for i,v := range roomInfo.TongyongCMDArr{
+				// 	if i > 0{
+				// 		v["playInterval"] = roomInfo.SCurrentTimeInterval;
+				// 	}
+				// } 郭明龙 1019-7-9屏蔽代码， 为了实现用户进入教室后能够从头答题，而不记录上一次已经答题所使用了多久，防止用户答题时间不足
 				if roomInfo.SCurrentTimeInterval >= roomInfo.SCurrentQuesionTimeOut{
 					//关键帧脚本已经达到超时时间，为了不影响之后的脚本运行，则应该直接执行下个关键帧
 					roomInfo.SCurrentQuesionTimeOut = 0;
@@ -677,12 +688,8 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						} 
 					}else{
 						////已播放到课程结尾，课程结束
-						// // roomInfo.RoomState = model.RoomState_End;//设置课程结束
-					 	// tempScript := map[string]interface{}{"id":j,"type":"classEnd","value":map[string]interface{}{}};
-					 	// clientScriptItem = map[string]interface{}{"suid":0,"playInterval":0,"st":curTime,"data":tempScript};
-						 // cmdArr = append(cmdArr,clientScriptItem);//将脚本塞入 下发列表
-						 //sendTeachScriptToUser(client,rid,cmdArr,roomInfo.AnswerUIDQueue);
-						//cmdArr = []map[string]interface{}{};//清空已发的命令集合
+						//roomInfo.RoomState = model.RoomState_End;//设置课程结束
+						 
 						roomInfo.MAllowNew = true;
 						roomInfo.MCurrent = nil;
 						roomInfo.MainFrames = nil;
@@ -696,9 +703,6 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						roomInfo.CurrentProcess = 0;//重置播放状态。使其播放媒体命令
 						roomInfo.Credit = 0;
 						roomInfo.CanPlayWaitVideo = false;
-						// // break;
-						
-						//测试用
 						continue;
 					}
 

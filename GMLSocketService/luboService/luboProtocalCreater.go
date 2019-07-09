@@ -61,7 +61,7 @@ func createTeachScriptLoadEnd_s2c_notify()interface{}{
 }
 
 func createPushTeachScriptCache_s2c_notify()interface{}{
-	result := &model.PushTeachScriptCache_s2c_notify{Cmd:model.S_NOTIFY_C_TEACHSCRIPTCMD,Code:0,FaildMsg:"",Rid:0,PlayTimeInterval:0};
+	result := &model.PushTeachScriptCache_s2c_notify{Cmd:model.S_NOTIFY_C_TEACHSCRIPTCMD,Code:0,FaildMsg:"",Rid:0};
 	return result;
 }
 
