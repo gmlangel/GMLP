@@ -169,9 +169,10 @@ func c2s_UploadAnswerCMD(client *LuBoClientConnection,jsonByte []byte){
 				resultKey := fmt.Sprintf("%d_%d",client.UID,client.RID);
 				resultArr := LessonResultMap_GetValue(resultKey)
 				ans_c2s := model.Answer_c2s{Id:req.Id,Data:req.Data};
-				if req.Data.Score > 0{
+				score := req.Data.Score;
+				if  score >= 60{
 					roomInfo.CurrentAnswerState = "success";
-				}else if 0 == req.Data.Score{
+				}else if score >= 0 && score < 60{
 					roomInfo.CurrentAnswerState = "faild";
 				}else{
 					roomInfo.CurrentAnswerState = "timeouterr";
