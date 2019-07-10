@@ -626,6 +626,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 					roomInfo.SAllowNew = true;
 					roomInfo.CurrentAnswerState = "timeouterr";//设置答题结果为'超时'
 				}
+				//nil != roomInfo.SCurrent && roomInfo.SCurrent.Type == "templateCMD" && 
 				if roomInfo.MCurrentTimeInterval >= roomInfo.MCompleteTime && roomInfo.CanPlayWaitVideo == true{
 					roomInfo.CanPlayWaitVideo = false;
 					waitVideoArr := client.WaitAnswerVideo//取等待视频数组
@@ -664,23 +665,6 @@ func loopSendTeachScript(client *LuBoClientConnection){
 									roomInfo.TongyongCMDArr[0] = clientScriptItem;//替换掉第一条命令
 								}
 								roomInfo.MainFrames = mediaItem.MainFrames;
-								//根据mainFrames时间轴，解析stepData,并获取要执行的命令数组
-								tempCmdArr,frameStepIdx,hasChangePage := execStepDataByMainFrames(roomInfo.MainFrames,stepDataArr,roomInfo,roomInfo.MCurrentMainFrameIdx,curTime)
-								roomInfo.MCurrentMainFrameIdx = frameStepIdx;
-								// if len(tempCmdArr) > 0{
-								// 	roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,tempCmdArr...);//添加新的教学d命令到缓存
-								// 	cmdArr = append(cmdArr,tempCmdArr...);//将脚本塞入 下发列表
-								// }
-								if len(tempCmdArr) > 0{
-									if true == hasChangePage{
-										//如果tempCmdArr中存在翻页命令，则删除TongyongCMDArr中除第一条命令以外的所有命令后，再追加。
-										roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr[0:1],tempCmdArr...);//更新缓存的教学命令
-									}else{
-										//否则直接追加
-										roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,tempCmdArr...);
-									}
-									cmdArr = append(cmdArr,tempCmdArr...);//将脚本塞入 下发列表
-								}
 								roomInfo.MAllowNew = false;
 								roomInfo.MCompleteTime = getInt64(itemValue["endSecond"],0) - getInt64(itemValue["beginSecond"],0) + 2;//设置脚本超时时间
 								break;
@@ -705,13 +689,32 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						roomInfo.CanPlayWaitVideo = false;
 						continue;
 					}
-
-					if len(cmdArr) > 0{
-						//下发教学命令到客户端
-						sendTeachScriptToUser(client,rid,cmdArr,roomInfo.AnswerUIDQueue);
-						cmdArr = []map[string]interface{}{};//清空已发的命令集合
-					}
 				}
+
+				//根据mainFrames时间轴，解析stepData,并获取要执行的命令数组
+				tempCmdArr,frameStepIdx,hasChangePage := execStepDataByMainFrames(roomInfo.MainFrames,stepDataArr,roomInfo,roomInfo.MCurrentMainFrameIdx,curTime)
+				roomInfo.MCurrentMainFrameIdx = frameStepIdx;
+				// if len(tempCmdArr) > 0{
+				// 	roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,tempCmdArr...);//添加新的教学d命令到缓存
+				// 	cmdArr = append(cmdArr,tempCmdArr...);//将脚本塞入 下发列表
+				// }
+				if len(tempCmdArr) > 0{
+					if true == hasChangePage{
+						//如果tempCmdArr中存在翻页命令，则删除TongyongCMDArr中除第一条命令以外的所有命令后，再追加。
+						roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr[0:1],tempCmdArr...);//更新缓存的教学命令
+					}else{
+						//否则直接追加
+						roomInfo.TongyongCMDArr = append(roomInfo.TongyongCMDArr,tempCmdArr...);
+					}
+					cmdArr = append(cmdArr,tempCmdArr...);//将脚本塞入 下发列表
+				}
+
+				if len(cmdArr) > 0{
+					//下发教学命令到客户端
+					sendTeachScriptToUser(client,rid,cmdArr,roomInfo.AnswerUIDQueue);
+					cmdArr = []map[string]interface{}{};//清空已发的命令集合
+				}
+
 				roomInfo.MCurrentTimeInterval += offsetTime;//无论是否正在执行教学脚本， 都要更新媒体脚本的计时，防止教学脚本执行完毕后，要过很久才能迎来新的媒体脚本播放时机
 				client.GTimerInterval = curTime;//更新上一次处理脚本时的时间记录.
 				if roomInfo.MCurrentTimeInterval >= roomInfo.MCompleteTime{
@@ -748,6 +751,7 @@ func tempFunc(stepItem * model.ScriptStepData,stData []model.ScriptStepData,rinf
 			rinfo.CanPlayWaitVideo = true;//设置  允许播放等待视频
 			timeLength = getInt64(itemValue["timeout"],3);
 		}else{
+			rinfo.CanPlayWaitVideo = false;//设置  不允许播放等待视频
 			timeLength = getInt64(itemValue["endSecond"],0) - getInt64(itemValue["beginSecond"],0) + 3;
 		}
 		rinfo.SAllowNew = false;//禁用关键帧脚本的执行
@@ -814,6 +818,7 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 							rinfo.CanPlayWaitVideo = true;//设置  允许播放等待视频
 							timeLength = getInt64(itemValue["timeout"],3);
 						}else{
+							rinfo.CanPlayWaitVideo = false;//设置  不允许播放等待视频
 							timeLength = getInt64(itemValue["endSecond"],0) - getInt64(itemValue["beginSecond"],0) + 3;
 						}
 						rinfo.SAllowNew = false;//禁用关键帧脚本的执行
