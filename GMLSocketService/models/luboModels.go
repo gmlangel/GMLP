@@ -24,7 +24,8 @@ type RoomInfo struct{
     //通用---begin
     Rid int64;
     RoomState Enum_RoomState;//课程状态
-    StartTimeInterval int64;//课程开始时间beginTime
+    StartTimeinterval int64;//课程开始时间beginTime
+    EndTimeinterval int64;//课程结束时间
     TeachingTmaterialScriptID int64;//教学脚本ID
     UserArr []CurrentUser;//当前频道中的人的信息数组
     UserIdArr []int64;//用户ID数组
@@ -197,6 +198,7 @@ type JoinRoom_c2s struct{
     Rid int64 `json:"rid"`;//教室ID
     TeachScriptID int64 `json:"tts"`;//课程教学脚本的ID
     StartTimeinterval int64 `json:"sti"`;//课程开始时间的UTC时间戳秒值
+    EndTimeinterval int64 `json:"eti"`;//课程结束时间的UTC时间戳秒值
     Uid int64 `json:"uid"`;//用户ID
     NickName string `json:"nn"`;//用户昵称
 }

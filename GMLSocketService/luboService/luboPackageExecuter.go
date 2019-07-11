@@ -322,6 +322,8 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 				}
 			}
 			roomInfo.SCurrentTimeInterval = 0;
+			roomInfo.StartTimeinterval = req.StartTimeinterval;
+			roomInfo.EndTimeinterval = req.EndTimeinterval;
 			//如果教材脚本加载完毕，则下推教材脚本
 			if tsObj := TeachScriptMap_GetValue(req.TeachScriptID);tsObj != nil{
 				pushTeachingTmaterialScriptLoadEndNotify(client,tsObj);
@@ -561,14 +563,16 @@ func loopSendTeachScript(client *LuBoClientConnection){
 		if nil == roomInfo || nil == stepDataArr || nil == mediaDataArr{
 			break;
 		}
-		if roomInfo.RoomState == model.RoomState_End{
+		curTime = time.Now().Unix();
+		if curTime > roomInfo.EndTimeinterval || roomInfo.RoomState == model.RoomState_End{
+			//如果当前时间大于课程结束时间、或者课程处于结束状态，则直接下发classend命令，告知客户端，并break出循环
+			roomInfo.RoomState = model.RoomState_End
 			tempScript := map[string]interface{}{"id":len(mediaDataArr),"type":"classEnd","value":map[string]interface{}{}};
 			clientScriptItem = map[string]interface{}{"suid":0,"playInterval":0,"st":curTime,"data":tempScript};
 			cmdArr := []map[string]interface{}{clientScriptItem};//将脚本塞入 下发列表
 			sendTeachScriptToUser(client,rid,cmdArr,roomInfo.AnswerUIDQueue);
 			break;//如果课程已经停止，则停止下发数据
 		}
-		curTime = time.Now().Unix();
 		if roomInfo.RoomState == model.RoomState_Started{
 			cmdArr := []map[string]interface{}{};//要下发的教学脚本数组
 			offsetTime := curTime - client.GTimerInterval;
@@ -726,7 +730,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 			}
 		}else{
 			//计时，实时更新课程状态
-			if curTime > roomInfo.StartTimeInterval{
+			if curTime > roomInfo.StartTimeinterval && curTime < roomInfo.EndTimeinterval{
 				roomInfo.RoomState = model.RoomState_Started
 			}
 		}
