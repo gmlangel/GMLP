@@ -279,7 +279,6 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 				roomInfo.TongyongCMDArr = []map[string]interface{}{};
 				roomInfo.CurrentAnswerState = "";
 				roomInfo.CurrentProcess = 0;
-				roomInfo.CanPlayWaitVideo = false;
 				RoomInfoMap_SetValue(req.Rid,roomInfo);//存入教室信息集合
 			}
 
@@ -331,7 +330,6 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 				//向该用户推送正在执行的教学命令
 				sendTeachScriptToUser(client,req.Rid,roomInfo.TongyongCMDArr,roomInfo.AnswerUIDQueue)
 				client.TeachScriptStepDataArr = objArrToStepDataArr(getObjArray(tsObj["stepData"],nil));
-				client.WaitAnswerVideo = objArrToStepDataArr(getObjArray(tsObj["waitAnswerVideo"],nil));
 				client.MediaStepDataArr = objArrToMediaDataArr(getObjArray(tsObj["mediaData"], nil))
 				go loopSendTeachScript(client);//定时下发教学脚本
 			}else{
@@ -479,7 +477,6 @@ func loadTeachingTmaterialScript(client *LuBoClientConnection,req model.JoinRoom
 	sendTeachScriptToUser(client,req.Rid,roomInfo.TongyongCMDArr,roomInfo.AnswerUIDQueue)
 
 	client.TeachScriptStepDataArr = objArrToStepDataArr(getObjArray(teachScriptObj["stepData"],nil));
-	client.WaitAnswerVideo = objArrToStepDataArr(getObjArray(teachScriptObj["waitAnswerVideo"],nil));
 	client.MediaStepDataArr = objArrToMediaDataArr(getObjArray(teachScriptObj["mediaData"],nil));
 	go loopSendTeachScript(client);//定时下发教学脚本
 }
@@ -631,19 +628,6 @@ func loopSendTeachScript(client *LuBoClientConnection){
 					roomInfo.SAllowNew = true;
 					roomInfo.CurrentAnswerState = "timeouterr";//设置答题结果为'超时'
 				}
-				//nil != roomInfo.SCurrent && roomInfo.SCurrent.Type == "templateCMD" && 
-				if roomInfo.MCurrentTimeInterval >= roomInfo.MCompleteTime && roomInfo.CanPlayWaitVideo == true{
-					roomInfo.CanPlayWaitVideo = false;
-					waitVideoArr := client.WaitAnswerVideo//取等待视频数组
-					if len(waitVideoArr) > 0{
-						waitScript := waitVideoArr[0];
-						waitVideoScriptItem := map[string]interface{}{"suid":0,"playInterval":0,"st":curTime,"data":&waitScript};
-						cmdArr = append(cmdArr,waitVideoScriptItem);//将脚本塞入 下发列表
-						//已经达到当前媒体脚本的播放结束时间，但是当前的stepData链还未执行完，则需要播放“等待”视频
-						sendTeachScriptToUser(client,rid,cmdArr,roomInfo.AnswerUIDQueue);
-						cmdArr = []map[string]interface{}{};//清空已发的命令集合
-					}
-				}
 			}else{
 				//处理媒体脚本
 				//遍历媒体播放数组
@@ -691,7 +675,6 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						roomInfo.SCurrentQuesionTimeOut = 0;
 						roomInfo.CurrentProcess = 0;//重置播放状态。使其播放媒体命令
 						roomInfo.Credit = 0;
-						roomInfo.CanPlayWaitVideo = false;
 						continue;
 					}
 				}
@@ -753,10 +736,8 @@ func tempFunc(stepItem * model.ScriptStepData,stData []model.ScriptStepData,rinf
 		rinfo.SWaitAnswerUids = rinfo.UserIdArr;//设置应答序列
 		var timeLength int64;
 		if itemType == "templateCMD"{
-			rinfo.CanPlayWaitVideo = true;//设置  允许播放等待视频
 			timeLength = getInt64(itemValue["timeout"],3);
 		}else{
-			rinfo.CanPlayWaitVideo = false;//设置  不允许播放等待视频
 			timeLength = getInt64(itemValue["endSecond"],0) - getInt64(itemValue["beginSecond"],0) + 3;
 		}
 		rinfo.SAllowNew = false;//禁用关键帧脚本的执行
@@ -820,10 +801,8 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 						rinfo.SWaitAnswerUids = rinfo.UserIdArr;//设置应答序列
 						var timeLength int64;
 						if itemType == "templateCMD"{
-							rinfo.CanPlayWaitVideo = true;//设置  允许播放等待视频
 							timeLength = getInt64(itemValue["timeout"],3);
 						}else{
-							rinfo.CanPlayWaitVideo = false;//设置  不允许播放等待视频
 							timeLength = getInt64(itemValue["endSecond"],0) - getInt64(itemValue["beginSecond"],0) + 3;
 						}
 						rinfo.SAllowNew = false;//禁用关键帧脚本的执行

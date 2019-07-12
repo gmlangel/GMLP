@@ -35,7 +35,6 @@ type LuBoClientConnection struct{
 	OnSocketCloseComplete func();//当当前socket连接被close完毕后触发的处理函数。
 	TeachScriptStepDataArr []model.ScriptStepData;//教材数据集
 	MediaStepDataArr []model.MediaData;//教材数据集
-	WaitAnswerVideo []model.ScriptStepData;//用于作答等待时的 衔接视频的数组
 	GTimerInterval int64;//教材相关的当前时间utc 秒值.
 	RoomInfo *model.RoomInfo;//教室信息
 }
@@ -54,7 +53,6 @@ func NewLuBoClientConn(sid int64,conn net.Conn)(*LuBoClientConnection){
 	client.UID = -1;
 	client.RID = -1;
 	client.TeachScriptStepDataArr = nil;
-	client.WaitAnswerVideo = nil;
 	client.MediaStepDataArr = nil;
 	client.RoomInfo = nil;
 	go client.runLoopRead();//开socket read队列
@@ -77,7 +75,6 @@ func (lbc *LuBoClientConnection)DestroySocket(arg interface{}){
 	lbc.OnTimeout = nil;
 	lbc.OnError = nil;
 	lbc.TeachScriptStepDataArr = nil;
-	lbc.WaitAnswerVideo = nil;
 	lbc.MediaStepDataArr = nil;
 	go lbc.writeLastMsgAndCloseSock(arg);//送最后一条消息后，关闭socket
 	
