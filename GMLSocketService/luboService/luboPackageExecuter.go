@@ -322,7 +322,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			}
 			roomInfo.SCurrentTimeInterval = 0;
 			roomInfo.StartTimeinterval = req.StartTimeinterval;
-			roomInfo.EndTimeinterval = req.EndTimeinterval;
+			roomInfo.EndTimeinterval = req.EndTimeinterval + 1800;//延长课程结束时间30分钟，防止用户在正常上课期间频繁掉线，导致课程无法准点结束
 			//如果教材脚本加载完毕，则下推教材脚本
 			if tsObj := TeachScriptMap_GetValue(req.TeachScriptID);tsObj != nil{
 				pushTeachingTmaterialScriptLoadEndNotify(client,tsObj);
