@@ -661,7 +661,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						} 
 					}else{
 						////已播放到课程结尾，课程结束
-						//roomInfo.RoomState = model.RoomState_End;//设置课程结束
+						roomInfo.RoomState = model.RoomState_End;//设置课程结束
 						 
 						roomInfo.MAllowNew = true;
 						roomInfo.MCurrent = nil;
