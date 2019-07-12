@@ -3,7 +3,7 @@
 	"width": 2723,
 	"height": 1526,
 	"resource": {
-		"waitAnswerVideo":[
+		"waitAnswerVideos":[
 			{
 				"id": 0,
 				"type": "video",
@@ -23,10 +23,7 @@
 	},
 	"mediaData": [
 		{
-			"id": 0,
-			"type": "video",
-			"n": 1,
-			"p": -1,
+			"id": 0,"type": "video","n": 1,"p": -1,
 			"value": {
 				"path": "p1-1~p4-1_actv_20190628133814666_505aec1e",
 				"beginSecond": 0,
@@ -36,47 +33,18 @@
 				"size": [1196, 673],
 				"position": [81, 477]
 			},
-			"mainFrames": [{
-				"mt":0,
-				"st": 0,
-				"sid": 0
-			},{
-				"mt":8,
-				"st": 10,
-				"sid": 1
-			},{
-				"mt":16,
-				"st": 16,
-				"sid": 3
-			},{
-				"mt":16,
-				"st": 18,
-				"sid": 4
-			},{
-				"mt":27,
-				"st": 27,
-				"sid": 5
-			},{
-				"mt":35,
-				"st": 35,
-				"sid": 6
-			},{
-				"mt":44,
-				"st": 44,
-				"sid": 7
-			},{
-				"mt":50,
-				"st": 50,
-				"sid": 8
-			},{
-				"mt":59,
-				"st": 59,
-				"sid": 9
-			},{
-				"mt":63,
-				"st": 63,
-				"sid": 10
-			}]
+			"mainFrames": [
+				{"mt":0,"st": 0,"sid": 0},
+				{"mt":8,"st": 10,"sid": 1},
+				{"mt":16,"st": 16,"sid": 3},
+				{"mt":16,"st": 18,"sid": 4},
+				{"mt":27,"st": 27,"sid": 5},
+				{"mt":35,"st": 35,"sid": 6},
+				{"mt":44,"st": 44,"sid": 7},
+				{"mt":50,"st": 50,"sid": 8},
+				{"mt":59,"st": 59,"sid": 9},
+				{"mt":63,"st": 63,"sid": 10}
+			]
 		},
 		{
 			"id": 1,
