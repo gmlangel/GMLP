@@ -30,11 +30,13 @@ type RoomInfo struct{
     UserArr []CurrentUser;//当前频道中的人的信息数组
     UserIdArr []int64;//用户ID数组
     AnswerUIDQueue []int64;//用户答题序列数组
-    TongyongCMDArr []map[string]interface{};//通用教学命令
     MainFrames []MediaMainFrame;//主媒体播放轴
     CurrentAnswerState string;//当前问题的用户答题结果 faild success timeouterr
     CurrentProcess int ;//当前正在处理哪个流程 。  0 代表 正在处理媒体播放流程   1代表正在处理关键帧处理流程
     Credit int;//当前用户所获得的奖励数,临时记录,之后采用单独开发接口的方式实现
+    NeedPlayPreMedia bool;//是否应该播放上一段媒体视频
+    NeedPlayBack bool;//是否要回放
+    MPreMainFrameIdx int64;//记录MCurrentMainFrameIdx改变前的值，用于续播
     //通用---end
 
     //媒体播放相关---begin
@@ -43,6 +45,7 @@ type RoomInfo struct{
     MCompleteTime int64;//当前媒体脚本的播放结束时间，应与MCurrentTimeInterval进行比对
     MCurrentTimeInterval int64;//某一段媒体脚本已经执行了的时间，用于进行各种时间比对及计算
     MCurrentMainFrameIdx int64;//当前播放视频对应的关键帧数组中 当前正在播放的关键帧的索引
+    MMainFramePlayInterval int64;//关键帧对应的媒体播放视频的时间节点
     //媒体播放相关---end
 
     //教学脚本相关---begin
