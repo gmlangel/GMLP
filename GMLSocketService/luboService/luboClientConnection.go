@@ -227,13 +227,13 @@ func (lbc *LuBoClientConnection)runLoopRead(){
 			}
 			lbc.readBuffer = append(lbc.readBuffer,data...);
 			lbc.readChan <- 1
-			go lbc.checkPackage(data);
+			go lbc.checkPackage();
 		}
 	}
 }
 
 /*在readbuffer中检索有用的数据包*/
-func (lbc *LuBoClientConnection)checkPackage(data []byte){
+func (lbc *LuBoClientConnection)checkPackage(){
 	/*
 	以下的处理环节存在一个问题，即无法解决第一个包为 <gmlb>"cmd":10010,"mgs":"abc"<gmle><gmlb>"cmd":10010,"mgs":"abc"
 	第二个包为<gmlb>"cmd":10010,"mgs":"abc"<gmle>的丢包情况。 这种情况下只会处理第一个包，而第二个包会被丢弃，视作丢包
