@@ -133,18 +133,23 @@ func c2s_Test(client *LuBoClientConnection,jsonByte []byte){
 	}
 }
 	
-
-func tempFunc(roomInfo *model.RoomInfo)bool{
-	roomInfo.SCurrent
-	roomInfo.stepDataArr
-	roomInfo.SCurrent.Next
-
-	//如果roomInfo.SCurrent == nil,视为答题完毕 则return true
-	//如果roomInfo.SCurrent != nil,且拥有next，则 return 递归next, 否则视为答题完毕return false，
-
-	//如果next step == nil,视为答题完毕 则return true
-	//如果next step != nil,且next step的type == “templateCMD”，视为答题环节未结束，则return false
-	//如果next strp !=nil,且next step的type != “templateCMD”,且拥有next，则 return 递归next,否则视为答题完毕return false，
+/**判断当前的教学环节是否已经结束*/
+func answerIsEnd(idx int,stepArr []model.ScriptStepData,roomInfo *model.RoomInfo)bool{
+	if idx > -1 && idx < len(stepArr){
+		stepData := stepArr[idx];
+		if "templateCMD" == stepData.Type{
+			//如果step != nil,且step的type == “templateCMD”，视为答题环节未结束，则return false
+			return false;
+		}else{
+			if "star" == stepData.Type{
+				roomInfo.WantAddCredit += int(getInt64(stepData.Value["count"],0));//记录即将获得的星星数量，用于断线重连
+			}
+			return answerIsEnd(int(stepData.Next),stepArr,roomInfo)
+		}
+	}else{
+		//如果step == nil,视为答题完毕 则return true
+		return true;
+	}
 }
 
 /**
@@ -186,19 +191,22 @@ func c2s_UploadAnswerCMD(client *LuBoClientConnection,jsonByte []byte){
 				score := req.Data.Score;
 				if  score >= 60{
 					roomInfo.CurrentAnswerState = "success";
-					roomInfo.NeedPlayBack = false;//每次答题成功后，认定该问题已近答过，设置NeedPlayBack值为false，避免用户重新进入教室后，重复答题，
 				}else if score >= 0 && score < 60{
 					roomInfo.CurrentAnswerState = "faild";
-					if tempFunc(roomInfo) == true{
-						roomInfo.NeedPlayBack = false;//当答题错误后，并且当前问题的Next 链中没有再次答题的机会时，认定该问题已近答过，设置NeedPlayBack值为false，避免用户重新进入教室后，重复答题，
-					}
 				}else{
 					roomInfo.CurrentAnswerState = "timeouterr";
-					if tempFunc(roomInfo) == true{
-						roomInfo.NeedPlayBack = false;//当答题超时后，并且当前问题的Next 链中没有再次答题的机会时，认定该问题已近答过，设置NeedPlayBack值为false，避免用户重新进入教室后，重复答题，
-					}
 				}
-				
+				//计算当前问题是否已经答题完毕，从而确定教学环节是否已经完毕，避免重新进入教室后，播放重复的教学环节
+				nextState := -1;
+				if nil != roomInfo.SCurrent{
+					nextState = int(getInt64(roomInfo.SCurrent.Value[roomInfo.CurrentAnswerState],-1));
+				}
+				if answerIsEnd(nextState,client.TeachScriptStepDataArr,roomInfo) == true{
+					roomInfo.NeedPlayBack = false;//当答题错误后，并且当前问题的Next 链中没有再次答题的机会时，认定该问题已近答过，设置NeedPlayBack值为false，避免用户重新进入教室后，重复答题，
+				}else{
+					roomInfo.NeedPlayBack = true;
+				}
+				//将答题结果记录至课程报告数组
 				if resultArr == nil{
 					resultArr = append([]model.Answer_c2s{},ans_c2s)
 				}else{
@@ -328,7 +336,8 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			res.FaildMsg = "";
 			res.Rid = req.Rid;
 			res.UserArr = roomInfo.UserArr;
-			res.Credit = roomInfo.Credit;
+			res.Credit = roomInfo.Credit + roomInfo.WantAddCredit;
+			roomInfo.Credit = res.Credit;
 			client.Write(res);
 			result = true;
 			//向教室内的其它用户发送 用户状态变更通知
@@ -345,7 +354,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			roomInfo.SAllowNew = true;
 			roomInfo.SCurrent = nil;
 			roomInfo.SCurrentTimeInterval = 0;
-			roomInfo.SCurrentQuesionTimeOut = 0;
+			roomInfo.SCurrentQuesionTimeOut = -1;
 			roomInfo.CurrentProcess = 0;//重置播放状态。使其播放媒体命令
 			roomInfo.SWaitAnswerUids = nil;
 			roomInfo.SCurrentQuestionId = -1;
@@ -606,13 +615,19 @@ func loopSendTeachScript(client *LuBoClientConnection){
 				roomInfo.MCurrentTimeInterval += offsetTime;//无论是否正在执行教学脚本， 都要更新媒体脚本的计时，防止教学脚本执行完毕后，要过很久才能迎来新的媒体脚本播放时机
 				roomInfo.SCurrentTimeInterval += offsetTime;
 				client.GTimerInterval = curTime;//更新上一次处理脚本时的时间记录.
-				if roomInfo.SCurrentTimeInterval >= roomInfo.SCurrentQuesionTimeOut{
+				if roomInfo.SCurrentQuesionTimeOut > -1 && roomInfo.SCurrentTimeInterval >= roomInfo.SCurrentQuesionTimeOut{
 					//关键帧脚本已经达到超时时间，为了不影响之后的脚本运行，则应该直接执行下个关键帧
-					roomInfo.SCurrentQuesionTimeOut = 0;
+					roomInfo.SCurrentQuesionTimeOut = -1;
 					roomInfo.SAllowNew = true;
 					roomInfo.CurrentAnswerState = "timeouterr";//设置答题结果为'超时'
-					if tempFunc(roomInfo.SCurrent) == true{
+					nextState := -1;
+					if nil != roomInfo.SCurrent{
+						nextState = int(getInt64(roomInfo.SCurrent.Value[roomInfo.CurrentAnswerState],-1));
+					}
+					if answerIsEnd(nextState,client.TeachScriptStepDataArr,roomInfo) == true{
 						roomInfo.NeedPlayBack = false;//当答题超时后，并且当前问题的Next 链中没有再次答题的机会时，认定该问题已近答过，设置NeedPlayBack值为false，避免用户重新进入教室后，重复答题，
+					}else{
+						roomInfo.NeedPlayBack = true;
 					}
 				}
 			}else{
@@ -629,6 +644,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						}else{
 							//播放MCurrent的下一个视频
 							idx = roomInfo.MCurrent.Next;//如果存在当前播放列，则取当前播放项的下一条进行播放
+							roomInfo.MPreMainFrameIdx = 0;
 						}
 					}
 					
@@ -636,6 +652,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						mediaItem := &mediaDataArr[idx];//获取一条教学命令
 						roomInfo.NeedPlayBack = true;//每次成功获取到一条媒体播放命令后，都要设置NeedPlayBack为true，这样可以让用户每次进入教室后，播放上一次未完成的视频
 						roomInfo.MCurrentMainFrameIdx = roomInfo.MPreMainFrameIdx;
+						roomInfo.MPreMainFrameIdx = 0;
 						roomInfo.MCurrent = mediaItem;
 						//将服务端脚本转换为客户端可以执行的脚本命令
 						clientScriptItem = map[string]interface{}{"suid":0,"st":curTime,"playInterval":roomInfo.MCurrentTimeInterval,"data":mediaConverScript(mediaItem)};
@@ -667,7 +684,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						roomInfo.SAllowNew = true;
 						roomInfo.SCurrent = nil;
 						roomInfo.SCurrentTimeInterval = 0;
-						roomInfo.SCurrentQuesionTimeOut = 0;
+						roomInfo.SCurrentQuesionTimeOut = -1;
 						roomInfo.CurrentProcess = 0;//重置播放状态。使其播放媒体命令
 						roomInfo.Credit = 0;
 						continue;
@@ -816,7 +833,12 @@ func foreachScriptItem(item *model.ScriptStepData,stData []model.ScriptStepData,
 		if itemType == "changePage"{
 			hasChangePageCount += 1;//记录有无 翻页命令存在
 		}else if itemType == "star"{
-			rinfo.Credit += 1;//递增星星数量
+			starCount := int(getInt64(item.Value["count"],0));//递增星星数量
+			rinfo.Credit += starCount;
+			rinfo.WantAddCredit -= starCount;
+			if rinfo.WantAddCredit < 0 {
+				rinfo.WantAddCredit = 0;
+			}
 		}
 		if item.Next > -1 && int(item.Next) < len(stData){
 			//如果当前脚本存在下一个脚本，则递归下一个脚本
