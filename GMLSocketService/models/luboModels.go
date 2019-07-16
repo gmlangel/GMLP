@@ -37,7 +37,7 @@ type RoomInfo struct{
     WantAddCredit int;//每次用户进入教室后的Credit的地增量。 防止用户退出前未领取奖励，重新进入后奖励数不正确的问题
     NeedPlayPreMedia bool;//是否应该播放上一段媒体视频
     NeedPlayBack bool;//是否要回放
-    MPreMainFrameIdx int64;//记录MCurrentMainFrameIdx改变前的值，用于续播
+    PreChangePageCMD map[string]interface{};//上一次的翻页命令，用户断线重连或者续播
     //通用---end
 
     //媒体播放相关---begin
@@ -47,6 +47,8 @@ type RoomInfo struct{
     MCurrentTimeInterval int64;//某一段媒体脚本已经执行了的时间，用于进行各种时间比对及计算
     MCurrentMainFrameIdx int64;//当前播放视频对应的关键帧数组中 当前正在播放的关键帧的索引
     MMainFramePlayInterval int64;//关键帧对应的媒体播放视频的时间节点
+    MMainFramePrePlayInterval int64;//退出教室前的关键帧对应的媒体播放视频的时间节点
+    MPreMainFrameIdx int64;//记录MCurrentMainFrameIdx改变前的值，用于续播
     //媒体播放相关---end
 
     //教学脚本相关---begin

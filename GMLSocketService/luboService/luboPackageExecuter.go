@@ -180,10 +180,10 @@ func c2s_UploadAnswerCMD(client *LuBoClientConnection,jsonByte []byte){
 			}
 
 			if true == needRecordAnswerReport{
-				//每一个用户提交答案后进行判断，脚本执行时间不足3秒的，补充至3秒
-				if roomInfo.SCurrentQuesionTimeOut - roomInfo.SCurrentTimeInterval < 3{
-					roomInfo.SCurrentQuesionTimeOut = roomInfo.SCurrentTimeInterval + 3//更新关键帧脚本的时间
-				}
+				// //每一个用户提交答案后进行判断，脚本执行时间不足3秒的，补充至3秒
+				// if roomInfo.SCurrentQuesionTimeOut - roomInfo.SCurrentTimeInterval < 3{
+				// 	roomInfo.SCurrentQuesionTimeOut = roomInfo.SCurrentTimeInterval + 3//更新关键帧脚本的时间
+				// }
 				//记录用户相关的课程报告
 				resultKey := fmt.Sprintf("%d_%d",client.UID,client.RID);
 				resultArr := LessonResultMap_GetValue(resultKey)
@@ -360,7 +360,8 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			roomInfo.SCurrentQuestionId = -1;
 			if true == roomInfo.NeedPlayBack{
 				//当当前的问题流程还未答完，则从上一次退出教室时的关键帧对应的视频节点开始播放
-				roomInfo.MCurrentTimeInterval = roomInfo.MMainFramePlayInterval;
+				roomInfo.MCurrentTimeInterval = roomInfo.MMainFramePrePlayInterval;
+				roomInfo.MMainFramePrePlayInterval = 0;
 				roomInfo.NeedPlayPreMedia = true;
 			}else{
 				//当当前的问题流程回答完毕，不论之后的奖励和视频是否播完，则播放时间置0，播下一个视频
@@ -369,6 +370,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 				roomInfo.MCurrentTimeInterval = 0;
 				roomInfo.NeedPlayPreMedia = false;
 				roomInfo.MPreMainFrameIdx = 0;
+				roomInfo.MMainFramePrePlayInterval = 0;
 			}
 
 			//计算课程开课时间和结束时间
@@ -377,6 +379,9 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			//如果教材脚本加载完毕，则下推教材脚本
 			if tsObj := TeachScriptMap_GetValue(req.TeachScriptID);tsObj != nil{
 				pushTeachingTmaterialScriptLoadEndNotify(client,tsObj);
+				if nil != roomInfo.PreChangePageCMD{
+					sendTeachScriptToUser(client,req.Rid,[]map[string]interface{}{roomInfo.PreChangePageCMD},roomInfo.AnswerUIDQueue);
+				}
 				client.TeachScriptStepDataArr = objArrToStepDataArr(getObjArray(tsObj["stepData"],nil));
 				client.MediaStepDataArr = objArrToMediaDataArr(getObjArray(tsObj["mediaData"], nil))
 				go loopSendTeachScript(client);//定时下发教学脚本
@@ -482,7 +487,9 @@ func loadTeachingTmaterialScript(client *LuBoClientConnection,req model.JoinRoom
 	fmt.Println("教材ID:",teachScriptID," 加载完毕");
 	TeachScriptMap_SetValue(teachScriptID,teachScriptObj);//将教学脚本添加至脚本集合
 	pushTeachingTmaterialScriptLoadEndNotify(client,teachScriptObj);
-
+	if nil != roomInfo.PreChangePageCMD{
+		sendTeachScriptToUser(client,req.Rid,[]map[string]interface{}{roomInfo.PreChangePageCMD},roomInfo.AnswerUIDQueue);
+	}
 	client.TeachScriptStepDataArr = objArrToStepDataArr(getObjArray(teachScriptObj["stepData"],nil));
 	client.MediaStepDataArr = objArrToMediaDataArr(getObjArray(teachScriptObj["mediaData"],nil));
 	go loopSendTeachScript(client);//定时下发教学脚本
@@ -588,7 +595,6 @@ func loopSendTeachScript(client *LuBoClientConnection){
 					if nil != roomInfo.MainFrames{
 						//尝试生成要执行的关键帧脚本数组
 						tempCmdArr,frameStepIdx,_ := execStepDataByMainFrames(roomInfo.MainFrames,stepDataArr,roomInfo,roomInfo.MCurrentMainFrameIdx,curTime);
-						roomInfo.MPreMainFrameIdx = roomInfo.MCurrentMainFrameIdx;
 						roomInfo.MCurrentMainFrameIdx = frameStepIdx;//更新关键帧执行进度
 						if len(tempCmdArr) > 0{
 							cmdArr = append(cmdArr,tempCmdArr...);//将脚本塞入 下发列表
@@ -620,14 +626,14 @@ func loopSendTeachScript(client *LuBoClientConnection){
 					roomInfo.SCurrentQuesionTimeOut = -1;
 					roomInfo.SAllowNew = true;
 					roomInfo.CurrentAnswerState = "timeouterr";//设置答题结果为'超时'
-					nextState := -1;
-					if nil != roomInfo.SCurrent{
+					if nil != roomInfo.SCurrent && "templateCMD" == roomInfo.SCurrent.Type{
+						nextState := -1;
 						nextState = int(getInt64(roomInfo.SCurrent.Value[roomInfo.CurrentAnswerState],-1));
-					}
-					if answerIsEnd(nextState,client.TeachScriptStepDataArr,roomInfo) == true{
-						roomInfo.NeedPlayBack = false;//当答题超时后，并且当前问题的Next 链中没有再次答题的机会时，认定该问题已近答过，设置NeedPlayBack值为false，避免用户重新进入教室后，重复答题，
-					}else{
-						roomInfo.NeedPlayBack = true;
+						if answerIsEnd(nextState,client.TeachScriptStepDataArr,roomInfo) == true{
+							roomInfo.NeedPlayBack = false;//当答题超时后，并且当前问题的Next 链中没有再次答题的机会时，认定该问题已近答过，设置NeedPlayBack值为false，避免用户重新进入教室后，重复答题，
+						}else{
+							roomInfo.NeedPlayBack = true;
+						}
 					}
 				}
 			}else{
@@ -645,6 +651,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 							//播放MCurrent的下一个视频
 							idx = roomInfo.MCurrent.Next;//如果存在当前播放列，则取当前播放项的下一条进行播放
 							roomInfo.MPreMainFrameIdx = 0;
+							roomInfo.MMainFramePrePlayInterval = 0;
 						}
 					}
 					
@@ -680,6 +687,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						roomInfo.MCurrentMainFrameIdx = 0;
 						roomInfo.MPreMainFrameIdx = 0;
 						roomInfo.MMainFramePlayInterval = 0;
+						roomInfo.MMainFramePrePlayInterval = 0;
 
 						roomInfo.SAllowNew = true;
 						roomInfo.SCurrent = nil;
@@ -693,7 +701,6 @@ func loopSendTeachScript(client *LuBoClientConnection){
 
 				//根据mainFrames时间轴，解析stepData,并获取要执行的命令数组
 				tempCmdArr,frameStepIdx,_ := execStepDataByMainFrames(roomInfo.MainFrames,stepDataArr,roomInfo,roomInfo.MCurrentMainFrameIdx,curTime)
-				roomInfo.MPreMainFrameIdx = roomInfo.MCurrentMainFrameIdx;
 				roomInfo.MCurrentMainFrameIdx = frameStepIdx;
 				if len(tempCmdArr) > 0{
 					cmdArr = append(cmdArr,tempCmdArr...);//将脚本塞入 下发列表
@@ -781,10 +788,11 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 				ct = currentPlayTime + 1;
 			}
 			if ct <= currentPlayTime{
+				rinfo.MCurrentMainFrameIdx = currentFrameStepIdx;//记录当前媒体的播放关键帧，用于和之后的MPreMainFrameIdx配合使用记录changepage命令对应的关键帧，用于断线重连或者续播
 				currentFrameStepIdx += 1;//关键帧向后移动一位
 				//找到满足条件的关键帧，则取出对应的stepData命令
 				sid := frame.StepId;
-				//将媒体播放命令的已播放时间，更新至当前关键帧对应的媒体播放时间， 用于断线重连后的续播
+				//将媒体播放命令的已播放时间，更新至当前关键帧对应的媒体播放时间，与MMainFramePrePlayInterval配合使用 用于断线重连后的续播
 				rinfo.MMainFramePlayInterval = frame.MediaTime;
 				//处理可执行的教学脚本
 				if sid > -1 && int(sid) < stDataLength{
@@ -832,6 +840,10 @@ func foreachScriptItem(item *model.ScriptStepData,stData []model.ScriptStepData,
 	}else{
 		if itemType == "changePage"{
 			hasChangePageCount += 1;//记录有无 翻页命令存在
+			rinfo.MPreMainFrameIdx = rinfo.MCurrentMainFrameIdx;//记录关键的翻页命令对应的 媒体播放关键帧，用于退出教室后的重播或续播逻辑
+			//将媒体播放命令的已播放时间，更新至当前关键帧对应的媒体播放时间， 用于断线重连后的续播
+			rinfo.MMainFramePrePlayInterval = rinfo.MMainFramePlayInterval;
+			rinfo.PreChangePageCMD = subItem;
 		}else if itemType == "star"{
 			starCount := int(getInt64(item.Value["count"],0));//递增星星数量
 			rinfo.Credit += starCount;
