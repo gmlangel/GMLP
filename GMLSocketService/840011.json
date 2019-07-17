@@ -4,21 +4,7 @@
 	"height": 1526,
 	"resource": {
 		"waitAnswerVideo":[
-			{
-				"id": 0,
-				"type": "video",
-				"n": -1,
-				"p": -1,
-				"value": {
-					"path": "wait_actv_20190708171408316_2d366f43",
-					"beginSecond": 0,
-					"endSecond": 20,
-					"mType": "teaVideo",
-					"isOnWall":0,
-					"size": [512, 288],
-					"position": [0, 0]
-				}
-			}
+			"https://www.juliaol.cn/wait.mp4"
 		]
 	},
 	"mediaData": [
@@ -326,6 +312,7 @@
 			"n": -1,
 			"p": -1,
 			"value": {
+				"isFull":1,
 				"onWallPos": {
 					"teaArr": [{
 						"rect": [0, 0, 2723, 1526]
@@ -491,6 +478,7 @@
 			"n": -1,
 			"p": -1,
 			"value": {
+				"isFull":1,
 				"onWallPos": {
 					"teaArr": [{
 						"rect": [0, 0, 2723, 1526]
@@ -654,6 +642,7 @@
 			"n": -1,
 			"p": -1,
 			"value": {
+				"isFull":1,
 				"onWallPos": {
 					"teaArr": [{
 						"rect": [0, 0, 2723, 1526]
@@ -819,6 +808,7 @@
 			"n": -1,
 			"p": -1,
 			"value": {
+				"isFull":1,
 				"onWallPos": {
 					"teaArr": [{
 						"rect": [0, 0, 2723, 1526]
@@ -1048,6 +1038,7 @@
 			"n": -1,
 			"p": 0,
 			"value": {
+				"isFull":0,
 				"onWallPos": {
 					"teaArr": [{
 						"rect": [81, 477, 1196, 673]
