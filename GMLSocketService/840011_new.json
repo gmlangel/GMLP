@@ -11,7 +11,7 @@
 		{
 			"id": 0,"type": "video","n": 1,"p": -1,
 			"value": {
-				"path": "P1-1_P4-1_actv_20190717165209408_174c28bf",
+				"path": "P1-1_P4-1_actv_20190719114810702_ee61f9a",
 				"beginSecond": 0,
 				"endSecond": 171,
 				"mType": "teaVideo",
@@ -366,7 +366,143 @@
 			},
 			"mainFrames": [
 				{"mt":12,"st": 12,"sid": 200},
-				{"mt":16,"st": 16,"sid": 202}
+				{"mt":16,"st": 16,"sid": 202},
+				{"mt":22,"st": 22,"sid": 203},
+				{"mt":41,"st": 41,"sid": 204},
+				{"mt":49,"st": 49,"sid": 206}
+			]
+		},
+		{
+			"id": 21,"type": "video","n": 22,"p": -1,
+			"value": {
+				"path": "P20-pic1-2_actv_20190716194706569_378c72e1",
+				"beginSecond": 0,
+				"endSecond": 15,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":0,"st": 0,"sid": 213},
+				{"mt":8,"st": 8,"sid": 214}
+			]
+		},
+		{
+			"id": 22,"type": "video","n": 23,"p": -1,
+			"value": {
+				"path": "P20-pic1-3_actv_20190716200006241_df441828",
+				"beginSecond": 0,
+				"endSecond": 20,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":0,"st": 0,"sid": 221},
+				{"mt":12,"st": 12,"sid": 222}
+			]
+		},
+		{
+			"id": 23,"type": "video","n": 24,"p": -1,
+			"value": {
+				"path": "P20-pic2_actv_20190716201134046_365cfdbb",
+				"beginSecond": 0,
+				"endSecond": 18,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":0,"st": 0,"sid": 229},
+				{"mt":3,"st": 3,"sid": 230},
+				{"mt":11,"st": 11,"sid": 231}
+			]
+		},
+		{
+			"id": 24,"type": "video","n": 25,"p": -1,
+			"value": {
+				"path": "P20-end_actv_20190716193412559_5a61cce6",
+				"beginSecond": 0,
+				"endSecond": 8,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":5,"st": 5,"sid": 236}
+			]
+		},
+		{
+			"id": 24,"type": "video","n": 25,"p": -1,
+			"value": {
+				"path": "P20-end_actv_20190716193412559_5a61cce6",
+				"beginSecond": 0,
+				"endSecond": 8,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":5,"st": 5,"sid": 236}
+			]
+		},
+		{
+			"id": 25,"type": "video","n": 26,"p": -1,
+			"value": {
+				"path": "P20-end_actv_20190716193412559_5a61cce6",
+				"beginSecond": 0,
+				"endSecond": 8,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":5,"st": 5,"sid": 236}
+			]
+		},
+		{
+			"id": 26,"type": "video","n": 27,"p": -1,
+			"value": {
+				"path": "p21-p22_actv_20190719112705109_aa47a75d",
+				"beginSecond": 0,
+				"endSecond": 83,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":0,"st": 0,"sid": 237},
+				{"mt":5,"st": 5,"sid": 238},
+				{"mt":12,"st": 12,"sid": 239},
+				{"mt":17,"st": 17,"sid": 241},
+				{"mt":23,"st": 23,"sid": 243},
+				{"mt":32,"st": 32,"sid": 245},
+				{"mt":56,"st": 56,"sid": 247},
+				{"mt":67,"st": 67,"sid": 248},
+				{"mt":78,"st": 78,"sid": 250},
+				{"mt":82,"st": 82,"sid": 252}
+			]
+		},
+		{
+			"id": 27,"type": "video","n": -1,"p": -1,
+			"value": {
+				"path": "P23_actv_20190716203051664_2e8111af",
+				"beginSecond": 0,
+				"endSecond": 15,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":0,"st": 0,"sid": 253}
 			]
 		}
 	],
@@ -1021,6 +1157,171 @@
 		{"id": 199,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[172,654,1174,788]]}},
 		{"id": 200,"type": "removeHighLight","n": 201,"p": -1,"value": {"rectArr": [[172,654,1174,788]]}},
 		{"id": 201,"type": "star","n": -1,"p": -1,"value":{"count":1}},
-		{"id": 202,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 19}}
+		{"id": 202,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 19}},
+
+
+		{"id": 203,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[510,458,1348,810]]}},
+		{"id": 204,"type": "removeHighLight","n": 205,"p": -1,"value": {"rectArr": [[510,458,1348,810]]}},
+		{"id": 205,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[42,158,810,623]]}},
+		{"id": 206,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"This is a cat. A cat can climb.",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":14,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 207,
+				"faild": 211,
+				"timeouterr": 209
+			}
+		},
+		{"id": 207,"type": "video","n": 208,"p": -1,"value": {"path": "P20-pic1-1-a_actv_20190716194200423_c93cdaa6","beginSecond": 0,"endSecond": 4,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 208,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[42,158,810,623]]}},
+		{"id": 209,"type": "video","n": 210,"p": -1,"value": {"path": "P20-pic1-b_actv_20190716200919169_b54a693","beginSecond": 0,"endSecond": 9,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 210,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"This is a cat. A cat can climb.",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":14,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 207,
+				"faild": 211,
+				"timeouterr": 211
+			}
+		},
+		{"id": 211,"type": "video","n": 212,"p": -1,"value": {"path": "P20-pic1-1-c","beginSecond": 0,"endSecond": 4,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 212,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[42,158,810,623]]}},
+		{"id": 213,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[2088,489,494,479]]}},
+		{"id": 214,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"This is a duck. A duck can swim.",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":14,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 215,
+				"faild": 219,
+				"timeouterr": 217
+			}
+		},
+		{"id": 215,"type": "video","n": 216,"p": -1,"value": {"path": "P20-pic1-2-a_actv_20190716194921553_b8ab31f0","beginSecond": 0,"endSecond": 6,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 216,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[2088,489,494,479]]}},
+		{"id": 217,"type": "video","n": 218,"p": -1,"value": {"path": "P20-pic1-b_actv_20190716200919169_b54a693","beginSecond": 0,"endSecond": 9,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 218,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"This is a duck. A duck can swim.",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":14,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 215,
+				"faild": 219,
+				"timeouterr": 219
+			}
+		},
+		{"id": 219,"type": "video","n": 220,"p": -1,"value": {"path": "P20-pic1-2-c_actv_20190716195405371_ec7226a7","beginSecond": 0,"endSecond": 7,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 220,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[2088,489,494,479]]}},
+		{"id": 221,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[1853,23,746,342]]}},
+		{"id": 222,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"This is a bird. A bird can fly.",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":14,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 223,
+				"faild": 227,
+				"timeouterr": 225
+			}
+		},
+		{"id": 223,"type": "video","n": 224,"p": -1,"value": {"path": "P20-pic1-3-a_actv_20190716200236128_9161b6b5","beginSecond": 0,"endSecond": 8,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 224,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[1853,23,746,342]]}},
+		{"id": 225,"type": "video","n": 226,"p": -1,"value": {"path": "P20-pic1-b_actv_20190716200919169_b54a693","beginSecond": 0,"endSecond": 9,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 226,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"This is a bird. A bird can fly.",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":14,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 223,
+				"faild": 227,
+				"timeouterr": 227
+			}
+		},
+		{"id": 227,"type": "video","n": 228,"p": -1,"value": {"path": "P20-pic1-3-c_actv_20190716200714789_c018857","beginSecond": 0,"endSecond": 10,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 228,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[1853,23,746,342]]}},
+		{"id": 229,"type": "extend","n": -1,"p": -1,"value": {}},
+		{"id": 230,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[834,745,1222,759]]}},
+		{"id": 231,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"This is a bird. A bird can fly.",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":14,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 232,
+				"faild": 234,
+				"timeouterr": 234
+			}
+		},
+		{"id": 232,"type": "video","n": 233,"p": -1,"value": {"path": "P20-pic2-a_actv_20190716201359330_66e8387b","beginSecond": 0,"endSecond": 6,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 233,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[834,745,1222,759]]}},
+		{"id": 234,"type": "video","n": 235,"p": -1,"value": {"path": "P20-pic2-b_actv_20190716201608827_a564bd5","beginSecond": 0,"endSecond": 10,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 235,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[834,745,1222,759]]}},
+		{"id": 236,"type": "star","n": -1,"p": -1,"value":{"count":1}},
+		{"id": 237,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 20}},
+		{"id": 238,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[76,402,646,1023]]}},
+		{"id": 239,"type": "removeHighLight","n": 240,"p": -1,"value": {"rectArr": [[76,402,646,1023]]}},
+		{"id": 240,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[721,402,646,1023]]}},
+		{"id": 241,"type": "removeHighLight","n": 242,"p": -1,"value": {"rectArr": [[721,402,646,1023]]}},
+		{"id": 242,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[1363,402,646,1023]]}},
+		{"id": 243,"type": "removeHighLight","n": 244,"p": -1,"value": {"rectArr": [[1363,402,646,1023]]}},
+		{"id": 244,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[2026,402,646,1023]]}},
+		{"id": 245,"type": "removeHighLight","n": 246,"p": -1,"value": {"rectArr": [[2026,402,646,1023]]}},
+		{"id": 246,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 21}},
+		{"id": 247,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[461,386,581,873]]}},
+		{"id": 248,"type": "removeHighLight","n": 249,"p": -1,"value": {"rectArr": [[461,386,581,873]]}},
+		{"id": 249,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[461,386,581,873],[931,386,819,873]]}},
+		{"id": 250,"type": "removeHighLight","n": 251,"p": -1,"value": {"rectArr": [[461,386,581,873],[931,386,819,873]]}},
+		{"id": 251,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[461,386,581,873],[931,386,819,873],[1647,261,581,873]]}},
+		{"id": 252,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[461,386,581,873],[931,386,819,873],[1647,261,581,873]]}},
+		{"id": 253,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 22}}
 	]
 }
