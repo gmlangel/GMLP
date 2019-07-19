@@ -246,6 +246,128 @@
 			"mainFrames": [
 				{"mt":5,"st": 5,"sid": 126}
 			]
+		},
+		{
+			"id": 14,"type": "video","n": 15,"p": -1,
+			"value": {
+				"path": "p13-2-p14-1_actv_20190718162529019_e0bcef5e",
+				"beginSecond": 0,
+				"endSecond": 54,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":4,"st": 4,"sid": 127},
+				{"mt":8,"st": 8,"sid": 128},
+				{"mt":15,"st": 15,"sid": 129},
+				{"mt":29,"st": 29,"sid": 130},
+				{"mt":48,"st": 48,"sid": 132}
+			]
+		},
+		{
+			"id": 15,"type": "video","n": 16,"p": -1,
+			"value": {
+				"path": "p14-2-p15-1_actv_20190718170945336_bea22ae9",
+				"beginSecond": 0,
+				"endSecond": 63,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":8,"st": 8,"sid": 142},
+				{"mt":18,"st": 18,"sid": 143},
+				{"mt":33,"st": 33,"sid": 144},
+				{"mt":58,"st": 58,"sid": 146}
+			]
+		},
+		{
+			"id": 16,"type": "video","n": 17,"p": -1,
+			"value": {
+				"path": "p15-2-p16-1_actv_20190718172637381_18fefaaa",
+				"beginSecond": 0,
+				"endSecond": 57,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":6,"st": 6,"sid": 156},
+				{"mt":13,"st": 13,"sid": 157},
+				{"mt":29,"st": 29,"sid": 158},
+				{"mt":52,"st": 52,"sid": 160}
+			]
+		},
+		{
+			"id": 17,"type": "video","n": 18,"p": -1,
+			"value": {
+				"path": "p16-2-p17-1_actv_20190718174307656_da2ffa4f",
+				"beginSecond": 0,
+				"endSecond": 53,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":6,"st": 6,"sid": 170},
+				{"mt":12,"st": 12,"sid": 171},
+				{"mt":26,"st": 26,"sid": 172},
+				{"mt":48,"st": 48,"sid": 183}
+			]
+		},
+		{
+			"id": 18,"type": "video","n": 19,"p": -1,
+			"value": {
+				"path": "p17-2-p18-1_actv_20190718175931715_1d69da7b",
+				"beginSecond": 0,
+				"endSecond": 30,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":6,"st": 6,"sid": 184},
+				{"mt":10,"st": 10,"sid": 185},
+				{"mt":24,"st": 24,"sid": 186}
+			]
+		},
+		{
+			"id": 19,"type": "video","n": 20,"p": -1,
+			"value": {
+				"path": "P19-1_actv_20190716192154067_5dc02793",
+				"beginSecond": 0,
+				"endSecond": 18,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":0,"st": 0,"sid": 194},
+				{"mt":13,"st": 13,"sid": 195}
+			]
+		},
+		{
+			"id": 20,"type": "video","n": 21,"p": -1,
+			"value": {
+				"path": "p19-2-p20-pici-1_actv_20190718181414221_415a2ebb",
+				"beginSecond": 0,
+				"endSecond": 56,
+				"mType": "teaVideo",
+				"isOnWall":0,
+				"size": [1238, 929],
+				"position": [81, 477]
+			},
+			"mainFrames": [
+				{"mt":12,"st": 12,"sid": 200},
+				{"mt":16,"st": 16,"sid": 202}
+			]
 		}
 	],
 	"stepData": [
@@ -663,6 +785,242 @@
 				"timeouterr": 122
 			}
 		},
-		{"id": 126,"type": "extend","n": -1,"p": -1,"value": {}}
+		{"id": 126,"type": "extend","n": -1,"p": -1,"value": {}},
+		{"id": 127,"type": "star","n": -1,"p": -1,"value":{"count":1}},
+		{"id": 128,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 13}},
+		{"id": 129,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[1540,648,865,502]]}},
+		{"id": 130,"type": "removeHighLight","n": 131,"p": -1,"value": {"rectArr": [[1540,648,865,502]]}},
+		{"id": 131,"type": "playAni","n": -1,"p": -1,"value": {}},
+		{"id": 132,"type": "highLight","n": 133,"p": -1,"value": {"rectArr": [[1187,152,1309,243]]}},
+		{"id": 133,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"a cat can climb",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":8,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 134,
+				"faild": 136,
+				"timeouterr": 138
+			}
+		},
+		{"id": 134,"type": "removeHighLight","n": 135,"p": -1,"value": {"rectArr": [[1187,152,1309,243]]}},
+		{"id": 135,"type": "video","n": -1,"p": -1,"value": {"path": "P14-1-a_actv_20190716171519061_1ebd444","beginSecond": 0,"endSecond": 3,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 136,"type": "removeHighLight","n": 137,"p": -1,"value": {"rectArr": [[1187,152,1309,243]]}},
+		{"id": 137,"type": "video","n": -1,"p": -1,"value": {"path": "P14-1-c_actv_20190716174548487_abef42d7","beginSecond": 0,"endSecond": 7,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 138,"type": "removeHighLight","n": 139,"p": -1,"value": {"rectArr": [[1187,152,1309,243]]}},
+		{"id": 139,"type": "video","n": 140,"p": -1,"value": {"path": "P14-1-b_actv_20190716171657315_ebd98cfa","beginSecond": 0,"endSecond": 11,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 140,"type": "highLight","n": 141,"p": -1,"value": {"rectArr": [[1187,152,1309,243]]}},
+		{"id": 141,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"a cat can climb",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":8,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 134,
+				"faild": 136,
+				"timeouterr": 136
+			}
+		},
+		{"id": 142,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 14}},
+		{"id": 143,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[1804,703,857,489]]}},
+		{"id": 144,"type": "removeHighLight","n": 145,"p": -1,"value": {"rectArr": [[1804,703,857,489]]}},
+		{"id": 145,"type": "playAni","n": -1,"p": -1,"value": {}},
+		{"id": 146,"type": "highLight","n": 147,"p": -1,"value": {"rectArr": [[1183,143,1316,258]]}},
+		{"id": 147,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"a horse can run",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":8,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 148,
+				"faild": 150,
+				"timeouterr": 152
+			}
+		},
+		{"id": 148,"type": "removeHighLight","n": 149,"p": -1,"value": {"rectArr": [[1183,143,1316,258]]}},
+		{"id": 149,"type": "video","n": -1,"p": -1,"value": {"path": "P15-1-a_actv_20190716175203176_8e6b8b9","beginSecond": 0,"endSecond": 4,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 150,"type": "removeHighLight","n": 151,"p": -1,"value": {"rectArr": [[1183,143,1316,258]]}},
+		{"id": 151,"type": "video","n": -1,"p": -1,"value": {"path": "P15-1-c_actv_20190716175540190_8502c6d","beginSecond": 0,"endSecond": 8,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 152,"type": "removeHighLight","n": 153,"p": -1,"value": {"rectArr": [[1183,143,1316,258]]}},
+		{"id": 153,"type": "video","n": 154,"p": -1,"value": {"path": "P15-1-b_actv_20190716175342315_88b9fba1","beginSecond": 0,"endSecond": 11,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 154,"type": "highLight","n": 155,"p": -1,"value": {"rectArr": [[1183,143,1316,258]]}},
+		{"id": 155,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"a horse can run",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":8,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 148,
+				"faild": 150,
+				"timeouterr": 150
+			}
+		},
+		{"id": 156,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 15}},
+		{"id": 157,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[1559,472,829,480]]}},
+		{"id": 158,"type": "removeHighLight","n": 159,"p": -1,"value": {"rectArr": [[1559,472,829,480]]}},
+		{"id": 159,"type": "playAni","n": -1,"p": -1,"value": {}},
+		{"id": 160,"type": "highLight","n": 161,"p": -1,"value": {"rectArr": [[1157,146,1368,256]]}},
+		{"id": 161,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"a duck can swim",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":8,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 162,
+				"faild": 164,
+				"timeouterr": 166
+			}
+		},
+		{"id": 162,"type": "removeHighLight","n": 163,"p": -1,"value": {"rectArr": [[1157,146,1368,256]]}},
+		{"id": 163,"type": "video","n": -1,"p": -1,"value": {"path": "P16-1-a_actv_20190716183707825_c18aba9","beginSecond": 0,"endSecond": 7,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 164,"type": "removeHighLight","n": 165,"p": -1,"value": {"rectArr": [[1157,146,1368,256]]}},
+		{"id": 165,"type": "video","n": -1,"p": -1,"value": {"path": "P16-1-c_actv_20190716184057485_206d672b","beginSecond": 0,"endSecond": 8,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 166,"type": "removeHighLight","n": 167,"p": -1,"value": {"rectArr": [[1157,146,1368,256]]}},
+		{"id": 167,"type": "video","n": 168,"p": -1,"value": {"path": "P16-1-b_actv_20190716183857325_15ced1ae","beginSecond": 0,"endSecond": 11,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 168,"type": "highLight","n": 169,"p": -1,"value": {"rectArr": [[1157,146,1368,256]]}},
+		{"id": 169,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"a duck can swim",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":8,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 162,
+				"faild": 164,
+				"timeouterr": 164
+			}
+		},
+		{"id": 170,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 16}},
+		{"id": 171,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[1562,741,837,498]]}},
+		{"id": 172,"type": "removeHighLight","n": 173,"p": -1,"value": {"rectArr": [[1562,741,837,498]]}},
+		{"id": 173,"type": "playAni","n": -1,"p": -1,"value": {}},
+		{"id": 174,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"a bird can fly",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":8,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 175,
+				"faild": 177,
+				"timeouterr": 179
+			}
+		},
+		{"id": 175,"type": "removeHighLight","n": 176,"p": -1,"value": {"rectArr": [[1279,144,1116,258]]}},
+		{"id": 176,"type": "video","n": -1,"p": -1,"value": {"path": "P17-1-a_actv_20190716184806606_58d9708d","beginSecond": 0,"endSecond": 3,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 177,"type": "removeHighLight","n": 178,"p": -1,"value": {"rectArr": [[1279,144,1116,258]]}},
+		{"id": 178,"type": "video","n": -1,"p": -1,"value": {"path": "P17-1-c_actv_20190716185236636_5d4ebf85","beginSecond": 0,"endSecond": 7,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 179,"type": "removeHighLight","n": 180,"p": -1,"value": {"rectArr": [[1279,144,1116,258]]}},
+		{"id": 180,"type": "video","n": 181,"p": -1,"value": {"path": "P17-1-b_actv_20190716184956751_f1aaa68b","beginSecond": 0,"endSecond": 11,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 181,"type": "highLight","n": 182,"p": -1,"value": {"rectArr": [[1279,144,1116,258]]}},
+		{"id": 182,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType":"audioTest",
+				"target":"a bird can fly",
+				"targetType":"sentence",
+				"reAnswer":0,
+				"timeout":5,
+				"recordingTime":8,
+				"flag":[
+					{"score":40,"star":1},
+					{"score":60,"star":2},
+					{"score":80,"star":3}
+				],
+				"success": 175,
+				"faild": 177,
+				"timeouterr": 177
+			}
+		},
+		{"id": 183,"type": "highLight","n": 174,"p": -1,"value": {"rectArr": [[1279,144,1116,258]]}},
+		{"id": 184,"type": "star","n": -1,"p": -1,"value":{"count":1}},
+		{"id": 185,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 17}},
+		{"id": 186,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType": "singleSelTemplate",
+				"reAnswer":20,
+				"timeout": 7,
+				"success": 187,
+				"faild": 188,
+				"timeouterr": 188
+			}
+		},
+		{"id": 187,"type": "video","n": 193,"p": -1,"value": {"path": "P18-1-a_actv_20190716191250654_c4c1c220","beginSecond": 0,"endSecond": 3,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 188,"type": "video","n": 189,"p": -1,"value": {"path": "P18-1-b_actv_20190716191501535_44c8c415","beginSecond": 0,"endSecond": 10,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 189,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType": "singleSelTemplate",
+				"reAnswer":20,
+				"timeout": 7,
+				"success": 187,
+				"faild": 190,
+				"timeouterr": 190
+			}
+		},
+		{"id": 190,"type": "highLight","n": 191,"p": -1,"value": {"rectArr": [[1354,650,1193,777]]}},
+		{"id": 191,"type": "video","n": 192,"p": -1,"value": {"path": "P18-1-c_actv_20190716191712022_3515fbd","beginSecond": 0,"endSecond": 13,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 192,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[1354,650,1193,777]]}},
+		{"id": 193,"type": "video","n": -1,"p": -1,"value": {"path": "P18-2_actv_20190716191935724_6222d63d","beginSecond": 0,"endSecond": 14,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 194,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 18}},
+		{"id": 195,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType": "singleSelTemplate",
+				"reAnswer":20,
+				"timeout": 7,
+				"success": 196,
+				"faild": 197,
+				"timeouterr": 197
+			}
+		},
+		{"id": 196,"type": "video","n": -1,"p": -1,"value": {"path": "P19-1-a_actv_20190716192441252_273e8e34","beginSecond": 0,"endSecond": 4,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 197,"type": "video","n": 198,"p": -1,"value": {"path": "P19-1-b_actv_20190716192635854_afaaf447","beginSecond": 0,"endSecond": 10,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 198,"type": "templateCMD","n": -1,"p": -1,"value": {
+				"templateType": "singleSelTemplate",
+				"reAnswer":20,
+				"timeout": 7,
+				"success": 196,
+				"faild": 199,
+				"timeouterr": 199
+			}
+		},
+		{"id": 199,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[172,654,1174,788]]}},
+		{"id": 200,"type": "removeHighLight","n": 201,"p": -1,"value": {"rectArr": [[172,654,1174,788]]}},
+		{"id": 201,"type": "star","n": -1,"p": -1,"value":{"count":1}},
+		{"id": 202,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 19}}
 	]
 }
