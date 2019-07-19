@@ -437,37 +437,7 @@
 			]
 		},
 		{
-			"id": 24,"type": "video","n": 25,"p": -1,
-			"value": {
-				"path": "P20-end_actv_20190716193412559_5a61cce6",
-				"beginSecond": 0,
-				"endSecond": 8,
-				"mType": "teaVideo",
-				"isOnWall":0,
-				"size": [1238, 929],
-				"position": [81, 477]
-			},
-			"mainFrames": [
-				{"mt":5,"st": 5,"sid": 236}
-			]
-		},
-		{
 			"id": 25,"type": "video","n": 26,"p": -1,
-			"value": {
-				"path": "P20-end_actv_20190716193412559_5a61cce6",
-				"beginSecond": 0,
-				"endSecond": 8,
-				"mType": "teaVideo",
-				"isOnWall":0,
-				"size": [1238, 929],
-				"position": [81, 477]
-			},
-			"mainFrames": [
-				{"mt":5,"st": 5,"sid": 236}
-			]
-		},
-		{
-			"id": 26,"type": "video","n": 27,"p": -1,
 			"value": {
 				"path": "p21-p22_actv_20190719112705109_aa47a75d",
 				"beginSecond": 0,
@@ -491,7 +461,7 @@
 			]
 		},
 		{
-			"id": 27,"type": "video","n": -1,"p": -1,
+			"id": 26,"type": "video","n": -1,"p": -1,
 			"value": {
 				"path": "P23_actv_20190716203051664_2e8111af",
 				"beginSecond": 0,
@@ -1016,8 +986,8 @@
 			}
 		},
 		{"id": 156,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 15}},
-		{"id": 157,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[1559,472,829,480]]}},
-		{"id": 158,"type": "removeHighLight","n": 159,"p": -1,"value": {"rectArr": [[1559,472,829,480]]}},
+		{"id": 157,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[1559,742,829,480]]}},
+		{"id": 158,"type": "removeHighLight","n": 159,"p": -1,"value": {"rectArr": [[1559,742,829,480]]}},
 		{"id": 159,"type": "playAni","n": -1,"p": -1,"value": {}},
 		{"id": 160,"type": "highLight","n": 161,"p": -1,"value": {"rectArr": [[1157,146,1368,256]]}},
 		{"id": 161,"type": "templateCMD","n": -1,"p": -1,"value": {
@@ -1025,7 +995,7 @@
 				"target":"a duck can swim",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":13,
 				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
@@ -1049,7 +1019,7 @@
 				"target":"a duck can swim",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":13,
 				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
@@ -1070,7 +1040,7 @@
 				"target":"a bird can fly",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":13,
 				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
@@ -1094,7 +1064,7 @@
 				"target":"a bird can fly",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":13,
 				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
@@ -1158,8 +1128,6 @@
 		{"id": 200,"type": "removeHighLight","n": 201,"p": -1,"value": {"rectArr": [[172,654,1174,788]]}},
 		{"id": 201,"type": "star","n": -1,"p": -1,"value":{"count":1}},
 		{"id": 202,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 19}},
-
-
 		{"id": 203,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[510,458,1348,810]]}},
 		{"id": 204,"type": "removeHighLight","n": 205,"p": -1,"value": {"rectArr": [[510,458,1348,810]]}},
 		{"id": 205,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[42,158,810,623]]}},
@@ -1168,7 +1136,7 @@
 				"target":"This is a cat. A cat can climb.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":17,
 				"recordingTime":14,
 				"flag":[
 					{"score":40,"star":1},
@@ -1188,7 +1156,7 @@
 				"target":"This is a cat. A cat can climb.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":17,
 				"recordingTime":14,
 				"flag":[
 					{"score":40,"star":1},
@@ -1208,7 +1176,7 @@
 				"target":"This is a duck. A duck can swim.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":17,
 				"recordingTime":14,
 				"flag":[
 					{"score":40,"star":1},
@@ -1228,7 +1196,7 @@
 				"target":"This is a duck. A duck can swim.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":17,
 				"recordingTime":14,
 				"flag":[
 					{"score":40,"star":1},
@@ -1248,7 +1216,7 @@
 				"target":"This is a bird. A bird can fly.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":17,
 				"recordingTime":14,
 				"flag":[
 					{"score":40,"star":1},
@@ -1268,7 +1236,7 @@
 				"target":"This is a bird. A bird can fly.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":17,
 				"recordingTime":14,
 				"flag":[
 					{"score":40,"star":1},
@@ -1289,7 +1257,7 @@
 				"target":"This is a bird. A bird can fly.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":17,
 				"recordingTime":14,
 				"flag":[
 					{"score":40,"star":1},
@@ -1320,8 +1288,8 @@
 		{"id": 248,"type": "removeHighLight","n": 249,"p": -1,"value": {"rectArr": [[461,386,581,873]]}},
 		{"id": 249,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[461,386,581,873],[931,386,819,873]]}},
 		{"id": 250,"type": "removeHighLight","n": 251,"p": -1,"value": {"rectArr": [[461,386,581,873],[931,386,819,873]]}},
-		{"id": 251,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[461,386,581,873],[931,386,819,873],[1647,261,581,873]]}},
-		{"id": 252,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[461,386,581,873],[931,386,819,873],[1647,261,581,873]]}},
+		{"id": 251,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[461,386,581,873],[931,386,819,873],[1647,386,581,873]]}},
+		{"id": 252,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[461,386,581,873],[931,386,819,873],[1647,386,581,873]]}},
 		{"id": 253,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 22}}
 	]
 }
