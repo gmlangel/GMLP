@@ -23,6 +23,7 @@ type LoBoServerConfig struct{
 type RoomInfo struct{
     //通用---begin
     Rid int64;
+    CreateTime int64;//教师信息的创建时间，用于过期清除处理
     RoomState Enum_RoomState;//课程状态
     StartTimeinterval int64;//课程开始时间beginTime
     EndTimeinterval int64;//课程结束时间

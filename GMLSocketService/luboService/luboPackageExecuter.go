@@ -317,6 +317,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 				// roomInfo.SCurrentTimeInterval = 0;
 				//roomInfo.CurrentProcess = 0;
 				roomInfo.CurrentAnswerState = "";
+				roomInfo.CreateTime = time.Now().Unix();
 				RoomInfoMap_SetValue(req.Rid,roomInfo);//存入教室信息集合
 			}
 

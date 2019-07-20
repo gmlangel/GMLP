@@ -5,10 +5,12 @@ import(
 	model "../models"
 	"log"
 	"net"
+	"time"
 	"os"
 )
 /**全局记录集合声明及操作函数*/
 var(
+	DeadLineInterval int64 = 24 * 3600;//数据的过期时间，默认为缓存1天
 	unOwnedConnectChan chan int = make(chan int,1);
 	unOwnedConnect map[int64]*LuBoClientConnection = map[int64]*LuBoClientConnection{};/*无主连接字典.用于记录未进入教室的用户的socket链接 {sid:socket}*/
 	
@@ -22,6 +24,7 @@ var(
 	roomInfoMapChan = make(chan int,1);
 
 	lessonResultMap map[string][]model.Answer_c2s = map[string][]model.Answer_c2s{};//课程报告数据集
+	lessonDeadLineMap map[string]int64 = map[string]int64{};//记录课程报告超时操作的map
 	lessonResultMapChan = make(chan int,1);
 
 	teachScriptMap map[int64]map[string]interface{} = map[int64]map[string]interface{}{};//教学脚本数据集
@@ -30,6 +33,25 @@ var(
 	connectIdPool = []int64{};/*客户端连接ID池*/
 	destroyChan = make(chan int,1);/*client socket释放操作时的互斥锁*/
 )
+
+/**
+定时清理过期的数据
+*/
+func ExecDeadLineTask(){
+	for {
+		//获取距离当前时间点最近的下一天的凌晨4点整
+		nowTime := time.Now();
+		nextTime := nowTime.Add(time.Hour * 0);
+		nextTime = time.Date(nextTime.Year(),nextTime.Month(),nextTime.Day(),16,15,0,0,nextTime.Location());
+		waitTimeInterval := nextTime.Unix() - nowTime.Unix();
+		if waitTimeInterval > 0{
+			time.Sleep(time.Duration(waitTimeInterval) * time.Second);
+			DeleteDeadLineRoominfo();
+			DeleteDeadLineLessonResul();
+			DeleteDeadLineTeachScript();
+		}
+	}
+}
 
 /*根据SID和UID获取 socket连接*/
 func GetSocketByUIDAndSID(sid int64,uid int64)*LuBoClientConnection{
@@ -77,13 +99,14 @@ func NewUserClientJoinRoom(sid int64,uid int64,client *LuBoClientConnection){
 func TeachScriptMap_SetValue(key int64,value map[string]interface{}){
 	teachScriptMapChan <- 1;
 	teachScriptMap[key] = value;
+	value["createTime"] = time.Now().Unix();
 	<-teachScriptMapChan;
 }
 /*获取teachScriptMap中的指定key对应的值*/
 func TeachScriptMap_GetValue(key int64)map[string]interface{}{
 	var result map[string]interface{} = nil;
 	teachScriptMapChan <- 1;
-	result =teachScriptMap[key];
+	result = teachScriptMap[key];
 	<-teachScriptMapChan;
 	return result;
 }
@@ -94,10 +117,30 @@ func TeachScriptMap_Clear(){
 	<-teachScriptMapChan;
 }
 
+/*定时删除过期脚本数据*/
+func DeleteDeadLineTeachScript(){
+	teachScriptMapChan <- 1;
+	tempMap := teachScriptMap;
+	nowTime := time.Now().Unix();
+	teachScriptMap = map[int64]map[string]interface{}{};
+	for k,v := range tempMap{
+		if nil != v && nil != v["createTime"]{
+			tv := v["createTime"];
+			ct,ok := tv.(int64);
+			if true == ok && nowTime - ct < DeadLineInterval{
+				teachScriptMap[k] = v;//将还没有过期的数据放入teachScriptMap中，留用
+			}
+		}
+	}
+	<-teachScriptMapChan;
+}
+
+
 /*向lessonResultMap 添加或者设置值*/
 func LessonResultMap_SetValue(key string,value []model.Answer_c2s){
 	lessonResultMapChan <- 1;
 	lessonResultMap[key] = value;
+	lessonDeadLineMap[key] = time.Now().Unix();
 	<-lessonResultMapChan;
 }
 /*获取lessonResultMap中的指定key对应的值*/
@@ -112,6 +155,24 @@ func LessonResultMap_GetValue(key string)[]model.Answer_c2s{
 func LessonResultMap_Clear(){
 	lessonResultMapChan <- 1;
 	lessonResultMap = map[string][]model.Answer_c2s{};
+	lessonDeadLineMap = map[string]int64{};
+	<-lessonResultMapChan;
+}
+
+/*定时删除过期的教学报告*/
+func DeleteDeadLineLessonResul(){
+	lessonResultMapChan <- 1;
+	tempMap := lessonResultMap;
+	tempDeadLineMap := lessonDeadLineMap;
+	nowTime := time.Now().Unix();
+	lessonResultMap = map[string][]model.Answer_c2s{};
+	lessonDeadLineMap = map[string]int64{};
+	for key,v := range tempDeadLineMap{
+		if nowTime - v < DeadLineInterval{
+			lessonResultMap[key] = tempMap[key];//将还没有过期的数据放入lessonResultMap中，留用
+			lessonDeadLineMap[key] = v;
+		} 
+	}
 	<-lessonResultMapChan;
 }
 
@@ -119,6 +180,7 @@ func LessonResultMap_Clear(){
 func RoomInfoMap_SetValue(key int64,value *model.RoomInfo){
 	roomInfoMapChan <- 1;
 	roomInfoMap[key] = value;
+	value.CreateTime = time.Now().Unix();
 	<-roomInfoMapChan;
 }
 /*获取roomInfoMap中的指定key对应的值*/
@@ -136,6 +198,19 @@ func RoomInfoMap_Clear(){
 	<-roomInfoMapChan;
 }
 
+/*定时删除过期的教室数据*/
+func DeleteDeadLineRoominfo(){
+	roomInfoMapChan <- 1;
+	tempMap := roomInfoMap;
+	nowTime := time.Now().Unix();
+	roomInfoMap = map[int64]*model.RoomInfo{};
+	for k,v := range tempMap{
+		if nil != v && nowTime - v.CreateTime < DeadLineInterval{
+			roomInfoMap[k] = v;//将还没有过期的数据放入roomInfoMap中，留用
+		}
+	}
+	<-roomInfoMapChan;
+}
 
 
 //向unOwnedConnect 添加或者设置值
@@ -202,6 +277,7 @@ func OwnedConnectUIDMap_Clear(){
 	ownedConnectUIDMap = map[int64]*LuBoClientConnection{};
 	<-ownedConnectUIDMapChan;
 }
+
 
 /**服务错误声明*/
 type LuboServerError struct{
