@@ -164,6 +164,11 @@ func c2s_UploadAnswerCMD(client *LuBoClientConnection,jsonByte []byte){
 			if roomInfo.SCurrentQuestionId != req.Id{
 				return;//如果学生上报的答案，不是当前的问题的答案，则不作数
 			}
+
+			_,dataSyncOk := <- client.dataSyncChan;
+			if false == dataSyncOk{
+				return;
+			}
 			roomInfo.SCurrentQuestionId = -1;//匹配成功后重置题号，比面重复匹配
 			tempUid := req.Uid;
 			j := len(roomInfo.SWaitAnswerUids);
@@ -219,10 +224,13 @@ func c2s_UploadAnswerCMD(client *LuBoClientConnection,jsonByte []byte){
 			if len(roomInfo.SWaitAnswerUids) == 0{
 				roomInfo.SAllowNew = true;
 			}
+			client.dataSyncChan <- 1;
 
 			//发送客户端回执
 			res := &model.UploadAnswer_s2c{Cmd:model.S_RES_C_UPLOADANSWERCMD,Code:0,FaildMsg:""};
 			client.Write(res);
+
+			
 		}
 	}
 }
@@ -624,8 +632,14 @@ func loopSendTeachScript(client *LuBoClientConnection){
 				if roomInfo.SCurrentQuesionTimeOut > -1 && roomInfo.SCurrentTimeInterval >= roomInfo.SCurrentQuesionTimeOut{
 					//关键帧脚本已经达到超时时间，为了不影响之后的脚本运行，则应该直接执行下个关键帧
 					roomInfo.SCurrentQuesionTimeOut = -1;
+					_,dataSyncOk := <- client.dataSyncChan;
+					if false == dataSyncOk{
+						break;
+					}
 					roomInfo.SAllowNew = true;
 					roomInfo.CurrentAnswerState = "timeouterr";//设置答题结果为'超时'
+					//重置题号，避免触发了超时响应后，又进入答案上报计算逻辑，
+					roomInfo.SCurrentQuestionId = -1;
 					if nil != roomInfo.SCurrent && "templateCMD" == roomInfo.SCurrent.Type{
 						nextState := -1;
 						nextState = int(getInt64(roomInfo.SCurrent.Value[roomInfo.CurrentAnswerState],-1));
@@ -635,6 +649,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 							roomInfo.NeedPlayBack = true;
 						}
 					}
+					client.dataSyncChan <- 1;
 				}
 			}else{
 				//处理媒体脚本
