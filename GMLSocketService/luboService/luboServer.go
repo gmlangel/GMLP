@@ -41,8 +41,8 @@ func ExecDeadLineTask(){
 	for {
 		//获取距离当前时间点最近的下一天的凌晨4点整
 		nowTime := time.Now();
-		nextTime := nowTime.Add(time.Hour * 0);
-		nextTime = time.Date(nextTime.Year(),nextTime.Month(),nextTime.Day(),16,15,0,0,nextTime.Location());
+		nextTime := nowTime.Add(time.Hour * 24);
+		nextTime = time.Date(nextTime.Year(),nextTime.Month(),nextTime.Day(),4,0,0,0,nextTime.Location());
 		waitTimeInterval := nextTime.Unix() - nowTime.Unix();
 		if waitTimeInterval > 0{
 			time.Sleep(time.Duration(waitTimeInterval) * time.Second);
