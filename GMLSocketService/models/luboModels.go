@@ -214,7 +214,7 @@ type JoinRoom_s2c struct{
     C_Seq uint32 `json:"c_seq"`;//数据包的序号，可以为0
     Credit int `json:"credit"`;//下发用户已经获得的奖励
     Rid int64 `json:"rid"`;//教室ID
-    Code uint32 `json:"code"`;//进入教室是否成功0 = 成功 ,262 = 进入room失败,uid无效,263 = 进入room失败,roomId小于0,无效
+    Code uint32 `json:"code"`;//进入教室是否成功0 = 成功 ,262 = 进入room失败,uid无效,263 = 进入room失败,roomId小于0,无效,  code = 14  课程未开始
     FaildMsg string `json:"fe"`;//报错信息
     UserArr []CurrentUser `json:"ua"`;//用户列表
 }
