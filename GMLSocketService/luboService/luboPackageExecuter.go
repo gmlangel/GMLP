@@ -300,7 +300,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 		}else if req.Rid < 0{
 			res.Code = 263;
 			res.FaildMsg = "进入room失败,roomId小于0,无效";
-		}else if req.StartTimeinterval < nowTime{
+		}else if req.StartTimeinterval > nowTime{
 			res.Code = 14;
 			res.FaildMsg = "进入room失败,课程还未开始";
 		}else{
