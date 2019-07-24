@@ -4,7 +4,7 @@
 	"height": 1526,
 	"resource": {
 		"waitAnswerVideo":[
-			"https://www.juliaol.cn/wait.mp4"
+			"https://www.juliaol.cn/wait2.mp4"
 		]
 	},
 	"mediaData": [
@@ -70,7 +70,7 @@
 		{
 			"id": 3,"type": "video","n": 4,"p": -1,
 			"value": {
-				"path": "p6-2-p7-1_actv_20190718120650045_e6faaa4d",
+				"path": "p6-2-p7-1_actv_20190723165845749_6a5a8a6d",
 				"beginSecond": 0,
 				"endSecond": 47,
 				"mType": "teaVideo",
@@ -88,7 +88,7 @@
 		{
 			"id": 4,"type": "video","n": 5,"p": -1,
 			"value": {
-				"path": "p7-2-p8-1_actv_20190718134008180_1f1eafb4",
+				"path": "p7-2-p8-1_actv_20190723183006526_c45ac2a4",
 				"beginSecond": 0,
 				"endSecond": 20,
 				"mType": "teaVideo",
@@ -495,8 +495,8 @@
 				"target":"cat",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -510,15 +510,15 @@
 		{"id": 14,"type": "removeHighLight","n": 15,"p": -1,"value": {"rectArr": [[1685,0,798,427]]}},
 		{"id": 15,"type": "video","n": -1,"p": -1,"value": {"path": "p4_p7-1a_actv_20190723115551016_32e93473","beginSecond": 0,"endSecond": 4,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 16,"type": "removeHighLight","n": 17,"p": -1,"value": {"rectArr": [[1685,0,798,427]]}},
-		{"id": 17,"type": "video","n": 18,"p": -1,"value": {"path": "P4-1-c_actv_20190716174133328_e96810ed","beginSecond": 0,"endSecond": 13,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 17,"type": "video","n": 18,"p": -1,"value": {"path": "P4-1-c_actv_20190724103252154_fa539288","beginSecond": 0,"endSecond": 21,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 18,"type": "highLight","n": 19,"p": -1,"value": {"rectArr": [[1685,0,798,427]]}},
 		{"id": 19,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType":"audioTest",
 				"target":"cat",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -530,9 +530,9 @@
 			}
 		},
 		{"id": 20,"type": "removeHighLight","n": 21,"p": -1,"value": {"rectArr": [[1685,0,798,427]]}},
-		{"id": 21,"type": "video","n": -1,"p": -1,"value": {"path": "P4-1-d_actv_20190716174327873_985637b4","beginSecond": 0,"endSecond": 9,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 21,"type": "video","n": -1,"p": -1,"value": {"path": "P4-1-d_actv_20190724105616568_4113f9ce","beginSecond": 0,"endSecond": 9,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 22,"type": "removeHighLight","n": 23,"p": -1,"value": {"rectArr": [[1685,0,798,427]]}},
-		{"id": 23,"type": "video","n": 18,"p": -1,"value": {"path": "P4-1-b_actv_20190716173948207_4c805ba","beginSecond": 0,"endSecond": 14,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 23,"type": "video","n": 18,"p": -1,"value": {"path": "P4-1-b_actv_20190724103028566_db71876d","beginSecond": 0,"endSecond": 21,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 24,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[92,715,294,594]]}},
 		{"id": 25,"type": "removeHighLight","n": 26,"p": -1,"value": {"rectArr": [[92,715,294,594]]}},
 		{"id": 26,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 4}},
@@ -543,8 +543,8 @@
 				"target":"horse",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -558,15 +558,15 @@
 		{"id": 30,"type": "removeHighLight","n": 31,"p": -1,"value": {"rectArr": [[1619,38,1043,474]]}},
 		{"id": 31,"type": "video","n": -1,"p": -1,"value": {"path": "p4_p7-1a_actv_20190723115551016_32e93473","beginSecond": 0,"endSecond": 4,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 32,"type": "removeHighLight","n": 33,"p": -1,"value": {"rectArr": [[1619,38,1043,474]]}},
-		{"id": 33,"type": "video","n": 34,"p": -1,"value": {"path": "P5-1-c_actv_20190716160902244_489365e5","beginSecond": 0,"endSecond": 17,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 33,"type": "video","n": 34,"p": -1,"value": {"path": "p5-1-c_actv_20190724103713872_96552d6d","beginSecond": 0,"endSecond": 21,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 34,"type": "highLight","n": 35,"p": -1,"value": {"rectArr": [[1619,38,1043,474]]}},
 		{"id": 35,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType":"audioTest",
 				"target":"horse",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -580,7 +580,7 @@
 		{"id": 36,"type": "removeHighLight","n": 37,"p": -1,"value": {"rectArr": [[1619,38,1043,474]]}},
 		{"id": 37,"type": "video","n": -1,"p": -1,"value": {"path": "p5-1-d_actv_20190723140552157_a3b84416","beginSecond": 0,"endSecond": 15,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 38,"type": "removeHighLight","n": 39,"p": -1,"value": {"rectArr": [[1619,38,1043,474]]}},
-		{"id": 39,"type": "video","n": 34,"p": -1,"value": {"path": "P5-1-b_actv_20190716160551568_e4803c4b","beginSecond": 0,"endSecond": 22,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 39,"type": "video","n": 34,"p": -1,"value": {"path": "p5-1-b_actv_20190724103458833_3c68ef4","beginSecond": 0,"endSecond": 21,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 40,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[2039,636,303,301]]}},
 		{"id": 41,"type": "removeHighLight","n": 42,"p": -1,"value": {"rectArr": [[2039,636,303,301]]}},
 		{"id": 42,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 5}},
@@ -591,8 +591,8 @@
 				"target":"duck",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -606,15 +606,15 @@
 		{"id": 46,"type": "removeHighLight","n": 47,"p": -1,"value": {"rectArr": [[1594,65,982,387]]}},
 		{"id": 47,"type": "video","n": -1,"p": -1,"value": {"path": "p4_p7-1a_actv_20190723115551016_32e93473","beginSecond": 0,"endSecond": 4,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 48,"type": "removeHighLight","n": 49,"p": -1,"value": {"rectArr": [[1594,65,982,387]]}},
-		{"id": 49,"type": "video","n": 50,"p": -1,"value": {"path": "P6-1-c_actv_20190716161913758_75671e4f","beginSecond": 0,"endSecond": 12,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 49,"type": "video","n": 50,"p": -1,"value": {"path": "P6-1-c_actv_20190724104236067_fccdf8d8","beginSecond": 0,"endSecond": 23,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 50,"type": "highLight","n": 51,"p": -1,"value": {"rectArr": [[1594,65,982,387]]}},
 		{"id": 51,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType":"audioTest",
 				"target":"duck",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -628,7 +628,7 @@
 		{"id": 52,"type": "removeHighLight","n": 53,"p": -1,"value": {"rectArr": [[1594,65,982,387]]}},
 		{"id": 53,"type": "video","n": -1,"p": -1,"value": {"path": "p6-1-d_actv_20190723162417203_a12d3265","beginSecond": 0,"endSecond": 10,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 54,"type": "removeHighLight","n": 55,"p": -1,"value": {"rectArr": [[1594,65,982,387]]}},
-		{"id": 55,"type": "video","n": 50,"p": -1,"value": {"path": "P6-1-b_actv_20190716161534644_61f5362d","beginSecond": 0,"endSecond": 19,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 55,"type": "video","n": 50,"p": -1,"value": {"path": "P6-1-b_actv_20190724103951740_975452e9","beginSecond": 0,"endSecond": 22,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 56,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[341,5,257,227]]}},
 		{"id": 57,"type": "removeHighLight","n": 58,"p": -1,"value": {"rectArr": [[341,5,257,227]]}},
 		{"id": 58,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 6}},
@@ -639,8 +639,8 @@
 				"target":"bird",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -654,15 +654,15 @@
 		{"id": 62,"type": "removeHighLight","n": 63,"p": -1,"value": {"rectArr": [[1613,13,968,452]]}},
 		{"id": 63,"type": "video","n": -1,"p": -1,"value": {"path": "p4_p7—1a_actv_20190716173552108_868abfe0","beginSecond": 0,"endSecond": 4,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 64,"type": "removeHighLight","n": 65,"p": -1,"value": {"rectArr": [[1613,13,968,452]]}},
-		{"id": 65,"type": "video","n": 66,"p": -1,"value": {"path": "P7-1-c_actv_20190716162950499_c958178f","beginSecond": 0,"endSecond": 10,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 65,"type": "video","n": 66,"p": -1,"value": {"path": "P7-1-c_actv_20190724104908347_abe5e8f1","beginSecond": 0,"endSecond": 21,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 66,"type": "highLight","n": 67,"p": -1,"value": {"rectArr": [[1613,13,968,452]]}},
 		{"id": 67,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType":"audioTest",
 				"target":"bird",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -674,9 +674,9 @@
 			}
 		},
 		{"id": 68,"type": "removeHighLight","n": 69,"p": -1,"value": {"rectArr": [[1613,13,968,452]]}},
-		{"id": 69,"type": "video","n": -1,"p": -1,"value": {"path": "P7-1-d_actv_20190716163208943_5b946a4","beginSecond": 0,"endSecond": 8,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 69,"type": "video","n": -1,"p": -1,"value": {"path": "P7-1-d_actv_20190724105853370_6bae1d10","beginSecond": 0,"endSecond": 8,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 70,"type": "removeHighLight","n": 71,"p": -1,"value": {"rectArr": [[1613,13,968,452]]}},
-		{"id": 71,"type": "video","n": 66,"p": -1,"value": {"path": "P7-1-b_actv_20190716162747118_7e7644f1","beginSecond": 0,"endSecond": 11,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 71,"type": "video","n": 66,"p": -1,"value": {"path": "P7-1-b_actv_20190724104607264_ec3b6f9","beginSecond": 0,"endSecond": 23,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 72,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 7}},
 		{"id": 73,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[177,661,1177,761],[1358,661,1177,761]]}},
 		{"id": 74,"type": "removeHighLight","n": 75,"p": -1,"value": {"rectArr": [[177,661,1177,761],[1358,661,1177,761]]}},
@@ -689,8 +689,8 @@
 				"timeouterr": 77
 			}
 		},
-		{"id": 76,"type": "video","n": -1,"p": -1,"value": {"path": "P8-1-a_actv_20190716151023779_3ec31476","beginSecond": 0,"endSecond": 7,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
-		{"id": 77,"type": "video","n": 78,"p": -1,"value": {"path": "P8-1-b_actv_20190716151352987_bee21b38","beginSecond": 0,"endSecond": 14,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 76,"type": "video","n": -1,"p": -1,"value": {"path": "p8-1-a_actv_20190724110732222_20ea2d61","beginSecond": 0,"endSecond": 7,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 77,"type": "video","n": 78,"p": -1,"value": {"path": "P8-1-b_actv_20190724110926088_2d62b1","beginSecond": 0,"endSecond": 14,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 78,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType": "singleSelTemplate",
 				"reAnswer":20,
@@ -700,7 +700,7 @@
 				"timeouterr": 79
 			}
 		},
-		{"id": 79,"type": "video","n": -1,"p": -1,"value": {"path": "P8-1-c_actv_20190716151709996_d5dcb1fb","beginSecond": 0,"endSecond": 5,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 79,"type": "video","n": -1,"p": -1,"value": {"path": "P8-1-c_actv_20190724111227850_9acfd337","beginSecond": 0,"endSecond": 5,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 80,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 8}},
 		{"id": 81,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType": "singleSelTemplate",
@@ -711,8 +711,8 @@
 				"timeouterr": 83
 			}
 		},
-		{"id": 82,"type": "video","n": -1,"p": -1,"value": {"path": "P9-1-a_actv_20190716152858253_9ec4a6d","beginSecond": 0,"endSecond": 5,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
-		{"id": 83,"type": "video","n": 84,"p": -1,"value": {"path": "P9-1-b_actv_20190716153043543_89bf9ffc","beginSecond": 0,"endSecond": 12,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 82,"type": "video","n": -1,"p": -1,"value": {"path": "P9-1-a_actv_20190724112253127_c55a4b1","beginSecond": 0,"endSecond": 5,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 83,"type": "video","n": 84,"p": -1,"value": {"path": "P9-1-b_actv_20190724112434429_c8fee3d0","beginSecond": 0,"endSecond": 12,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 84,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType": "singleSelTemplate",
 				"reAnswer":20,
@@ -722,7 +722,7 @@
 				"timeouterr": 85
 			}
 		},
-		{"id": 85,"type": "video","n": -1,"p": -1,"value": {"path": "P9-1-c_actv_20190716153224082_3027267","beginSecond": 0,"endSecond": 6,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 85,"type": "video","n": -1,"p": -1,"value": {"path": "P9-1-c_actv_20190724112628023_2f11413c","beginSecond": 0,"endSecond": 6,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 86,"type": "star","n": -1,"p": -1,"value":{"count":1}},
 		{"id": 87,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 9}},
 		{"id": 88,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[1170,912,823,384]]}},
@@ -733,8 +733,8 @@
 				"target":"cat",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -752,8 +752,8 @@
 				"target":"cat",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -774,8 +774,8 @@
 				"target":"horse",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -794,8 +794,8 @@
 				"target":"horse",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -817,8 +817,8 @@
 				"target":"duck",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -837,8 +837,8 @@
 				"target":"duck",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -859,8 +859,8 @@
 				"target":"bird",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -879,8 +879,8 @@
 				"target":"bird",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":5,
-				"recordingTime":3,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -903,7 +903,7 @@
 				"target":"a cat can climb",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":12,
 				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
@@ -927,7 +927,7 @@
 				"target":"a cat can climb",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":12,
 				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
@@ -949,7 +949,7 @@
 				"target":"a horse can run",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":12,
 				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
@@ -973,7 +973,7 @@
 				"target":"a horse can run",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":5,
+				"timeout":12,
 				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
@@ -1168,7 +1168,7 @@
 				"timeouterr": 211
 			}
 		},
-		{"id": 211,"type": "video","n": 212,"p": -1,"value": {"path": "P20-pic1-1-c","beginSecond": 0,"endSecond": 4,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 211,"type": "video","n": 212,"p": -1,"value": {"path": "p20-pic1-1-c_actv_20190723180717376_c1223042","beginSecond": 0,"endSecond": 9,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 212,"type": "removeHighLight","n": -1,"p": -1,"value": {"rectArr": [[42,158,810,623]]}},
 		{"id": 213,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[2088,489,494,479]]}},
 		{"id": 214,"type": "templateCMD","n": -1,"p": -1,"value": {
