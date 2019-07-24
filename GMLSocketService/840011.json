@@ -105,17 +105,17 @@
 		{
 			"id": 5,"type": "video","n": 6,"p": -1,
 			"value": {
-				"path": "p8-2-p9-1_actv_20190718140200478_56db64ef",
+				"path": "p8-2-p9-1_actv_20190724105207048_e364f59",
 				"beginSecond": 0,
-				"endSecond": 9,
+				"endSecond": 14,
 				"mType": "teaVideo",
 				"isOnWall":0,
 				"size": [1238, 929],
 				"position": [81, 477]
 			},
 			"mainFrames": [
-				{"mt":3,"st": 3,"sid": 80},
-				{"mt":8,"st": 8,"sid": 81}
+				{"mt":4,"st": 4,"sid": 80},
+				{"mt":12,"st": 12,"sid": 81}
 			]
 		},
 		{
@@ -186,7 +186,7 @@
 		{
 			"id": 10,"type": "video","n": 11,"p": -1,
 			"value": {
-				"path": "p11-2-p12-1_actv_20190718155636855_3cf7aa41",
+				"path": "p11-2-p12-1_actv_20190723173224001_8ceb575b",
 				"beginSecond": 0,
 				"endSecond": 17,
 				"mType": "teaVideo",
@@ -196,7 +196,7 @@
 			},
 			"mainFrames": [
 				{"mt":4,"st": 4,"sid": 107},
-				{"mt":8,"st": 8,"sid": 108},
+				{"mt":6,"st": 6,"sid": 108},
 				{"mt":14,"st": 14,"sid": 109}
 			]
 		},
@@ -248,28 +248,24 @@
 			]
 		},
 		{
-			"id": 14,"type": "video","n": 15,"p": -1,
+			"id": 14,"type": "video","n": 25,"p": -1,
 			"value": {
-				"path": "p13-2-p14-1_actv_20190718162529019_e0bcef5e",
+				"path": "P13-2_actv_20190723173641564_46f46cd0",
 				"beginSecond": 0,
-				"endSecond": 54,
+				"endSecond": 9,
 				"mType": "teaVideo",
 				"isOnWall":0,
 				"size": [1238, 929],
 				"position": [81, 477]
 			},
 			"mainFrames": [
-				{"mt":4,"st": 4,"sid": 127},
-				{"mt":8,"st": 8,"sid": 128},
-				{"mt":15,"st": 15,"sid": 129},
-				{"mt":29,"st": 29,"sid": 130},
-				{"mt":48,"st": 48,"sid": 132}
+				{"mt":4,"st": 4,"sid": 128}
 			]
 		},
 		{
 			"id": 15,"type": "video","n": 16,"p": -1,
 			"value": {
-				"path": "p14-2-p15-1_actv_20190718170945336_bea22ae9",
+				"path": "p14-2-p15-1_actv_20190723174218242_8c39dc52",
 				"beginSecond": 0,
 				"endSecond": 63,
 				"mType": "teaVideo",
@@ -278,9 +274,9 @@
 				"position": [81, 477]
 			},
 			"mainFrames": [
-				{"mt":8,"st": 8,"sid": 142},
-				{"mt":18,"st": 18,"sid": 143},
-				{"mt":33,"st": 33,"sid": 144},
+				{"mt":6,"st": 6,"sid": 142},
+				{"mt":14,"st": 14,"sid": 143},
+				{"mt":35,"st": 35,"sid": 144},
 				{"mt":58,"st": 58,"sid": 146}
 			]
 		},
@@ -422,57 +418,46 @@
 			]
 		},
 		{
-			"id": 24,"type": "video","n": 25,"p": -1,
+			"id": 24,"type": "video","n": -1,"p": -1,
 			"value": {
-				"path": "P20-end_actv_20190716193412559_5a61cce6",
+				"path": "p20-end-p23_actv_20190723164733953_fae390cb",
 				"beginSecond": 0,
-				"endSecond": 8,
+				"endSecond": 92,
 				"mType": "teaVideo",
 				"isOnWall":0,
 				"size": [1238, 929],
 				"position": [81, 477]
 			},
 			"mainFrames": [
-				{"mt":5,"st": 5,"sid": 236}
-			]
-		},
-		{
-			"id": 25,"type": "video","n": 26,"p": -1,
-			"value": {
-				"path": "p21-p22_actv_20190723180322759_2252548",
-				"beginSecond": 0,
-				"endSecond": 83,
-				"mType": "teaVideo",
-				"isOnWall":0,
-				"size": [1238, 929],
-				"position": [81, 477]
-			},
-			"mainFrames": [
-				{"mt":0,"st": 0,"sid": 237},
-				{"mt":5,"st": 5,"sid": 238},
-				{"mt":12,"st": 12,"sid": 239},
-				{"mt":17,"st": 17,"sid": 241},
-				{"mt":23,"st": 23,"sid": 243},
-				{"mt":32,"st": 32,"sid": 245},
-				{"mt":42,"st": 56,"sid": 247},
+				{"mt":5,"st": 5,"sid": 236},
+				{"mt":9,"st": 9,"sid": 237},
+				{"mt":15,"st": 15,"sid": 238},
+				{"mt":21,"st": 21,"sid": 239},
+				{"mt":27,"st": 27,"sid": 241},
+				{"mt":34,"st": 34,"sid": 243},
+				{"mt":43,"st": 43,"sid": 245},
+				{"mt":44,"st": 52,"sid": 247},
 				{"mt":57,"st": 67,"sid": 248},
 				{"mt":68,"st": 78,"sid": 250},
-				{"mt":82,"st": 82,"sid": 252}
+				{"mt":82,"st": 90,"sid": 252},
+				{"mt":91,"st": 91,"sid": 253}
 			]
 		},
 		{
-			"id": 26,"type": "video","n": -1,"p": -1,
+			"id": 25,"type": "video","n": 15,"p": -1,
 			"value": {
-				"path": "P23_actv_20190723173020995_bc697ed7",
+				"path": "P14-1_actv_20190724115312369_b821419",
 				"beginSecond": 0,
-				"endSecond": 15,
+				"endSecond": 45,
 				"mType": "teaVideo",
 				"isOnWall":0,
 				"size": [1238, 929],
 				"position": [81, 477]
 			},
 			"mainFrames": [
-				{"mt":0,"st": 0,"sid": 253}
+				{"mt":6,"st": 6,"sid": 129},
+				{"mt":22,"st": 22,"sid": 130},
+				{"mt":41,"st": 41,"sid": 132}
 			]
 		}
 	],
