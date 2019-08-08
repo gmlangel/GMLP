@@ -27,7 +27,7 @@
 				{"mt":125,"st": 125,"sid": 6},
 				{"mt":139,"st": 139,"sid": 7},
 				{"mt":143,"st": 143,"sid": 9},
-				{"mt":146,"st": 146,"sid": 11},
+				{"mt":148,"st": 148,"sid": 11},
 				{"mt":172,"st": 172,"sid": 12}
 			]
 		},
@@ -35,7 +35,7 @@
 			"id": 1,"type": "video","n": 2,"p": -1,
 			"value": {
 				"path": "p4-2-p5-1.mp4",
-				"beginSecond": 2,
+				"beginSecond": 0,
 				"endSecond": 50,
 				"mType": "teaVideo",
 				"isOnWall":0,
@@ -46,7 +46,7 @@
 				{"mt":3,"st": 3,"sid": 24},
 				{"mt":13,"st": 13,"sid": 25},
 				{"mt":21,"st": 21,"sid": 27},
-				{"mt":41,"st": 41,"sid": 28}
+				{"mt":13,"st": 41,"sid": 28}
 			]
 		},
 		{
@@ -64,7 +64,7 @@
 				{"mt":3,"st": 3,"sid": 40},
 				{"mt":10,"st": 10,"sid": 41},
 				{"mt":14,"st": 14,"sid": 43},
-				{"mt":30,"st": 30,"sid": 44}
+				{"mt":3,"st": 33,"sid": 44}
 			]
 		},
 		{
@@ -82,7 +82,7 @@
 				{"mt":0,"st": 0,"sid": 56},
 				{"mt":10,"st": 10,"sid": 57},
 				{"mt":19,"st": 19,"sid": 59},
-				{"mt":39,"st": 39,"sid": 60}
+				{"mt":10,"st": 40,"sid": 60}
 			]
 		},
 		{
@@ -414,7 +414,7 @@
 			"mainFrames": [
 				{"mt":0,"st": 0,"sid": 229},
 				{"mt":1,"st": 1,"sid": 230},
-				{"mt":9,"st": 9,"sid": 231}
+				{"mt":0,"st": 11,"sid": 231}
 			]
 		},
 		{
@@ -529,7 +529,7 @@
 			}
 		},
 		{"id": 20,"type": "removeHighLight","n": 21,"p": -1,"value": {"rectArr": [[1685,0,798,427]]}},
-		{"id": 21,"type": "video","n": -1,"p": -1,"value": {"path": "P4-1-d.mp4","beginSecond": 0,"endSecond": 9,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 21,"type": "video","n": -1,"p": -1,"value": {"path": "P4-1-d.mp4","beginSecond": 0,"endSecond": 8,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 22,"type": "removeHighLight","n": 23,"p": -1,"value": {"rectArr": [[1685,0,798,427]]}},
 		{"id": 23,"type": "video","n": 18,"p": -1,"value": {"path": "P4-1-b.mp4","beginSecond": 1,"endSecond": 11,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 24,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[92,715,294,594]]}},
@@ -557,7 +557,7 @@
 		{"id": 30,"type": "removeHighLight","n": 31,"p": -1,"value": {"rectArr": [[1619,38,1043,474]]}},
 		{"id": 31,"type": "video","n": -1,"p": -1,"value": {"path": "p4_p7-1a.mp4","beginSecond": 0,"endSecond": 4,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 32,"type": "removeHighLight","n": 33,"p": -1,"value": {"rectArr": [[1619,38,1043,474]]}},
-		{"id": 33,"type": "video","n": 34,"p": -1,"value": {"path": "P5-1-c.mp4","beginSecond": 2,"endSecond": 10,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 33,"type": "video","n": 34,"p": -1,"value": {"path": "p5-1-c.mp4","beginSecond": 2,"endSecond": 10,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 34,"type": "highLight","n": 35,"p": -1,"value": {"rectArr": [[1619,38,1043,474]]}},
 		{"id": 35,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType":"audioTest",
@@ -579,7 +579,7 @@
 		{"id": 36,"type": "removeHighLight","n": 37,"p": -1,"value": {"rectArr": [[1619,38,1043,474]]}},
 		{"id": 37,"type": "video","n": -1,"p": -1,"value": {"path": "p5-1-d.mp4","beginSecond": 0,"endSecond": 15,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 38,"type": "removeHighLight","n": 39,"p": -1,"value": {"rectArr": [[1619,38,1043,474]]}},
-		{"id": 39,"type": "video","n": 34,"p": -1,"value": {"path": "P5-1-b.mp4","beginSecond": 1,"endSecond": 12,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 39,"type": "video","n": 34,"p": -1,"value": {"path": "p5-1-b.mp4","beginSecond": 1,"endSecond": 12,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 40,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[2039,636,303,301]]}},
 		{"id": 41,"type": "removeHighLight","n": 42,"p": -1,"value": {"rectArr": [[2039,636,303,301]]}},
 		{"id": 42,"type": "changePage","n": -1,"p": -1,"value":{"pageId": 5}},
@@ -651,7 +651,7 @@
 			}
 		},
 		{"id": 62,"type": "removeHighLight","n": 63,"p": -1,"value": {"rectArr": [[1613,13,968,452]]}},
-		{"id": 63,"type": "video","n": -1,"p": -1,"value": {"path": "p4_p7—1a.mp4","beginSecond": 0,"endSecond": 4,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
+		{"id": 63,"type": "video","n": -1,"p": -1,"value": {"path": "p4_p7-1a.mp4","beginSecond": 0,"endSecond": 4,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 64,"type": "removeHighLight","n": 65,"p": -1,"value": {"rectArr": [[1613,13,968,452]]}},
 		{"id": 65,"type": "video","n": 66,"p": -1,"value": {"path": "P7-1-c.mp4","beginSecond": 1,"endSecond": 9,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
 		{"id": 66,"type": "highLight","n": 67,"p": -1,"value": {"rectArr": [[1613,13,968,452]]}},
@@ -682,10 +682,10 @@
 		{"id": 75,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType": "singleSelTemplate",
 				"reAnswer":20,
-				"timeout": 7,
+				"timeout": 10,
 				"success": 76,
-				"faild": 77,
-				"timeouterr": 77
+				"faild": 79,
+				"timeouterr": 79
 			}
 		},
 		{"id": 76,"type": "video","n": -1,"p": -1,"value": {"path": "p8-1-a.mp4","beginSecond": 0,"endSecond": 7,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
@@ -704,10 +704,10 @@
 		{"id": 81,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType": "singleSelTemplate",
 				"reAnswer":20,
-				"timeout": 7,
+				"timeout": 10,
 				"success": 82,
-				"faild": 83,
-				"timeouterr": 83
+				"faild": 85,
+				"timeouterr": 85
 			}
 		},
 		{"id": 82,"type": "video","n": -1,"p": -1,"value": {"path": "P9-1-a.mp4","beginSecond": 0,"endSecond": 5,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
@@ -732,8 +732,8 @@
 				"target":"cat",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":7,
-				"recordingTime":5,
+				"timeout":4,
+				"recordingTime":3,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -751,8 +751,8 @@
 				"target":"cat",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":7,
-				"recordingTime":5,
+				"timeout":4,
+				"recordingTime":3,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -773,8 +773,8 @@
 				"target":"horse",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":7,
-				"recordingTime":5,
+				"timeout":4,
+				"recordingTime":3,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -793,8 +793,8 @@
 				"target":"horse",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":7,
-				"recordingTime":5,
+				"timeout":4,
+				"recordingTime":3,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -816,8 +816,8 @@
 				"target":"duck",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":7,
-				"recordingTime":5,
+				"timeout":4,
+				"recordingTime":3,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -836,8 +836,8 @@
 				"target":"duck",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":7,
-				"recordingTime":5,
+				"timeout":4,
+				"recordingTime":3,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -858,8 +858,8 @@
 				"target":"bird",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":7,
-				"recordingTime":5,
+				"timeout":4,
+				"recordingTime":3,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -878,8 +878,8 @@
 				"target":"bird",
 				"targetType":"word",
 				"reAnswer":0,
-				"timeout":7,
-				"recordingTime":5,
+				"timeout":4,
+				"recordingTime":3,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -902,8 +902,8 @@
 				"target":"a cat can climb",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":12,
-				"recordingTime":8,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -926,8 +926,8 @@
 				"target":"a cat can climb",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":12,
-				"recordingTime":8,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -948,8 +948,8 @@
 				"target":"a horse can run",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":12,
-				"recordingTime":8,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -972,8 +972,8 @@
 				"target":"a horse can run",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":12,
-				"recordingTime":8,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -994,8 +994,8 @@
 				"target":"a duck can swim",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":13,
-				"recordingTime":8,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -1018,8 +1018,8 @@
 				"target":"a duck can swim",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":13,
-				"recordingTime":8,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -1039,8 +1039,8 @@
 				"target":"a bird can fly",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":13,
-				"recordingTime":8,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -1063,8 +1063,8 @@
 				"target":"a bird can fly",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":13,
-				"recordingTime":8,
+				"timeout":7,
+				"recordingTime":5,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -1081,10 +1081,10 @@
 		{"id": 186,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType": "singleSelTemplate",
 				"reAnswer":20,
-				"timeout": 7,
+				"timeout": 10,
 				"success": 187,
-				"faild": 188,
-				"timeouterr": 188
+				"faild": 190,
+				"timeouterr": 190
 			}
 		},
 		{"id": 187,"type": "video","n": 193,"p": -1,"value": {"path": "P18-1-a.mp4","beginSecond": 0,"endSecond": 3,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
@@ -1106,10 +1106,10 @@
 		{"id": 195,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType": "singleSelTemplate",
 				"reAnswer":20,
-				"timeout": 7,
+				"timeout": 10,
 				"success": 196,
-				"faild": 197,
-				"timeouterr": 197
+				"faild": 199,
+				"timeouterr": 199
 			}
 		},
 		{"id": 196,"type": "video","n": -1,"p": -1,"value": {"path": "P19-1-a.mp4","beginSecond": 1,"endSecond": 3,"mType": "teaVideo","isOnWall":0,"size": [512, 384],"position": [0, 0]}},
@@ -1135,8 +1135,8 @@
 				"target":"This is a cat. A cat can climb.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":17,
-				"recordingTime":14,
+				"timeout":10,
+				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -1155,8 +1155,8 @@
 				"target":"This is a cat. A cat can climb.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":17,
-				"recordingTime":14,
+				"timeout":10,
+				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -1175,8 +1175,8 @@
 				"target":"This is a duck. A duck can swim.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":17,
-				"recordingTime":14,
+				"timeout":10,
+				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -1195,8 +1195,8 @@
 				"target":"This is a duck. A duck can swim.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":17,
-				"recordingTime":14,
+				"timeout":10,
+				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -1215,8 +1215,8 @@
 				"target":"This is a bird. A bird can fly.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":17,
-				"recordingTime":14,
+				"timeout":10,
+				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -1235,8 +1235,8 @@
 				"target":"This is a bird. A bird can fly.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":17,
-				"recordingTime":14,
+				"timeout":10,
+				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},
@@ -1253,11 +1253,11 @@
 		{"id": 230,"type": "highLight","n": -1,"p": -1,"value": {"rectArr": [[834,745,1222,759]]}},
 		{"id": 231,"type": "templateCMD","n": -1,"p": -1,"value": {
 				"templateType":"audioTest",
-				"target":"This is a bird. A bird can fly.",
+				"target":"This is a cow. A cow can run.",
 				"targetType":"sentence",
 				"reAnswer":0,
-				"timeout":17,
-				"recordingTime":14,
+				"timeout":10,
+				"recordingTime":8,
 				"flag":[
 					{"score":40,"star":1},
 					{"score":60,"star":2},

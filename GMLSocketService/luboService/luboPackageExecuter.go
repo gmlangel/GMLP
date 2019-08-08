@@ -10,7 +10,7 @@ import(
 )
 
 const (
-	TeachScriptUrlFormat = "https://www.juliaol.cn/%d.cof?timeInterval=%d"
+	TeachScriptUrlFormat = "https://www.juliaol.cn/%d.json?timeInterval=%d"
 )
 /**
 数据包处理者
@@ -320,6 +320,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 				// roomInfo.MCurrent = nil;
 				// roomInfo.SCurrentTimeInterval = 0;
 				//roomInfo.CurrentProcess = 0;
+				roomInfo.NeedJumpSleep = false;
 				roomInfo.CurrentAnswerState = "";
 				roomInfo.CreateTime = time.Now().Unix();
 				RoomInfoMap_SetValue(req.Rid,roomInfo);//存入教室信息集合
@@ -369,6 +370,7 @@ func joinRoom(client *LuBoClientConnection,req model.JoinRoom_c2s){
 			roomInfo.SCurrentTimeInterval = 0;
 			roomInfo.SCurrentQuesionTimeOut = -1;
 			roomInfo.CurrentProcess = 0;//重置播放状态。使其播放媒体命令
+			roomInfo.NeedJumpSleep = false;
 			roomInfo.SWaitAnswerUids = nil;
 			roomInfo.SCurrentQuestionId = -1;
 			if true == roomInfo.NeedPlayBack{
@@ -579,7 +581,6 @@ func loopSendTeachScript(client *LuBoClientConnection){
 	var curTime int64 = 0;
 	var clientScriptItem map[string]interface{} = nil;
 	for client.RID != -1 && client.SID != -1{
-		time.Sleep(model.TeachScriptTimeInterval);//每隔一定时间，计算要下发的教材脚本
 		rid := client.RID;
 		roomInfo := client.RoomInfo;
 		stepDataArr := client.TeachScriptStepDataArr;
@@ -587,6 +588,13 @@ func loopSendTeachScript(client *LuBoClientConnection){
 		if nil == roomInfo || nil == stepDataArr || nil == mediaDataArr{
 			break;
 		}
+		if true == roomInfo.NeedJumpSleep{
+			//跳过延时，营造一种视频或者脚本连续播放的效果
+			roomInfo.NeedJumpSleep = false;
+		}else{
+			time.Sleep(model.TeachScriptTimeInterval);//每隔一定时间，计算要下发的教材脚本
+		}
+		
 		curTime = time.Now().Unix();
 		if curTime > roomInfo.EndTimeinterval || roomInfo.RoomState == model.RoomState_End{
 			//如果当前时间大于课程结束时间、或者课程处于结束状态，则直接下发classend命令，告知客户端，并break出循环
@@ -622,12 +630,14 @@ func loopSendTeachScript(client *LuBoClientConnection){
 								//没有可执行的关键帧时，继续播放媒体脚本
 								roomInfo.SCurrent = nil;
 								roomInfo.CurrentProcess = 0;
+								roomInfo.NeedJumpSleep = true;
 							}
 						}
 					}else{
 						//如果没有对应的关键帧序列，则继续播放媒体脚本
 						roomInfo.SCurrent = nil;
 						roomInfo.CurrentProcess = 0;
+						roomInfo.NeedJumpSleep = true;
 					}
 				}
 				//更新脚本计时时间
@@ -714,6 +724,7 @@ func loopSendTeachScript(client *LuBoClientConnection){
 						roomInfo.SCurrentTimeInterval = 0;
 						roomInfo.SCurrentQuesionTimeOut = -1;
 						roomInfo.CurrentProcess = 0;//重置播放状态。使其播放媒体命令
+						roomInfo.NeedJumpSleep = false;
 						roomInfo.Credit = 0;
 						continue;
 					}
@@ -764,9 +775,9 @@ func tempFunc(stepItem * model.ScriptStepData,stData []model.ScriptStepData,rinf
 		rinfo.SWaitAnswerUids = rinfo.UserIdArr;//设置应答序列
 		var timeLength int64;
 		if itemType == "templateCMD"{
-			timeLength = getInt64(itemValue["timeout"],3);
+			timeLength = getInt64(itemValue["timeout"],1) + 2;
 		}else{
-			timeLength = getInt64(itemValue["endSecond"],0) - getInt64(itemValue["beginSecond"],0) + 3;
+			timeLength = getInt64(itemValue["endSecond"],0) - getInt64(itemValue["beginSecond"],0);
 		}
 		rinfo.SAllowNew = false;//禁用关键帧脚本的执行
 		rinfo.SCurrentQuesionTimeOut = rinfo.SCurrentTimeInterval + timeLength;
@@ -830,9 +841,9 @@ func execStepDataByMainFrames(mainFrames []model.MediaMainFrame,stData []model.S
 						rinfo.SWaitAnswerUids = rinfo.UserIdArr;//设置应答序列
 						var timeLength int64;
 						if itemType == "templateCMD"{
-							timeLength = getInt64(itemValue["timeout"],3);
+							timeLength = getInt64(itemValue["timeout"],1) + 2;
 						}else{
-							timeLength = getInt64(itemValue["endSecond"],0) - getInt64(itemValue["beginSecond"],0) + 3;
+							timeLength = getInt64(itemValue["endSecond"],0) - getInt64(itemValue["beginSecond"],0);
 						}
 						rinfo.SAllowNew = false;//禁用关键帧脚本的执行
 						rinfo.SCurrentQuesionTimeOut = rinfo.SCurrentTimeInterval + timeLength;

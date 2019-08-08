@@ -39,6 +39,7 @@ type RoomInfo struct{
     NeedPlayPreMedia bool;//是否应该播放上一段媒体视频
     NeedPlayBack bool;//是否要回放
     PreChangePageCMD map[string]interface{};//上一次的翻页命令，用户断线重连或者续播
+    NeedJumpSleep bool;//是否需要跳过time.sleep
     //通用---end
 
     //媒体播放相关---begin
