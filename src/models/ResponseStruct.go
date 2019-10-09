@@ -1,5 +1,13 @@
 package models
 
+type CompensationInfoResponse struct{
+	Code string `json:"code"`
+	Res int `json:"res"`
+	Success bool `json:"success"`
+	Timestamp int64 `json:"timestamp"`
+	Message string `json:"message"`
+}
+
 type CurrentResponse struct{
 	Code string
 	Msg string

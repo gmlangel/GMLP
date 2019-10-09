@@ -29,6 +29,19 @@
             "args": [],
             "showLog":false/*,
             "trace": "log"*/
+        },
+        {
+            "name": "RemoteDecition",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "port":39398,//随便写
+            "host":"127.0.0.1",//  net/Http绑定监听的ip地址，如有必要的话，才需要配置这项
+            "program": "C:\\Users\\guominglong\\Documents\\GitHub\\GMLP\\RemoteDecition\\service\\appDelegate.go",
+            "env": {},
+            "args": [],
+            "showLog":false/*,
+            "trace": "log"*/
         }
     ]
 }
