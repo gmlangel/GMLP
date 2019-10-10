@@ -2,14 +2,14 @@ package models
 
 
 type CurrentResponse struct{
-	Code string
-	Msg string
+	Code string `json:"code"`
+	Msg string `json:"msg"`
 }
 
 type DataResponse struct{
-	Code string
-	Msg string
-	Data []map[string]interface{}
+	Code string `json:"code"`
+	Msg string `json:"msg"`
+	Data []map[string]interface{} `json:"data"`
 }
 
 
