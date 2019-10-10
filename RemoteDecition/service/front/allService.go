@@ -5,6 +5,8 @@ import(
 	m "../models"
 	"encoding/json"
 	"strconv"
+	"os"
+	"github.com/satori/go.uuid"
 )
 
 
@@ -359,6 +361,145 @@ func (ser *AllService)AddCondition(ctx iris.Context){
 	}
 
 	resBytes,err:=json.Marshal(res);
+	if nil != err{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes);
+	}
+}
+
+/**
+删除条件
+*/
+func (ser *AllService)DeleteCondition(ctx iris.Context){
+	id,err := strconv.ParseUint(ctx.URLParam("id"),0,32);
+	res := &m.CurrentResponse{}
+	if nil != err{
+		res.Code = "-1";
+		res.Msg = "删除条件失败,请检查参数"
+	}else{
+		result,err := ser.SQL.Exec(fmt.Sprintf("delete from `Condition` where `id` = %d",id))
+		if nil != err{
+			res.Code = "-1";
+			res.Msg = fmt.Sprintf("删除条件失败,%v",err)
+		}else if count,e:=result.RowsAffected();nil == e&& count >0{
+			res.Code = "0";
+			res.Msg = "条件删除成功"
+		}else{
+			res.Code = "-1";
+			res.Msg = "条件删除失败，参数id对应的条件不存在"
+		}
+	}
+	resBytes,err := json.Marshal(res);
+	if nil != err{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes);
+	}
+}
+
+/**
+更新条件信息
+*/
+func (ser *AllService)UpdateConditionInfo(ctx iris.Context){
+	id,err1:=strconv.ParseUint(ctx.URLParam("id"),0,32);
+	cType,err2:=strconv.ParseUint(ctx.URLParam("cType"),0,32);
+	name := ctx.URLParam("name");
+	val := ctx.URLParam("value");
+	probability,err3 := strconv.ParseFloat(ctx.URLParam("probability"),32);
+	des := ctx.URLParam("des");
+	res := &m.CurrentResponse{}
+	if nil == err1 && nil == err2 && nil == err3 && "" != name && "" != val{
+		result,err := ser.SQL.Exec(fmt.Sprintf("update `Condition` set `typeID`=%d,`value`='%s',`name`='%s',`probability`=%f,`des`='%s' where `id`=%d",cType,val,name,probability,des,id))
+		if nil != err{
+			res.Code = "-1";
+			res.Msg = fmt.Sprintf("条件信息更新失败,%v",err);
+		}else if count,e:=result.RowsAffected();nil == e && count > 0{
+			res.Code = "0";
+			res.Msg = "条件信息更新成功"
+		}else{
+			res.Code = "-1";
+			res.Msg = "条件信息更新失败，参数id对应的条件不存在";
+		}
+	}else{
+		res.Code = "-1";
+		res.Msg = "更新条件信息失败，请检查请求参数"
+	}
+	resBytes,err := json.Marshal(res);
+	if nil != err{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes)
+	}
+}
+
+/**
+新增策略组
+*/
+func(ser *AllService)AddStrategyCategroy(ctx iris.Context){
+	// name := ctx.PostValue("name");
+	// des := ctx.PostValue("des");
+	// templateContent := ctx.PostValue("templateContent");
+	name := ctx.URLParam("name");
+	des := ctx.URLParam("des");
+	templateContent := ctx.URLParam("templateContent");
+	res := &m.CurrentResponse{};
+	if "" != name && "" != templateContent{
+		//校验templateContent是否是JSON内容
+		var tmpJson map[string]interface{}
+		jsonErr := json.Unmarshal([]byte(templateContent),&tmpJson);
+		if nil != jsonErr{
+			res.Code = "-1";
+			res.Msg = "策略模板生成失败,原因：参数templateContent对应的json内容格式无效"
+		}else{
+			//将模板文件写入静态服务器
+			exist := true;
+			fileNameUUID,e := uuid.NewV4();
+			if nil != e{
+				res.Code = "-1";
+				res.Msg = "策略模板生成失败,请重试"
+			}else{
+				filePath := fmt.Sprintf("./static/%v.json",fileNameUUID);//生成文件名
+				if _,err := os.Stat(filePath);os.IsNotExist(err){
+					exist = false;;//判断文件是否存在
+				}
+				var f *os.File
+				var fe error
+				if exist{
+					//如果文件存在则更新内容
+					f,fe = os.OpenFile(filePath,os.O_APPEND,0774);
+				}else{
+					//创建文件，写入内容
+					f,fe = os.Create(filePath)
+				}
+				if nil != fe{
+					res.Code = "-1";
+					res.Msg = fmt.Sprintf("策略模板生成失败，原因是文件写入失败,%v",fe);
+				}else{
+					defer f.Close();//关闭文件
+					_,fe = f.Write([]byte(templateContent));//写入数据
+					if nil != fe{
+						res.Code = "-1";
+						res.Msg = fmt.Sprintf("策略模板生成失败，原因是文件写入失败,%v",fe);
+					}else{
+						//文件写入成功后， 更新数据库信息
+						_,err := ser.SQL.Exec(fmt.Sprintf("insert into `StrategyCategroy`(`name`,`des`,`baseTemplatePath`) values('%s','%s','%s')",name,des,filePath))
+						if nil != err{
+							res.Code = "-1";
+							res.Msg = fmt.Sprintf("新建策略组失败，%v",err)
+						}else{
+							res.Code = "0";
+							res.Msg = "新建策略组成功"
+						}
+					}
+				}
+			}
+		}
+	}else{
+		res.Code = "-1";
+		res.Msg = "新增策略组失败，请检查请求参数"
+	}
+	resBytes,err := json.Marshal(res);
 	if nil != err{
 		ctx.Write([]byte(""))
 	}else{

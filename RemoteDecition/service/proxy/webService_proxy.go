@@ -59,6 +59,9 @@ func (webs *WebServiceProxy)Start(){
 	webs.app.Get("GetAllConditionTypeInfo",allser.GetAllConditionTypeInfo);//获取所有策略条件类型的信息
 	webs.app.Get("AddConditionType",allser.AddConditionType);//添加条件类型
 	webs.app.Get("AddCondition",allser.AddCondition);//新增条件
+	webs.app.Get("UpdateConditionInfo",allser.UpdateConditionInfo);//更新条件信息接口
+	webs.app.Get("DeleteCondition",allser.DeleteCondition);//删除策略条件接口
+	webs.app.Get("AddStrategyCategroy",allser.AddStrategyCategroy);//新增策略组
 	// //开启后端服务监听
 	// //signServiceGroup2 := webs.app.Party("/rear/sign");
 	// // rearProxy := rear.LoginService{};

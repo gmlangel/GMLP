@@ -19,8 +19,8 @@ type StaticManagerProxy struct{
 启动静态服务
 */
 func (sm *StaticManagerProxy)Start(){
-	// //设置服务器图标
-	// sm.app.Favicon("./GMLClient/static/myico.ico");
-	// //设置静态服务器
-	// sm.app.StaticWeb("/static","./GMLClient/static");
+	//设置服务器图标
+	sm.app.Favicon("./static/myico.ico");
+	//设置静态服务器
+	sm.app.StaticWeb("/static","./static");
 }
