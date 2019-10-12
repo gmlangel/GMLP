@@ -7,6 +7,8 @@ import(
 	"strconv"
 	"os"
 	"github.com/satori/go.uuid"
+	"errors"
+	"strings"
 )
 
 
@@ -230,7 +232,7 @@ func (ser *AllService)UpdateUserInfo(ctx iris.Context){
 }
 
 /**
-查询所有策略条件信息,支持分页查询，默认返回最近的20条信息
+查询所有策略条件信息,支持分页查询，默认返回全部信息
 */
 func (ser *AllService)GetAllConditionInfo(ctx iris.Context){
 	startPoint,err1 := ctx.URLParamInt("startPoint");
@@ -242,7 +244,7 @@ func (ser *AllService)GetAllConditionInfo(ctx iris.Context){
 		queryStr = fmt.Sprintf("select `Condition`.`id`,`ConditionType`.`zhName` ,`ConditionType`.`des` AS `typeDes` ,`Condition`.`value` ,`Condition`.`name` ,`Condition`.`probability` ,`Condition`.`des`    from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` ORDER BY `Condition`.`id` DESC LIMIT %d,%d;",startPoint,readCount)
 	}else{
 		//查询前20条
-		queryStr = fmt.Sprintf("select `Condition`.`id`,`ConditionType`.`zhName` ,`ConditionType`.`des` AS `typeDes` ,`Condition`.`value` ,`Condition`.`name` ,`Condition`.`probability` ,`Condition`.`des`    from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` ORDER BY `Condition`.`id` DESC LIMIT %d,%d;",0,20)
+		queryStr = fmt.Sprintf("select `Condition`.`id`,`ConditionType`.`zhName` ,`ConditionType`.`des` AS `typeDes` ,`Condition`.`value` ,`Condition`.`name` ,`Condition`.`probability` ,`Condition`.`des`    from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` ORDER BY `Condition`.`id` DESC")
 	}
 	result,err := ser.SQL.Query(queryStr);
 	if nil != err{
@@ -434,6 +436,53 @@ func (ser *AllService)UpdateConditionInfo(ctx iris.Context){
 }
 
 /**
+将内容写入文件
+*/
+func(ser *AllService)writeToFile(templateContent string,basePath string)(filePath string,err error){
+	//将模板文件写入静态服务器
+	exist := true;
+	fileNameUUID,e := uuid.NewV4();
+	if nil != e{
+		return "",errors.New("生成失败,请重试")
+	}else{
+		//判断目录是否存在，否则就创建
+		if _,err := os.Stat(basePath);os.IsNotExist(err){
+			//目录不存在，则创建
+			mkdirErr := os.MkdirAll(basePath,0774);	
+			if nil != mkdirErr{
+				return "",errors.New(fmt.Sprintf("生成失败,%s路径创建失败",basePath))
+			}
+		}
+
+		filePath = fmt.Sprintf("%s%v.json",basePath,fileNameUUID);//生成文件名
+		if _,err := os.Stat(filePath);os.IsNotExist(err){
+			exist = false;;//判断文件是否存在
+		}
+		var f *os.File
+		var fe error
+		if exist{
+			//如果文件存在则更新内容
+			f,fe = os.OpenFile(filePath,os.O_WRONLY,0774);
+		}else{
+			//创建文件，写入内容
+			f,fe = os.Create(filePath)
+		}
+		if nil != fe{
+			return "",errors.New(fmt.Sprintf("生成失败，原因是文件写入失败,%v",fe));
+		}else{
+			defer f.Close();//关闭文件
+			_,fe = f.Write([]byte(templateContent));//写入数据
+			if nil != fe{
+				return "",errors.New(fmt.Sprintf("生成失败，原因是文件写入失败,%v",fe));
+			}else{
+				//文件写入成功后， 更新数据库信息
+				return filePath,nil;
+			}
+		}
+	}
+}
+
+/**
 新增策略组
 */
 func(ser *AllService)AddStrategyCategroy(ctx iris.Context){
@@ -453,45 +502,19 @@ func(ser *AllService)AddStrategyCategroy(ctx iris.Context){
 			res.Msg = "策略模板生成失败,原因：参数templateContent对应的json内容格式无效"
 		}else{
 			//将模板文件写入静态服务器
-			exist := true;
-			fileNameUUID,e := uuid.NewV4();
+			filePath,e :=ser.writeToFile(templateContent,"./static/")
 			if nil != e{
 				res.Code = "-1";
-				res.Msg = "策略模板生成失败,请重试"
+				res.Msg = fmt.Sprintf("策略模板%v",e);
 			}else{
-				filePath := fmt.Sprintf("./static/%v.json",fileNameUUID);//生成文件名
-				if _,err := os.Stat(filePath);os.IsNotExist(err){
-					exist = false;;//判断文件是否存在
-				}
-				var f *os.File
-				var fe error
-				if exist{
-					//如果文件存在则更新内容
-					f,fe = os.OpenFile(filePath,os.O_APPEND,0774);
-				}else{
-					//创建文件，写入内容
-					f,fe = os.Create(filePath)
-				}
-				if nil != fe{
+				//文件写入成功后， 更新数据库信息
+				_,err := ser.SQL.Exec(fmt.Sprintf("insert into `StrategyCategroy`(`name`,`des`,`baseTemplatePath`) values('%s','%s','%s')",name,des,filePath))
+				if nil != err{
 					res.Code = "-1";
-					res.Msg = fmt.Sprintf("策略模板生成失败，原因是文件写入失败,%v",fe);
+					res.Msg = fmt.Sprintf("新建策略组失败，%v",err)
 				}else{
-					defer f.Close();//关闭文件
-					_,fe = f.Write([]byte(templateContent));//写入数据
-					if nil != fe{
-						res.Code = "-1";
-						res.Msg = fmt.Sprintf("策略模板生成失败，原因是文件写入失败,%v",fe);
-					}else{
-						//文件写入成功后， 更新数据库信息
-						_,err := ser.SQL.Exec(fmt.Sprintf("insert into `StrategyCategroy`(`name`,`des`,`baseTemplatePath`) values('%s','%s','%s')",name,des,filePath))
-						if nil != err{
-							res.Code = "-1";
-							res.Msg = fmt.Sprintf("新建策略组失败，%v",err)
-						}else{
-							res.Code = "0";
-							res.Msg = "新建策略组成功"
-						}
-					}
+					res.Code = "0";
+					res.Msg = "新建策略组成功"
 				}
 			}
 		}
@@ -506,3 +529,408 @@ func(ser *AllService)AddStrategyCategroy(ctx iris.Context){
 		ctx.Write(resBytes);
 	}
 }
+
+/**
+编辑策略组信息
+*/
+func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
+	id,err1 := strconv.ParseUint(ctx.URLParam("id"),0,32);
+	name := ctx.URLParam("name");
+	des := ctx.URLParam("des");
+	templateContent := ctx.URLParam("templateContent");
+	res := &m.CurrentResponse{}
+	if nil == err1 && "" != name && "" != des && "" != templateContent{
+		//校验模板格式
+		var jsonObj map[string]interface{};
+		jsonErr := json.Unmarshal([]byte(templateContent),&jsonObj);
+		if nil != jsonErr{
+			res.Code = "-1";
+			res.Msg = "templateContent内容不是JSON"
+		}else{
+			//删除之前的模板文件
+			tmpSel,err := ser.SQL.Query(fmt.Sprintf("select `baseTemplatePath` from `StrategyCategroy` where `id` = %d",id));
+			if nil != err{
+				res.Code = "-1";
+				res.Msg = "更新策略组信息失败，未能找到id对应的策略组"
+			}else{
+				//生成策略组的模板文件
+				filePath,e := ser.writeToFile(templateContent,"./static/");
+				if nil != e{
+					res.Code = "-1";
+					res.Msg = fmt.Sprintf("策略模板%v",e);
+				}else{
+					//写入数据库
+					_,e := ser.SQL.Exec(fmt.Sprintf("update `StrategyCategroy` set `name`='%s',`des`='%s',`baseTemplatePath`='%s' where `id`=%d",name,des,filePath,id))
+					if nil != e{
+						res.Code = "-1";
+						res.Msg = fmt.Sprintf("更新策略组信息失败,%s",e.Error());
+					}else{
+						res.Code = "0";
+						res.Msg = "更新策略组信息，成功"
+						//删除旧的无用的策略模板文件
+						for _,v :=range(tmpSel){
+							baseTemplatePath := string(v["baseTemplatePath"]);
+							os.Remove(baseTemplatePath);//删除文件
+						}
+					}
+				}
+			}
+		}
+	}else{
+		res.Code = "-1";
+		res.Msg = "更新策略组信息失败，请检查参数"
+	}
+	resBytes,e := json.Marshal(res);
+	if nil != e{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes);
+	}
+ }
+
+ /**
+ 删除策略组
+ */
+ func(ser *AllService)DeleteStrategyCategroy(ctx iris.Context){
+	id,err := strconv.ParseUint(ctx.URLParam("id"),0,32);
+	res := &m.CurrentResponse{}
+	if nil != err{
+		res.Code = "-1";
+		res.Msg = "删除策略组失败，请检查参数"
+	}else{
+		filePathArr :=[]string{};//文件路径集合,用于删除
+		//查询策略分类表中的记录
+		result,e:= ser.SQL.Query(fmt.Sprintf("select `baseTemplatePath` from `StrategyCategroy` where `id` = %d",id));
+		if nil == e{
+			for _,v:=range(result){
+				filePathArr = append(filePathArr,string(v["baseTemplatePath"]));//填充文件路径组
+			}
+		}
+		//遍历 策略记录表中的记录
+		result,e = ser.SQL.Query(fmt.Sprintf("select `valuePath` from `Strategy` where `sid` = %d",id))
+		if nil == e{
+			for _,v:=range(result){
+				filePathArr = append(filePathArr,string(v["valuePath"]));
+			}
+		}
+		//删除策略类别表中的记录
+		_,e = ser.SQL.Exec(fmt.Sprintf("delete from `StrategyCategroy` where `id` = %d",id));
+		if nil != e{
+			res.Code = "-1";
+			res.Msg = fmt.Sprintf("策略模板删除失败，%s",e.Error());
+		}else{
+			//删除策略表中的所有记录
+			_,e=ser.SQL.Exec(fmt.Sprintf("delete from `Strategy` where `sid` = %d",id));
+			if nil != e{
+				res.Code = "-1";
+				res.Msg = fmt.Sprintf("策略模板删除失败，%s",e.Error());
+			}else{
+				res.Code = "0";
+				res.Msg = "策略组信息删除成功"
+			}
+			//删除所有无用的文件
+			for _,v := range(filePathArr){
+				os.Remove(v);
+			}
+		}
+	}
+
+	resBytes,err := json.Marshal(res);
+	if nil != err{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes)
+	}
+ }
+
+ /**
+ 新增策略
+ */
+ func(ser *AllService)AddStrategy(ctx iris.Context){
+	sid,err1 := strconv.ParseUint(ctx.URLParam("sid"),0,32);//策略组ID
+	strategyContext := ctx.URLParam("strategyContext");//策略内容
+	expire,err2 := strconv.ParseUint(ctx.URLParam("expire"),0,32);//过期时间戳
+	isEnabled,err3:= strconv.ParseUint(ctx.URLParam("enabled"),0,32);//是否为开启状态
+	name := ctx.URLParam("name");//策略名称
+	res := &m.CurrentResponse{};
+	if nil == err3 && nil == err1 && nil == err2 && "" != strategyContext && "" != name{
+		//校验strategyContext是否为json
+		var jsonObj map[string]interface{};
+		err := json.Unmarshal([]byte(strategyContext),&jsonObj);
+		if nil != err{
+			res.Code = "-1";
+			res.Msg = "添加策略失败,strategyContext对应的内容不是json"
+		}else{
+			//将策略内容写入文件
+			filePath,err := ser.writeToFile(strategyContext,"./static/strategy/")
+			if nil != err{
+				res.Code = "-1";
+				res.Msg = fmt.Sprintf("策略文件创建失败%v",err);
+			}else{
+				//写入数据库
+				_,err := ser.SQL.Exec(fmt.Sprintf("insert into `Strategy`(`name`,`expireDate`,`enabled`,`valuePath`,`sid`) values('%v',%d,%d,'%v',%d)",name,expire,isEnabled,filePath,sid));
+				if nil != err{
+					res.Code = "-1";
+					res.Msg = fmt.Sprintf("创建策略失败,%s",err.Error());
+				}else{
+					res.Code = "0";
+					res.Msg = "创建策略成功"
+				}
+			}
+		}
+	}else{
+		res.Code = "-1";
+		res.Msg = "添加策略失败，请检查参数"
+	}
+	resBytes,err := json.Marshal(res);
+	if nil != err{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes)
+	}
+ }
+
+/**
+为策略编辑匹配条件
+*/
+ func(ser *AllService)EditConditionForStrategy(ctx iris.Context){
+	id,err1:= strconv.ParseUint(ctx.URLParam("id"),0,32); //策略id
+	conditionStr := ctx.URLParam("conditionGroup");//条件id的组合字符传
+	res := &m.CurrentResponse{}
+	if nil  == err1 && "" != conditionStr{
+		_,err:= ser.SQL.Exec(fmt.Sprintf("update `Strategy` set `conditionGroup`='%s' where `id`=%d",conditionStr,id))
+		if nil != err{
+			res.Code = "-1";
+			res.Msg = fmt.Sprintf("策略条件变更失败,%s",err.Error())
+		}else{
+			res.Code = "0";
+			res.Msg = fmt.Sprintf("策略条件变更成功");
+		}
+	}else{
+		res.Code = "-1"
+		res.Msg = "为策略附加匹配条件，失败。请检查参数"
+	}
+	resBytes,err := json.Marshal(res);
+	if nil != err{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes);
+	}
+ }
+
+
+ /**
+ 根据策略ID，查询该策略对应的匹配条件
+ */
+ func(ser *AllService)GetConditionInfoByStrategyID(ctx iris.Context){
+	 id,err1 := strconv.ParseUint(ctx.URLParam("id"),0,32);
+	 res := &m.DataResponse{}
+	 if nil == err1{
+		 //开始查询
+		 result,err:=ser.SQL.Query(fmt.Sprintf("select `conditionGroup` from `Strategy` where `id` = %d",id));
+		 if nil != err{
+			 res.Code = "-1";
+			 res.Msg = fmt.Sprintf("查询失败,%s",err.Error());
+		 }else{
+			 cidArr := []string{};
+			 for _,v:=range(result){
+				 strArr := strings.Split(string(v["conditionGroup"]),",");
+				 for _,sv:=range(strArr){
+					if _,ce:=strconv.ParseUint(sv,0,32);ce == nil{
+						cidArr = append(cidArr,sv);
+					}
+				 }
+			 }
+			 cidStr := strings.Join(cidArr,",");
+			 result,err=ser.SQL.Query(fmt.Sprintf("select `Condition`.`id` as `ConditionID`,`Condition`.`value`,`Condition`.`name` as `ConditionName`,`Condition`.`probability`,`ConditionType`.`enName`,`ConditionType`.`zhName` from `Condition` left join `ConditionType`  on  `Condition`.`typeID` = `ConditionType`.`id` where `Condition`.`id` in(%s)",cidStr))
+			 if nil != err{
+				 res.Code = "-1";
+				 res.Msg = fmt.Sprintf("查询村略对应的条件，失败。%s",err.Error());
+			 }else{
+				 resultData := []map[string]interface{}{};
+				 //遍历查询结果
+				 for _,v:=range(result){
+					tmp := map[string]interface{}{};
+					for key,nv:=range(v){
+						if key == "id"{
+							tmp[key],err= strconv.ParseUint(string(nv),0,32);
+						}else if "probability" == key{
+							tmp[key],err= strconv.ParseFloat(string(nv),32);
+						}else{
+							tmp[key] = string(nv);
+						}
+					}
+					resultData = append(resultData,tmp)
+				 }
+				 res.Data = resultData;
+				 res.Code = "0";
+			 }
+		 }
+	 }else{
+		 res.Code = "-1"
+		 res.Msg = "查询策略对应的条件，失败。请检查请求参数"
+	 }
+
+	 resBytes,err:=json.Marshal(res);
+	 if nil != err{
+		 ctx.Write([]byte(""))
+	 }else{
+		 ctx.Write(resBytes);
+	 }
+ }
+
+ /**
+ 获取指定策略组内的所有策略信息
+ */
+ func(ser *AllService)GetStrategyByStrategyCategroyID(ctx iris.Context){
+	sid,err:= strconv.ParseUint(ctx.URLParam("sid"),0,32);//策略组id
+	res := &m.DataResponse{};
+	if nil == err{
+		result,err := ser.SQL.Query(fmt.Sprintf("select * from `Strategy` where `sid` = %d",sid));
+		if nil != err{
+			res.Code = "-1";
+			res.Msg = fmt.Sprintf("查询策略信息失败,%s",err.Error())
+		}else{
+			arr := []map[string]interface{}{};
+			//遍历结果
+			for _,v:=range(result){
+				item := map[string]interface{}{};
+				for key,nv:=range(v){
+					if "id" == key || "sid" == key || "expireDate" == key || "enabled" == key{
+						item[key],err= strconv.ParseUint(string(nv),0,32);
+					}else{
+						item[key] = string(nv);
+					}
+				}
+				arr = append(arr,item);
+			}
+			res.Code = "0";
+			res.Data = arr;
+		}
+	}else{
+		res.Code = "-1";
+		res.Msg="查询策略信息失败，请检查请求参数"
+	}
+	resBytes,err:= json.Marshal(res);
+	if nil != err{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes);
+	}
+ }
+
+ /**
+ 更新策略信息
+ */
+ func(ser *AllService)UpdateStrategyInfo(ctx iris.Context){
+	id,err1 := strconv.ParseUint(ctx.URLParam("id"),0,32);//策略ID
+	strategyContext := ctx.URLParam("strategyContext");//策略内容
+	expire,err2 := strconv.ParseUint(ctx.URLParam("expire"),0,32);//过期时间戳
+	isEnabled,err3:= strconv.ParseUint(ctx.URLParam("enabled"),0,32);//是否为开启状态
+	name := ctx.URLParam("name");//策略名称
+	res := &m.CurrentResponse{};
+	if nil == err3 && nil == err1 && nil == err2 && "" != strategyContext && "" != name{
+		//校验strategyContext是否为json
+		var jsonObj map[string]interface{};
+		err := json.Unmarshal([]byte(strategyContext),&jsonObj);
+		if nil != err{
+			res.Code = "-1";
+			res.Msg = "更新策略信息失败,strategyContext对应的内容不是json"
+		}else{
+			//根据id查询原有的策略信息
+			result,err:= ser.SQL.Query(fmt.Sprintf("select `valuePath` from `Strategy` where `id` = %d",id))
+			if nil != err || len(result) <= 0{
+				res.Code = "-1";
+				res.Msg = "未能找到策略ID对应的信息"
+			}else{
+				path := string(result[0]["valuePath"])
+				//将策略内容写入新的文件
+				filePath,err := ser.writeToFile(strategyContext,"./static/strategy/")
+				if nil != err{
+					res.Code = "-1";
+					res.Msg = fmt.Sprintf("策略文件更新失败%v",err);
+				}else{
+					//写入数据库
+					_,err := ser.SQL.Exec(fmt.Sprintf("update `Strategy` set `name`='%s',`expireDate`=%d,`enabled`=%d,`valuePath`='%s' where `id` = %d",name,expire,isEnabled,filePath,id));
+					if nil != err{
+						res.Code = "-1";
+						res.Msg = fmt.Sprintf("更新策略失败,%s",err.Error());
+					}else{
+						res.Code = "0";
+						res.Msg = "更新策略成功"
+						if "" != path{
+							os.Remove(path);//移除旧的策略
+						}
+					}
+				}
+			}
+		}
+	}else{
+		res.Code = "-1";
+		res.Msg = "更新策略信息失败，请检查参数"
+	}
+	resBytes,err := json.Marshal(res);
+	if nil != err{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes)
+	}
+ }
+
+ /**
+ 根据策略ID删除指定策略
+ */
+ func(ser *AllService)DeleteStrategyByID(ctx iris.Context){
+	id,err:=strconv.ParseUint(ctx.URLParam("id"),0,32);
+	res := &m.CurrentResponse{};
+	if nil == err{
+		tmp,err:=ser.SQL.Query(fmt.Sprintf("select `valuePath` from `Strategy` where `id` = %d",id))
+		if nil != err || len(tmp) <=0{
+			res.Code = "-1";
+			res.Msg = fmt.Sprintf("删除策略失败，未能查询到id对应的指定策略");
+		}else{
+			oldPath := string(tmp[0]["valuePath"]);//获取旧的策略文件路径
+			_,err:=ser.SQL.Exec(fmt.Sprintf("delete from `Strategy` where `id` = %d",id));
+			if nil != err{
+				res.Code = "-1";
+				res.Msg = fmt.Sprintf("删除策略失败，%s",err.Error());
+			}else{
+				res.Code = "0";
+				res.Msg = "策略删除成功";
+				if "" != oldPath{
+					os.Remove(oldPath);//删除旧策略文件
+				}
+			}
+		}
+	}else{
+		res.Code = "-1"
+		res.Msg = "删除策略失败，请检查参数"
+	}
+	resBytes,err:=json.Marshal(res);
+	if nil != err{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes)
+	}
+ }
+
+ /*
+ 使策略强制即时生效，即所有在线用户即时更新指定ID对应的策略
+ **/
+ func(ser *AllService)ForceStrategyBeUseage(ctx iris.Context){
+	_,err:=strconv.ParseUint(ctx.URLParam("id"),0,32);
+	res := &m.CurrentResponse{};
+	if nil == err{
+		res.Code = "0"
+		res.Msg = "策略已即时生效"
+	}else{
+		res.Code = "-1"
+		res.Msg = "策略未能即时生效"
+	}
+	resBytes,err:=json.Marshal(res);
+	if nil != err{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes)
+	}
+ }
