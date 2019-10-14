@@ -12,6 +12,7 @@
         }
     </style>
     <script type="text/javascript" src="jq.js"></script>
+    <script type="text/javascript" src="interfaceExec.js"></script>
     <link rel="stylesheet" href="./layui/css/layui.css">
 </head>
 <body>
@@ -20,13 +21,68 @@
 <script src="./layui/layui.js"></script>
 <script>
     //一般直接写在一个js文件中
-    layui.use(['layer', 'form'], function(){
-        var layer = layui.layer,form = layui.form;
+    layui.use(['layer', 'form','element','table','laypage'], function(){
+        var layer = layui.layer,form = layui.form,ele = layui.element,table = layui.table,laypage = layui.laypage;
 
         layer.msg('Hello World');
+        //添加tab的相关处理
+        ele.on('tab(mainTab)',function(data){
+            console.log(data);
+            let index = data.index;
+            if(index == 0){
+                //添加用户管理列表table
+                table.render({
+                    elem:"#table_userList",
+                    loading:false,
+                    title:"用户列表",
+                    skin:"nob",
+                    even:"true",
+                    size:"sm",
+                    cols:[
+                        [
+                            {field: 'userName', title: '用户名', width:160, sort: false, fixed: 'left',align:'center'},
+                            {field: 'userpwd', title: '密码', width:160, sort: false, fixed: 'left',align:'center'},
+                            {field: 'role', title: '角色', width:160, sort: false, fixed: 'left',align:'center'}
+                        ]
+                    ]
+                })
+                //调用“获取用户信息接口”
+                //执行一个laypage实例
+                laypage.render({
+                    elem: 'limitBottomBar' //注意，这里的 testlaypage1 是 ID，不用加 # 号
+                    ,count: 50 //数据总数，从服务端得到
+                });
+            }else if(index == 1){
+                //调用“获取策略条件接口”
+            }else if(index == 2){
+                //调用“获取全部策略接口”
+            }
+        })
+        ele.tabChange('mainTab','mUser');//默认选择第一选项"用户管理"
+    });
+
+    //一般直接写在一个js文件中
+    layui.use(['element','table'], function(){
+        
     });
 
 </script>
+
+<div class="layui-tab layui-tab-brief" lay-filter="mainTab">
+    <ul class="layui-tab-title">
+      <li lay-id="mUser">用户管理</li>
+      <li lay-id="mCondition">维护策略条件</li>
+      <li lay-id="mStrategy">维护策略</li>
+    </ul>
+    <div class="layui-tab-content">
+      <div class="layui-tab-item">
+        <div id="table_userList" lay-filter="lay_table_userList"></div>
+        <div id="limitBottomBar"></div>
+      </div>
+      <div class="layui-tab-item">内容2</div>
+      <div class="layui-tab-item">内容3</div>
+    </div>
+  </div>
 
 </body>
 </html>

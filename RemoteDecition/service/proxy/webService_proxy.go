@@ -3,6 +3,7 @@ package proxy;
 import(
 	"../front"
 	"github.com/kataras/iris"
+	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/sessions"
 	"time"
 )
@@ -42,6 +43,12 @@ func (webs *WebServiceProxy)init(){
 }
 
 func (webs *WebServiceProxy)Start(){
+	//修改跨域访问限制
+	crs := cors.New(cors.Options{
+        AllowedOrigins:   []string{"*"}, // allows everything, use that to change the hosts."*"代表允许所有域访问，这是一个数组，可以添加多个域名
+        AllowCredentials: true,
+	})
+	webs.app.Use(crs)
 	//开启前端服务监听
 	frontSignGroup := webs.app.Party("/front/sign");//前端需要验证签名的服务组
 	f_loginProxy := front.LoginService{SqlPro:sqlpro,App:webs.app,SignGroup:&frontSignGroup,Sm:sm};

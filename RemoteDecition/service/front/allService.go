@@ -22,10 +22,10 @@ func (ser *AllService)AddUser(ctx iris.Context){
 	fmt.Println("添加成功");
 	ln := ctx.URLParam("ln");
 	pwd := ctx.URLParam("pwd");
-	authType,err := ctx.URLParamInt("authType");
+	roleID,err := ctx.URLParamInt("roleID");
 	response := m.CurrentResponse{};
-	if "" != ln && "" != pwd && -1 < authType && nil == err{
-		_,err := ser.SQL.Exec(fmt.Sprintf("insert into RDUser(`signName`,`signPWD`,`roleID`) Values('%s','%s',%d)",ln,pwd,authType))
+	if "" != ln && "" != pwd && -1 < roleID && nil == err{
+		_,err := ser.SQL.Exec(fmt.Sprintf("insert into RDUser(`signName`,`signPWD`,`roleID`) Values('%s','%s',%d)",ln,pwd,roleID))
 		if nil != err{
 			response.Code = "-1";
 			response.Msg = fmt.Sprintf("数据库插入数据出错，%v",err);
@@ -120,6 +120,54 @@ func (ser *AllService)GetAllAuth(ctx iris.Context){
 	}
 	
 }
+
+
+/**
+获取后台管理账号数的总和
+*/
+func (ser *AllService)GetConditionCount(ctx iris.Context){
+	queryStr := "select COUNT(*) as cCount from `Condition`";
+	queryResult,err := ser.SQL.Query(queryStr);
+	res := &m.CurrentResponse{};
+	if nil != err || len(queryResult) == 0{
+		res.Code = "-1";
+		res.Msg = fmt.Sprintf("获取条件总数失败,%s",err);
+	}else{
+		res.Code = "0";
+		count,_ := strconv.ParseUint(string(queryResult[0]["cCount"]),0,64);
+		res.Msg= fmt.Sprintf("%d",count);
+	}
+	resBytes,err := json.Marshal(res);
+	if nil != err{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes);
+	}
+}
+/**
+获取后台管理账号数的总和
+*/
+func (ser *AllService)GetUsersCount(ctx iris.Context){
+	queryStr := "select COUNT(*) as userCount from `RDUser`";
+	queryResult,err := ser.SQL.Query(queryStr);
+	res := &m.CurrentResponse{};
+	if nil != err || len(queryResult) == 0{
+		res.Code = "-1";
+		res.Msg = fmt.Sprintf("获取用户总数失败,%s",err);
+	}else{
+		//遍历用户列表
+		res.Code = "0";
+		count,_ :=strconv.ParseUint(string(queryResult[0]["userCount"]),0,64);
+		res.Msg= fmt.Sprintf("%d",count);
+	}
+	resBytes,err := json.Marshal(res);
+	if nil != err{
+		ctx.Write([]byte(""))
+	}else{
+		ctx.Write(resBytes);
+	}
+}
+
 
 /**
 获取所有的后台管理账号（支持分页查询），默认为查询前20条数据
