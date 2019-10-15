@@ -6,7 +6,7 @@ var interfaceDomain = "http://localhost:8080/"
  * @param ln string 用户名
  * @param pwd string 用户登录密码
 */
-function signByAccount(ln,pwd){
+function signByAccount(ln,pwd,callbackFunc){
     $.ajax({
         url:interfaceDomain + "signByAccount",
         data:{
@@ -29,7 +29,7 @@ function signByAccount(ln,pwd){
  * 登出后台
  * 
 */
-function signOut(){
+function signOut(callbackFunc){
     $.ajax({
         url:interfaceDomain + "signOut",
         data:{
@@ -79,7 +79,7 @@ function addUser(ln,pwd,roleID,callbackFunc){
  * 获取所有的用户角色类型
  * http://localhost:8080/GetAllRoleType
 */
-function getAllRoleType(){
+function getAllRoleType(callbackFunc){
     $.ajax({
         url:interfaceDomain + "GetAllRoleType",
         data:{
@@ -101,7 +101,7 @@ function getAllRoleType(){
  * http://localhost:8080/GetAllAuth
  * 
 */
-function getAllAuth(){
+function getAllAuth(callbackFunc){
     $.ajax({
         url:interfaceDomain + "GetAllAuth",
         data:{
@@ -122,7 +122,7 @@ function getAllAuth(){
  * 获取后台管理账号总数
  * http://localhost:8080/GetUsersCount
 */
-function getUserCount(){
+function getUserCount(callbackFunc){
     $.ajax({
         url:interfaceDomain + "GetUsersCount",
         data:{
@@ -145,9 +145,9 @@ function getUserCount(){
  * @param startPoint int 开始读取数据的索引
  * @param readCount int 读取条数
 */
-function getAllUsers(startPoint,readCount){
+function getAllUsers(startPoint,readCount,callbackFunc){
     $.ajax({
-        url:interfaceDomain + "getAllUsers",
+        url:interfaceDomain + "GetAllUsers",
         data:{
             startPoint:startPoint,
             readCount:readCount,
@@ -169,7 +169,7 @@ function getAllUsers(startPoint,readCount){
  * http://localhost:8080/DeleteUser?uid=1
  * @param uid int 用户id
 */
-function deleteUser(uid){
+function deleteUser(uid,callbackFunc){
     $.ajax({
         url:interfaceDomain + "DeleteUser",
         data:{
@@ -195,7 +195,7 @@ function deleteUser(uid){
  * @param rid int 用户角色类型ID
  * @param uid int 用户id
 */
-function updateUserInfo(uid,sn,sp,rid){
+function updateUserInfo(uid,sn,sp,rid,callbackFunc){
     $.ajax({
         url:interfaceDomain + "UpdateUserInfo",
         data:{
@@ -222,7 +222,7 @@ function updateUserInfo(uid,sn,sp,rid){
  * @param startPoint int 起始位置
  * @param readCount int 获取数量
 */
-function getAllConditionInfo(startPoint,readCount){
+function getAllConditionInfo(startPoint,readCount,callbackFunc){
     $.ajax({
         url:interfaceDomain + "GetAllConditionInfo",
         data:{
@@ -245,7 +245,7 @@ function getAllConditionInfo(startPoint,readCount){
  * 获取策略条件总数
  * http://localhost:8080/GetConditionCount
 */
-function getConditionCount(){
+function getConditionCount(callbackFunc){
     $.ajax({
         url:interfaceDomain + "GetConditionCount",
         data:{
@@ -267,7 +267,7 @@ function getConditionCount(){
  * http://localhost:8080/GetAllConditionTypeInfo
  * 
 */
-function getAllConditionTypeInfo(){
+function getAllConditionTypeInfo(callbackFunc){
     $.ajax({
         url:interfaceDomain + "GetAllConditionTypeInfo",
         data:{
@@ -291,7 +291,7 @@ function getAllConditionTypeInfo(){
  * @param zn string 中文名
  * @param en string 英文名
 */
-function addConditionType(zn,en){
+function addConditionType(zn,en,callbackFunc){
     $.ajax({
         url:interfaceDomain + "AddConditionType",
         data:{
@@ -319,7 +319,7 @@ function addConditionType(zn,en){
  * @param probability number 生效几率 0-1之间任意小数
  * @param des string 条件描述
 */
-function addCondition(cType,name,value,probability,des){
+function addCondition(cType,name,value,probability,des,callbackFunc){
     $.ajax({
         url:interfaceDomain + "AddCondition",
         data:{
@@ -351,7 +351,7 @@ function addCondition(cType,name,value,probability,des){
  * @param des string 条件描述
  * @param id int 条件ID
 */
-function updateConditionInfo(cType,name,value,probability,des,id){
+function updateConditionInfo(cType,name,value,probability,des,id,callbackFunc){
     $.ajax({
         url:interfaceDomain + "UpdateConditionInfo",
         data:{
@@ -379,7 +379,7 @@ function updateConditionInfo(cType,name,value,probability,des,id){
  * http://localhost:8080/DeleteCondition?id=3
  * @param id int 条件ID
 */
-function deleteCondition(id){
+function deleteCondition(id,callbackFunc){
     $.ajax({
         url:interfaceDomain + "DeleteCondition",
         data:{
@@ -404,7 +404,7 @@ function deleteCondition(id){
  * @param des string 描述
  * @param templateContent string 策略模板内容
 */
-function addStrategyCategroy(name,des,templateContent){
+function addStrategyCategroy(name,des,templateContent,callbackFunc){
     $.ajax({
         url:interfaceDomain + "AddStrategyCategroy",
         data:{
@@ -432,7 +432,7 @@ function addStrategyCategroy(name,des,templateContent){
  * @param templateContent string 策略模板内容
  * @param id int 策略类别id
 */
-function updateStrategyCategroy(name,des,templateContent,id){
+function updateStrategyCategroy(name,des,templateContent,id,callbackFunc){
     $.ajax({
         url:interfaceDomain + "UpdateStrategyCategroy",
         data:{
@@ -459,7 +459,7 @@ function updateStrategyCategroy(name,des,templateContent,id){
  * http://localhost:8080/DeleteStrategyCategroy?id=3
  * @param id int 策略类别ID
 */
-function deleteStrategyCategroy(id){
+function deleteStrategyCategroy(id,callbackFunc){
     $.ajax({
         url:interfaceDomain + "DeleteStrategyCategroy",
         data:{
@@ -487,7 +487,7 @@ function deleteStrategyCategroy(id){
  * @param enabled int 是否启用 0或者1
  * @param name string 策略名
  */
-function addStrategy(sid,strategyContext,expire,enabled,name){
+function addStrategy(sid,strategyContext,expire,enabled,name,callbackFunc){
     $.ajax({
         url:interfaceDomain + "AddStrategy",
         data:{
@@ -515,7 +515,7 @@ function addStrategy(sid,strategyContext,expire,enabled,name){
  * @param id int 策略id
  * @param conditionGroup string 条件组
 */
-function editConditionForStrategy(id,conditionGroup){
+function editConditionForStrategy(id,conditionGroup,callbackFunc){
     $.ajax({
         url:interfaceDomain + "EditConditionForStrategy",
         data:{
@@ -539,7 +539,7 @@ function editConditionForStrategy(id,conditionGroup){
  * http://localhost:8080/SelectConditionInfoByStrategyID?id=2
  * @param id int 策略ID
 */
-function getConditionInfoByStrategyID(id){
+function getConditionInfoByStrategyID(id,callbackFunc){
     $.ajax({
         url:interfaceDomain + "SelectConditionInfoByStrategyID",
         data:{
@@ -562,7 +562,7 @@ function getConditionInfoByStrategyID(id){
  * http://localhost:8080/GetStrategyByStrategyCategroyID?sid=2
  * @param sid int 策略类别ID
 */
-function getStrategyByStrategyCategroyID(sid){
+function getStrategyByStrategyCategroyID(sid,callbackFunc){
     $.ajax({
         url:interfaceDomain + "GetStrategyByStrategyCategroyID",
         data:{
@@ -589,7 +589,7 @@ function getStrategyByStrategyCategroyID(sid){
  * @param enabled int 是否启用 0或者1
  * @param name string 策略名
 */
-function updateStrategyInfo(id,strategyContext,expire,enabled,name){
+function updateStrategyInfo(id,strategyContext,expire,enabled,name,callbackFunc){
     $.ajax({
         url:interfaceDomain + "UpdateStrategyInfo",
         data:{
@@ -616,7 +616,7 @@ function updateStrategyInfo(id,strategyContext,expire,enabled,name){
  * http://localhost:8080/DeleteStrategyByID?id=4
  * @param id int 策略ID
 */
-function deleteStrategyByID(id){
+function deleteStrategyByID(id,callbackFunc){
     $.ajax({
         url:interfaceDomain + "DeleteStrategyByID",
         data:{
@@ -639,7 +639,7 @@ function deleteStrategyByID(id){
  * http://localhost:8080/ForceStrategyBeUseage?id=4
  * @param id int 策略ID
 */
-function forceStrategyBeUseage(id){
+function forceStrategyBeUseage(id,callbackFunc){
     $.ajax({
         url:interfaceDomain + "ForceStrategyBeUseage",
         data:{

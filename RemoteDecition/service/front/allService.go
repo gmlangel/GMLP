@@ -178,10 +178,10 @@ func (ser *AllService)GetAllUsers(ctx iris.Context){
 	queryStr := "";
 	if nil == err && nil == err2{
 		//分页查询
-		queryStr = fmt.Sprintf("select * from RDUser limit %d,%d",sp,rc)
+		queryStr = fmt.Sprintf("select * from RDUser order by `id` desc limit %d,%d",sp,rc)
 	}else{
 		//查询前20
-		queryStr = fmt.Sprintf("select * from RDUser limit %d,%d",0,20)
+		queryStr = fmt.Sprintf("select * from RDUser order by `id` desc limit %d,%d",0,20)
 	}
 	queryResult,err := ser.SQL.Query(queryStr);
 	res := &m.DataResponse{};

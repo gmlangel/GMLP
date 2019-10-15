@@ -60,8 +60,10 @@ func (webs *WebServiceProxy)Start(){
 	webs.app.Get("GetAllRoleType",allser.GetAllRoleType);//查询后台管理账号可选角色
 	webs.app.Get("GetAllAuth",allser.GetAllAuth);//查询后台角色的权限说明
 	webs.app.Get("GetAllUsers",allser.GetAllUsers);//查询后台角色的权限说明
+	webs.app.Get("GetUsersCount",allser.GetUsersCount);//获取后台用户总数
 	webs.app.Get("DeleteUser",allser.DeleteUser);//删除后台管理账号
 	webs.app.Get("UpdateUserInfo",allser.UpdateUserInfo);//更新管理账号的信息
+	webs.app.Get("GetConditionCount",allser.GetConditionCount);//分页获取策略条件总数
 	webs.app.Get("GetAllConditionInfo",allser.GetAllConditionInfo);//分页获取策略条件信息
 	webs.app.Get("GetAllConditionTypeInfo",allser.GetAllConditionTypeInfo);//获取所有策略条件类型的信息
 	webs.app.Get("AddConditionType",allser.AddConditionType);//添加条件类型
