@@ -20,8 +20,15 @@
         <a class="layui-btn layui-btn-xs" lay-event="edit_userinfo" lay-filter="edit_userinfo">编辑</a>
         <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="delete_userinfo" lay-filter="delete_userinfo">删除</a>
     </script>
+
+    <!-- 条件信息编辑的工具条 -->
+    <script type="text/html" id="table_condition_bar">
+        <a class="layui-btn layui-btn-xs" lay-event="btn_edit_condition" lay-filter="btn_edit_condition">编辑</a>
+        <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="btn_delete_condition" lay-filter="btn_delete_condition">删除</a>
+    </script>
+    
 </head>
-<!-- 编辑用户信息模板 -->
+<!-- 编辑/新增用户信息模板 -->
 <form style="display:none;width:300px;" class="layui-form" lay-filter="panel_editUserinfo" id="panel_editUserinfo"> <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
     <div class="layui-form-item" style="padding-top: 30px;">
       <label class="layui-form-label">用户名</label>
@@ -53,6 +60,33 @@
       </div>
   </form>
 
+  <!-- 新增条件类型信息模板 -->
+<form style="display:none;width:300px;" class="layui-form" lay-filter="panel_addConditionType" id="panel_addConditionType"> 
+    <div class="layui-form-item" style="padding-top: 30px;">
+      <label class="layui-form-label">中文名</label>
+      <div class="layui-input-block">
+        <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" id="tb_add_conditionType_zh">
+      </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">英文名</label>
+        <div class="layui-input-block">
+          <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" id="tb_add_conditionType_en">
+        </div>
+      </div>
+      <div class="layui-form-item layui-form-text">
+            <label class="layui-form-label">请填写描述</label>
+            <div class="layui-input-block">
+              <textarea placeholder="请输入内容" class="layui-textarea" id="tb_add_conditionType_des"></textarea>
+            </div>
+        </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+          <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_addConditionType_cancel" id="btn_addConditionType_cancel">取消</button>
+          <button class="layui-btn" lay-submit lay-filter="btn_addConditionType_commit" id="btn_addConditionType_commit">提交</button>
+        </div>
+      </div>
+  </form>
 <body>
 
 
@@ -66,6 +100,15 @@
     var userCount = 0;//总用户数
     var userlistInfo = null;
     var userSelectPoint = 0;//用户数据起始查询点
+
+    var table_conditionList =null;
+    var maxConditionListLineCount = 15;
+    var table_conditionListCurrentPageID = 1;//条件列表的当前页码 注意这里不要用索引
+    var conditionTypeInfoMap = {};//条件信息字典
+    var conditionMap = {};//条件数组的条件ID与数组索引的映射表
+    var conditionArr = [];//条件信息数组
+    var conditionCount = 0;//总条件数
+    var conditionSelectPoint = 0;//条件信息数据的分页起始查询点
     //一般直接写在一个js文件中
     layui.use(['layer', 'form','element','table','laypage'], function(){
         var layer = layui.layer,form = layui.form,ele = layui.element,table = layui.table,laypage = layui.laypage;
@@ -119,7 +162,8 @@
                 })
             
             }else if(index == 1){
-                //调用“获取策略条件接口”
+                //添加策略管理table
+                table_conditionList = makeConditionListTable(table,layer,form,laypage);
             }else if(index == 2){
                 //调用“获取全部策略接口”
             }
@@ -192,10 +236,10 @@
                     limit:maxUserListLineCount,
                     cols:[
                         [
-                            {field: 'signName', title: '用户名', width:160, sort: false, fixed: 'left',align:'center'},
-                            {field: 'signPWD', title: '密码', width:160, sort: false, fixed: 'left',align:'center'},
-                            {field: 'roleName', title: '角色', width:160, sort: false, fixed: 'left',align:'center'},
-                            {width:300,title:'操作',fixed: 'left',align:'center',toolbar:'#table_userlist_barDemo'}
+                            {field: 'signName', title: '用户名', width:160, sort: false, fixed: 'left',align:'center',unresize:true},
+                            {field: 'signPWD', title: '密码', width:160, sort: false, fixed: 'left',align:'center',unresize:true},
+                            {field: 'roleName', title: '角色', width:160, sort: false, fixed: 'left',align:'center',unresize:true},
+                            {width:300,title:'操作',fixed: 'left',align:'center',toolbar:'#table_userlist_barDemo',unresize:true}
                         ]
                     ],
                     done: function(res, curr, count){
@@ -425,6 +469,89 @@
             return false;
         })
     }
+
+    /**
+     * 创建条件信息列表
+    */
+    function makeConditionListTable(table,layer,form,laypage){
+        let temp_table = table.render({
+                    elem:"#table_conditionList",
+                    loading:false,
+                    title:"条件列表",
+                    skin:"nob",
+                    even:"true",
+                    size:"sm",
+                    width:770,
+                    limit:maxConditionListLineCount,
+                    cols:[
+                        [
+                            {field: 'conditionTypeName', title: '条件类型', width:160, sort: false, fixed: 'left',align:'center',unresize:true},
+                            {field: 'conditionName', title: '条件名称', width:160, sort: false, fixed: 'left',align:'center',unresize:true},
+                            {field: 'conditionValue', title: '条件值', width:100, sort: false, fixed: 'left',align:'center',unresize:true},
+                            {field: 'probability', title: '生效几率', width:100, sort: false, fixed: 'left',align:'center',unresize:true},
+                            {width:240,title:'操作',fixed: 'left',align:'center',toolbar:'#table_condition_bar',unresize:true}
+                        ]
+                    ]
+                })
+        //添加工具条的监听事件
+        table.on("tool(table_conditionList)",function(obj){
+            // let userData = obj.data;
+            // let evtType = obj.event;
+            // switch(evtType){
+            //     case "roleinfo_des":
+            //         //查看角色详细描述
+            //         let str = "";
+            //         userData.authDesGroup.forEach((v,i)=>{
+            //             str +="</br>" + v
+            //         })
+            //         layer.open({
+            //             title: '拥有的的权限',
+            //             type:0,
+            //             content: str,
+            //             resize:false
+            //         });    
+            //         break;
+            //     case "edit_userinfo":
+            //         //编辑用户信息
+            //         showEditUserPanel(form,layer,userData,laypage);
+            //         break;
+            //     case "delete_userinfo":
+            //         //删除用户信息
+            //         layer.open({
+            //             title:"删除用户",
+            //             content:"确定要删除用户(" + userData.signName +")吗？",
+            //             area:["300px","200px"],
+            //             resize:false,
+            //             btn:["确定","取消"],
+            //             yes:(index,obj)=>{
+            //                 //确定操作
+            //                 deleteUser(userData.uid,(data,err)=>{
+            //                     if(data != null){
+            //                         layer.alert(data.msg);
+            //                         if(data.code == "0"){
+            //                             //分页获取用户信息
+            //                             if((userlistInfo || []).length == 1){
+            //                                 //如果删除的数据是本页的最后一条，则跳转至上一页
+            //                                 table_userListCurrentPageID-=1
+            //                             }
+            //                             fillUserList(laypage);
+            //                         }
+            //                     }else{
+            //                         console.error(err)
+            //                     }
+            //                 })
+            //             },
+            //             btn2:(index,obj)=>{
+            //                 //取消操作,不用谢任何代码，即可默认关闭layer
+            //             },
+            //             btnAlign:"c"/*居中对齐*/
+            //         })
+            //         break;
+            //     default:break;
+            // }
+        })
+        return temp_table;
+    }
 </script>
 
 <div class="layui-tab layui-tab-brief" lay-filter="mainTab">
@@ -439,7 +566,14 @@
         <div id="table_userList" lay-filter="lay_table_userList"></div>
         <div id="limitBottomBar"></div>
       </div>
-      <div class="layui-tab-item">内容2</div>
+      <div class="layui-tab-item">
+        <div class="layui-form-item">
+            <button class="layui-btn layui-btn-sm" lay-submit lay-filter="btn_showAddConditionTypePanel">新增条件类型</button>
+            <button class="layui-btn layui-btn-sm" lay-submit lay-filter="btn_showAddConditionPanel">新增条件</button>
+        </div>
+        <div id="table_conditionList" lay-filter="table_conditionList"></div>
+        <div id="conditionList_limitBottomBar"></div>
+      </div>
       <div class="layui-tab-item">内容3</div>
     </div>
   </div>
