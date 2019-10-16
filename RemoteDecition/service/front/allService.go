@@ -69,7 +69,7 @@ func(ser *AllService)GetAllRoleType(ctx iris.Context){
 			decodedItem := map[string]interface{}{};
 			for k,v := range(item){
 				if "id" == k{
-					decodedItem[k],err= strconv.ParseUint(string(v),0,16);
+					decodedItem[k],err= strconv.ParseUint(string(v),10,16);
 				}else{
 					decodedItem[k] = string(v);
 				}
@@ -102,7 +102,7 @@ func (ser *AllService)GetAllAuth(ctx iris.Context){
 			item := map[string]interface{}{};
 			for k,tv := range(v){
 				if "id" == k{
-					item[k],err= strconv.ParseUint(string(tv),0,16);
+					item[k],err= strconv.ParseUint(string(tv),10,16);
 				}else{
 					item[k] = string(tv);
 				}
@@ -134,7 +134,7 @@ func (ser *AllService)GetConditionCount(ctx iris.Context){
 		res.Msg = fmt.Sprintf("获取条件总数失败,%s",err);
 	}else{
 		res.Code = "0";
-		count,_ := strconv.ParseUint(string(queryResult[0]["cCount"]),0,64);
+		count,_ := strconv.ParseUint(string(queryResult[0]["cCount"]),10,64);
 		res.Msg= fmt.Sprintf("%d",count);
 	}
 	resBytes,err := json.Marshal(res);
@@ -157,7 +157,7 @@ func (ser *AllService)GetUsersCount(ctx iris.Context){
 	}else{
 		//遍历用户列表
 		res.Code = "0";
-		count,_ :=strconv.ParseUint(string(queryResult[0]["userCount"]),0,64);
+		count,_ :=strconv.ParseUint(string(queryResult[0]["userCount"]),10,64);
 		res.Msg= fmt.Sprintf("%d",count);
 	}
 	resBytes,err := json.Marshal(res);
@@ -195,9 +195,9 @@ func (ser *AllService)GetAllUsers(ctx iris.Context){
 			item := map[string]interface{}{};
 			for k,tv := range(v){
 				if "id" == k{
-					item[k],err= strconv.ParseUint(string(tv),0,32)
+					item[k],err= strconv.ParseUint(string(tv),10,32)
 				}else if "roleID" == k{
-					item[k],err= strconv.ParseUint(string(tv),0,16)
+					item[k],err= strconv.ParseUint(string(tv),10,16)
 				}else{
 					item[k] = string(tv);
 				}
@@ -219,7 +219,7 @@ func (ser *AllService)GetAllUsers(ctx iris.Context){
 删除后台管理账号
 */
 func (ser *AllService)DeleteUser(ctx iris.Context){
-	userID,err:= strconv.ParseUint(ctx.URLParam("uid"),0,32);
+	userID,err:= strconv.ParseUint(ctx.URLParam("uid"),10,32);
 	res := &m.CurrentResponse{}
 	if nil != err{
 		res.Code = "-1";
@@ -265,7 +265,7 @@ func (ser *AllService)UpdateUserInfo(ctx iris.Context){
 			res.Msg = "用户信息更新成功"
 		}else{
 			res.Code = "-1";
-			res.Msg = "用户信息更新失败,用户不存在";
+			res.Msg = "用户信息更新失败,用户不存在或用户信息未被更改导致：提交更新失败";
 		}
 	}else{
 		res.Code = "-1";
@@ -304,7 +304,7 @@ func (ser *AllService)GetAllConditionInfo(ctx iris.Context){
 			item := map[string]interface{}{};
 			for k,nv := range(v){
 				if "id" == k{
-					item[k],err= strconv.ParseUint(string(nv),0,32);
+					item[k],err= strconv.ParseUint(string(nv),10,32);
 				}else{
 					item[k] = string(nv);
 				}
@@ -338,7 +338,7 @@ func (ser *AllService)GetAllConditionTypeInfo(ctx iris.Context){
 			item := map[string]interface{}{};
 			for k,nv := range(v){
 				if "id" == k{
-					item[k],err= strconv.ParseUint(string(nv),0,32);
+					item[k],err= strconv.ParseUint(string(nv),10,32);
 				}else{
 					item[k] = string(nv);
 				}
@@ -422,7 +422,7 @@ func (ser *AllService)AddCondition(ctx iris.Context){
 删除条件
 */
 func (ser *AllService)DeleteCondition(ctx iris.Context){
-	id,err := strconv.ParseUint(ctx.URLParam("id"),0,32);
+	id,err := strconv.ParseUint(ctx.URLParam("id"),10,32);
 	res := &m.CurrentResponse{}
 	if nil != err{
 		res.Code = "-1";
@@ -452,8 +452,8 @@ func (ser *AllService)DeleteCondition(ctx iris.Context){
 更新条件信息
 */
 func (ser *AllService)UpdateConditionInfo(ctx iris.Context){
-	id,err1:=strconv.ParseUint(ctx.URLParam("id"),0,32);
-	cType,err2:=strconv.ParseUint(ctx.URLParam("cType"),0,32);
+	id,err1:=strconv.ParseUint(ctx.URLParam("id"),10,32);
+	cType,err2:=strconv.ParseUint(ctx.URLParam("cType"),10,32);
 	name := ctx.URLParam("name");
 	val := ctx.URLParam("value");
 	probability,err3 := strconv.ParseFloat(ctx.URLParam("probability"),32);
@@ -582,7 +582,7 @@ func(ser *AllService)AddStrategyCategroy(ctx iris.Context){
 编辑策略组信息
 */
 func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
-	id,err1 := strconv.ParseUint(ctx.URLParam("id"),0,32);
+	id,err1 := strconv.ParseUint(ctx.URLParam("id"),10,32);
 	name := ctx.URLParam("name");
 	des := ctx.URLParam("des");
 	templateContent := ctx.URLParam("templateContent");
@@ -640,7 +640,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
  删除策略组
  */
  func(ser *AllService)DeleteStrategyCategroy(ctx iris.Context){
-	id,err := strconv.ParseUint(ctx.URLParam("id"),0,32);
+	id,err := strconv.ParseUint(ctx.URLParam("id"),10,32);
 	res := &m.CurrentResponse{}
 	if nil != err{
 		res.Code = "-1";
@@ -695,10 +695,10 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
  新增策略
  */
  func(ser *AllService)AddStrategy(ctx iris.Context){
-	sid,err1 := strconv.ParseUint(ctx.URLParam("sid"),0,32);//策略组ID
+	sid,err1 := strconv.ParseUint(ctx.URLParam("sid"),10,32);//策略组ID
 	strategyContext := ctx.URLParam("strategyContext");//策略内容
-	expire,err2 := strconv.ParseUint(ctx.URLParam("expire"),0,32);//过期时间戳
-	isEnabled,err3:= strconv.ParseUint(ctx.URLParam("enabled"),0,32);//是否为开启状态
+	expire,err2 := strconv.ParseUint(ctx.URLParam("expire"),10,32);//过期时间戳
+	isEnabled,err3:= strconv.ParseUint(ctx.URLParam("enabled"),10,32);//是否为开启状态
 	name := ctx.URLParam("name");//策略名称
 	res := &m.CurrentResponse{};
 	if nil == err3 && nil == err1 && nil == err2 && "" != strategyContext && "" != name{
@@ -742,7 +742,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 为策略编辑匹配条件
 */
  func(ser *AllService)EditConditionForStrategy(ctx iris.Context){
-	id,err1:= strconv.ParseUint(ctx.URLParam("id"),0,32); //策略id
+	id,err1:= strconv.ParseUint(ctx.URLParam("id"),10,32); //策略id
 	conditionStr := ctx.URLParam("conditionGroup");//条件id的组合字符传
 	res := &m.CurrentResponse{}
 	if nil  == err1 && "" != conditionStr{
@@ -771,7 +771,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
  根据策略ID，查询该策略对应的匹配条件
  */
  func(ser *AllService)GetConditionInfoByStrategyID(ctx iris.Context){
-	 id,err1 := strconv.ParseUint(ctx.URLParam("id"),0,32);
+	 id,err1 := strconv.ParseUint(ctx.URLParam("id"),10,32);
 	 res := &m.DataResponse{}
 	 if nil == err1{
 		 //开始查询
@@ -784,7 +784,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 			 for _,v:=range(result){
 				 strArr := strings.Split(string(v["conditionGroup"]),",");
 				 for _,sv:=range(strArr){
-					if _,ce:=strconv.ParseUint(sv,0,32);ce == nil{
+					if _,ce:=strconv.ParseUint(sv,10,32);ce == nil{
 						cidArr = append(cidArr,sv);
 					}
 				 }
@@ -801,7 +801,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 					tmp := map[string]interface{}{};
 					for key,nv:=range(v){
 						if key == "id"{
-							tmp[key],err= strconv.ParseUint(string(nv),0,32);
+							tmp[key],err= strconv.ParseUint(string(nv),10,32);
 						}else if "probability" == key{
 							tmp[key],err= strconv.ParseFloat(string(nv),32);
 						}else{
@@ -831,7 +831,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
  获取指定策略组内的所有策略信息
  */
  func(ser *AllService)GetStrategyByStrategyCategroyID(ctx iris.Context){
-	sid,err:= strconv.ParseUint(ctx.URLParam("sid"),0,32);//策略组id
+	sid,err:= strconv.ParseUint(ctx.URLParam("sid"),10,32);//策略组id
 	res := &m.DataResponse{};
 	if nil == err{
 		result,err := ser.SQL.Query(fmt.Sprintf("select * from `Strategy` where `sid` = %d",sid));
@@ -845,7 +845,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 				item := map[string]interface{}{};
 				for key,nv:=range(v){
 					if "id" == key || "sid" == key || "expireDate" == key || "enabled" == key{
-						item[key],err= strconv.ParseUint(string(nv),0,32);
+						item[key],err= strconv.ParseUint(string(nv),10,32);
 					}else{
 						item[key] = string(nv);
 					}
@@ -871,10 +871,10 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
  更新策略信息
  */
  func(ser *AllService)UpdateStrategyInfo(ctx iris.Context){
-	id,err1 := strconv.ParseUint(ctx.URLParam("id"),0,32);//策略ID
+	id,err1 := strconv.ParseUint(ctx.URLParam("id"),10,32);//策略ID
 	strategyContext := ctx.URLParam("strategyContext");//策略内容
-	expire,err2 := strconv.ParseUint(ctx.URLParam("expire"),0,32);//过期时间戳
-	isEnabled,err3:= strconv.ParseUint(ctx.URLParam("enabled"),0,32);//是否为开启状态
+	expire,err2 := strconv.ParseUint(ctx.URLParam("expire"),10,32);//过期时间戳
+	isEnabled,err3:= strconv.ParseUint(ctx.URLParam("enabled"),10,32);//是否为开启状态
 	name := ctx.URLParam("name");//策略名称
 	res := &m.CurrentResponse{};
 	if nil == err3 && nil == err1 && nil == err2 && "" != strategyContext && "" != name{
@@ -929,7 +929,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
  根据策略ID删除指定策略
  */
  func(ser *AllService)DeleteStrategyByID(ctx iris.Context){
-	id,err:=strconv.ParseUint(ctx.URLParam("id"),0,32);
+	id,err:=strconv.ParseUint(ctx.URLParam("id"),10,32);
 	res := &m.CurrentResponse{};
 	if nil == err{
 		tmp,err:=ser.SQL.Query(fmt.Sprintf("select `valuePath` from `Strategy` where `id` = %d",id))
@@ -966,7 +966,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
  使策略强制即时生效，即所有在线用户即时更新指定ID对应的策略
  **/
  func(ser *AllService)ForceStrategyBeUseage(ctx iris.Context){
-	_,err:=strconv.ParseUint(ctx.URLParam("id"),0,32);
+	_,err:=strconv.ParseUint(ctx.URLParam("id"),10,32);
 	res := &m.CurrentResponse{};
 	if nil == err{
 		res.Code = "0"
