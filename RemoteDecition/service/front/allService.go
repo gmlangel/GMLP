@@ -289,10 +289,10 @@ func (ser *AllService)GetAllConditionInfo(ctx iris.Context){
 	res := &m.DataResponse{};
 	if nil == err1 && nil == err2{
 		//开始分页查询
-		queryStr = fmt.Sprintf("select `Condition`.`id`,`ConditionType`.`zhName` ,`ConditionType`.`des` AS `typeDes` ,`Condition`.`value` ,`Condition`.`name` ,`Condition`.`probability` ,`Condition`.`des`    from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` ORDER BY `Condition`.`id` DESC LIMIT %d,%d;",startPoint,readCount)
+		queryStr = fmt.Sprintf("select `Condition`.`id`,`Condition`.`typeID`,`ConditionType`.`zhName` ,`ConditionType`.`des` AS `typeDes` ,`Condition`.`value` ,`Condition`.`name` ,`Condition`.`probability` ,`Condition`.`des`    from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` ORDER BY `Condition`.`id` DESC LIMIT %d,%d;",startPoint,readCount)
 	}else{
 		//查询前20条
-		queryStr = fmt.Sprintf("select `Condition`.`id`,`ConditionType`.`zhName` ,`ConditionType`.`des` AS `typeDes` ,`Condition`.`value` ,`Condition`.`name` ,`Condition`.`probability` ,`Condition`.`des`    from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` ORDER BY `Condition`.`id` DESC")
+		queryStr = fmt.Sprintf("select `Condition`.`id`,`Condition`.`typeID`,`ConditionType`.`zhName` ,`ConditionType`.`des` AS `typeDes` ,`Condition`.`value` ,`Condition`.`name` ,`Condition`.`probability` ,`Condition`.`des`    from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` ORDER BY `Condition`.`id` DESC")
 	}
 	result,err := ser.SQL.Query(queryStr);
 	if nil != err{
@@ -303,7 +303,7 @@ func (ser *AllService)GetAllConditionInfo(ctx iris.Context){
 		for _,v := range(result){
 			item := map[string]interface{}{};
 			for k,nv := range(v){
-				if "id" == k{
+				if "id" == k || "typeID" == k{
 					item[k],err= strconv.ParseUint(string(nv),10,32);
 				}else{
 					item[k] = string(nv);

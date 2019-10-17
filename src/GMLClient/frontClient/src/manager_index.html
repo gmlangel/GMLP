@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>接口调用测试</title>
     <style type="text/css">
-        body,html{
+        body,
+        html {
             width: 100%;
             height: 100%;
             margin: 0px;
@@ -26,291 +28,326 @@
         <a class="layui-btn layui-btn-xs" lay-event="btn_edit_condition" lay-filter="btn_edit_condition">编辑</a>
         <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="btn_delete_condition" lay-filter="btn_delete_condition">删除</a>
     </script>
-    
+
 </head>
 <!-- 编辑/新增用户信息模板 -->
-<form style="display:none;width:300px;" class="layui-form" lay-filter="panel_editUserinfo" id="panel_editUserinfo"> <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
+<form style="display:none;width:300px;" class="layui-form" lay-filter="panel_editUserinfo" id="panel_editUserinfo">
+    <!-- 提示：如果你不想用form，你可以换成div等任何一个普通元素 -->
     <div class="layui-form-item" style="padding-top: 30px;">
-      <label class="layui-form-label">用户名</label>
-      <div class="layui-input-block">
-        <input type="text" name="" lay-verify="required|email" placeholder="请输入" autocomplete="off" class="layui-input" id="tb_edit_name">
-      </div>
+        <label class="layui-form-label">用户名</label>
+        <div class="layui-input-block">
+            <input type="text" name="" lay-verify="required|email" placeholder="请输入" autocomplete="off"
+                class="layui-input" id="tb_edit_name">
+        </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">密码</label>
         <div class="layui-input-block">
-          <input type="text" name="" lay-verify="required|pwdreg" placeholder="请输入" autocomplete="off" class="layui-input" id="tb_edit_pwd">
+            <input type="text" name="" lay-verify="required|pwdreg" placeholder="请输入" autocomplete="off"
+                class="layui-input" id="tb_edit_pwd">
         </div>
-      </div>
+    </div>
     <div class="layui-form-item">
-      <label class="layui-form-label">角色</label>
-      <div class="layui-input-block">
-        <select lay-filter="rolelist" id="rolelist">
-          <option value="0">写作</option>
-        </select>
-      </div>
+        <label class="layui-form-label">角色</label>
+        <div class="layui-input-block">
+            <select lay-filter="rolelist" id="rolelist">
+                <option value="0">写作</option>
+            </select>
+        </div>
     </div>
     <div class="layui-form-item">
         <div class="layui-input-block">
-          <button class="layui-btn layui-btn-primary" lay-submit lay-filter="editUser_cancel" id="editUser_cancel">取消</button>
-          <button class="layui-btn" lay-submit lay-filter="editUser_commit" id="editUser_commit">提交</button>
-          <button class="layui-btn layui-btn-primary" lay-submit lay-filter="addUser_cancel" id="addUser_cancel" style="display: none;">取消</button>
-          <button class="layui-btn" lay-submit lay-filter="addUser_commit" id="addUser_commit" style="display: none;">提交</button>
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="editUser_cancel"
+                id="editUser_cancel">取消</button>
+            <button class="layui-btn" lay-submit lay-filter="editUser_commit" id="editUser_commit">提交</button>
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="addUser_cancel" id="addUser_cancel"
+                style="display: none;">取消</button>
+            <button class="layui-btn" lay-submit lay-filter="addUser_commit" id="addUser_commit"
+                style="display: none;">提交</button>
         </div>
-      </div>
-  </form>
+    </div>
+</form>
 
-  <!-- 新增条件类型信息模板 -->
-<form style="display:none;width:300px;" class="layui-form" lay-filter="panel_addConditionType" id="panel_addConditionType"> 
+<!-- 新增条件类型信息模板 -->
+<form style="display:none;width:300px;" class="layui-form" lay-filter="panel_addConditionType"
+    id="panel_addConditionType">
     <div class="layui-form-item" style="padding-top: 30px;">
-      <label class="layui-form-label">中文名</label>
-      <div class="layui-input-block">
-        <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" id="tb_add_conditionType_zh">
-      </div>
+        <label class="layui-form-label">中文名</label>
+        <div class="layui-input-block">
+            <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input"
+                id="tb_add_conditionType_zh">
+        </div>
     </div>
     <div class="layui-form-item">
         <label class="layui-form-label">英文名</label>
         <div class="layui-input-block">
-          <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input" id="tb_add_conditionType_en">
+            <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input"
+                id="tb_add_conditionType_en">
         </div>
-      </div>
-      <div class="layui-form-item layui-form-text">
-            <label class="layui-form-label">请填写描述</label>
-            <div class="layui-input-block">
-              <textarea placeholder="请输入内容" class="layui-textarea" id="tb_add_conditionType_des"></textarea>
-            </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">请填写描述</label>
+        <div class="layui-input-block">
+            <textarea placeholder="请输入内容" class="layui-textarea" id="tb_add_conditionType_des"></textarea>
         </div>
+    </div>
     <div class="layui-form-item">
         <div class="layui-input-block">
-          <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_addConditionType_cancel" id="btn_addConditionType_cancel">取消</button>
-          <button class="layui-btn" lay-submit lay-filter="btn_addConditionType_commit" id="btn_addConditionType_commit">提交</button>
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_addConditionType_cancel"
+                id="btn_addConditionType_cancel">取消</button>
+            <button class="layui-btn" lay-submit lay-filter="btn_addConditionType_commit"
+                id="btn_addConditionType_commit">提交</button>
         </div>
-      </div>
-  </form>
+    </div>
+</form>
+
 <body>
+    <script src="./layui/layui.js"></script>
+    <script>
+        var table_userList = null;
+        var maxUserListLineCount = 15;
+        var table_userListCurrentPageID = 1;//用户列表的当前页， 注意这里不要用索引
+        var roleInfoMap = {};
+        var autoInfoMap = {};
+        var userCount = 0;//总用户数
+        var userlistInfo = null;
+        var userSelectPoint = 0;//用户数据起始查询点
 
+        var table_conditionList = null;
+        var maxConditionListLineCount = 15;
+        var table_conditionListCurrentPageID = 1;//条件列表的当前页码 注意这里不要用索引
+        var conditionTypeInfoMap = {};//条件信息字典
+        var conditionMap = {};//条件数组的条件ID与数组索引的映射表
+        var conditionArr = [];//条件信息数组
+        var conditionCount = 0;//总条件数
+        var conditionSelectPoint = 0;//条件信息数据的分页起始查询点
+        //一般直接写在一个js文件中
+        layui.use(['layer', 'form', 'element', 'table', 'laypage'], function () {
+            var layer = layui.layer, form = layui.form, ele = layui.element, table = layui.table, laypage = layui.laypage;
+            //自定义正则验证
+            form.verify({
+                pwdreg: [
+                    /^[\S]{6,12}$/
+                    , '密码必须6到12位，且不能出现空格'
+                ]
+            });
+            //添加 新增条件类型和新增条件的处理
+            bindAddConditionAboutEvent(form, layer, laypage)
+            bindAddUserEvent(form, layer, laypage);//绑定"添加用户"的相关事件
+            //添加tab的相关处理
+            ele.on('tab(mainTab)', function (data) {
+                let index = data.index;
+                if (index == 0) {
+                    //添加用户管理列表table
+                    table_userList = makeUserManagerList(table, layer, form, laypage);
+                    //创建翻页工具条
+                    laypage.render({
+                        elem: 'limitBottomBar' //注意，这里的 testlaypage1 是 ID，不用加 # 号
+                        , count: 50 //数据总数，从服务端得到
+                    });
+                    //获取权限信息列表
+                    getAllAuth((data, err) => {
+                        if (data != null) {
+                            if (data.code == "0") {
+                                autoInfoMap = {}
+                                data.data.forEach((v, i) => {
+                                    autoInfoMap[v.id] = v;
+                                });//赋值权限列表
+                                //获取权限列表
+                                getAllRoleType((data, err) => {
+                                    if (data != null) {
+                                        if (data.code == "0") {
+                                            roleInfoMap = {}
+                                            data.data.forEach((v, i) => {
+                                                roleInfoMap[v.id] = v;
+                                            });//赋值角色列表
 
-<script src="./layui/layui.js"></script>
-<script>
-    var table_userList = null;
-    var maxUserListLineCount = 15;
-    var table_userListCurrentPageID = 1;//用户列表的当前页， 注意这里不要用索引
-    var roleInfoMap = {};
-    var autoInfoMap = {};
-    var userCount = 0;//总用户数
-    var userlistInfo = null;
-    var userSelectPoint = 0;//用户数据起始查询点
-
-    var table_conditionList =null;
-    var maxConditionListLineCount = 15;
-    var table_conditionListCurrentPageID = 1;//条件列表的当前页码 注意这里不要用索引
-    var conditionTypeInfoMap = {};//条件信息字典
-    var conditionMap = {};//条件数组的条件ID与数组索引的映射表
-    var conditionArr = [];//条件信息数组
-    var conditionCount = 0;//总条件数
-    var conditionSelectPoint = 0;//条件信息数据的分页起始查询点
-    //一般直接写在一个js文件中
-    layui.use(['layer', 'form','element','table','laypage'], function(){
-        var layer = layui.layer,form = layui.form,ele = layui.element,table = layui.table,laypage = layui.laypage;
-        //自定义正则验证
-        form.verify({pwdreg: [
-                /^[\S]{6,12}$/
-                ,'密码必须6到12位，且不能出现空格'
-            ] 
-        }); 
-        //添加tab的相关处理
-        ele.on('tab(mainTab)',function(data){
-            let index = data.index;
-            if(index == 0){
-                //添加用户管理列表table
-                table_userList = makeUserManagerList(table,layer,form,laypage);
-                //创建翻页工具条
-                laypage.render({
-                    elem: 'limitBottomBar' //注意，这里的 testlaypage1 是 ID，不用加 # 号
-                    ,count: 50 //数据总数，从服务端得到
-                });
-                //获取权限信息列表
-                getAllAuth((data,err)=>{
-                    if(data != null){
-                        if(data.code == "0"){
-                            data.data.forEach((v,i)=>{
-                                autoInfoMap[v.id] = v;
-                            });//赋值权限列表
-                            //获取权限列表
-                            getAllRoleType((data,err)=>{
-                                if(data != null){
-                                    if(data.code == "0"){
-                                        data.data.forEach((v,i)=>{
-                                            roleInfoMap[v.id] = v;
-                                        });//赋值角色列表
-                                        bindAddUserEvent(form,layer,laypage);//绑定"添加用户"的相关事件
-                                        //获取用户列表，并填充分页工具条
-                                        fillUserList(laypage);
-                                    }else{
-                                        console.error(data.msg);
-                                    }
-                                }else{
-                                    console.error(err);
-                                }
-                            })
-                        }else{
-                            console.error(data.msg)
-                        }
-                    }else{
-                        console.error(err);
-                    }
-                })
-            
-            }else if(index == 1){
-                //添加策略管理table
-                table_conditionList = makeConditionListTable(table,layer,form,laypage);
-            }else if(index == 2){
-                //调用“获取全部策略接口”
-            }
-        })
-        ele.tabChange('mainTab','mUser');//默认选择第一选项"用户管理"
-    });
-
-    function fillUserList(laypage){
-        //获取用户总数
-        getUserCount((data,err)=>{
-                                            if(data != null){
-                                                if(data.code == "0"){
-                                                    userCount = parseInt(data.msg);
-                                                    //重新填充分页工具条
-                                                    laypage.render({
-                                                        elem: 'limitBottomBar' //注意，这里的 testlaypage1 是 ID，不用加 # 号
-                                                        ,count: userCount //数据总数，从服务端得到
-                                                        ,limit:maxUserListLineCount//每页显示maxUserListLineCount条数据
-                                                        ,curr:table_userListCurrentPageID//当前页码
-                                                        ,jump: function(pageobj, first){
-                                                            //页面ID更改的监听处理
-                                                            //首次不执行
-                                                            if(!first){
-                                                            //do something
-                                                                //换页操作
-                                                                table_userListCurrentPageID = pageobj.curr;//设置当前页
-                                                                userSelectPoint = (table_userListCurrentPageID - 1) * maxUserListLineCount;//重新计算用于查询数据的起始位置
-                                                                fillUserList(laypage)
-                                                            }else{
-                                                                //首次初始化，不做任何操作,避免无限调用fillUserList
-                                                            }
-                                                        }
-                                                    });
-                                                    //分页获取用户信息
-                                                    getAllUsers(userSelectPoint*(table_userListCurrentPageID-1),maxUserListLineCount,(data,err)=>{
-                                                        if(data != null){
-                                                            if(data.code == "0"){
-                                                                userlistInfo = makeUserInfo(data.data);
-                                                                table_userList.reload({
-                                                                    data:userlistInfo
-                                                                })
-                                                            }else{
-                                                                console.error(data.msg);
-                                                            }
-                                                        }else{
-                                                            console.error(err)
-                                                        }
-                                                    })
-                                                }else{
-                                                    console.error(data.msg)
-                                                }
-                                            }else{
-                                                console.error(err)
-                                            }
-                                        })
-    }
-
-    /**
-     * 创建用户管理列表
-    */
-    function makeUserManagerList(table,layer,form,laypage){
-        let temp_table = table.render({
-                    elem:"#table_userList",
-                    loading:false,
-                    title:"用户列表",
-                    skin:"nob",
-                    even:"true",
-                    size:"sm",
-                    width:786,
-                    limit:maxUserListLineCount,
-                    cols:[
-                        [
-                            {field: 'signName', title: '用户名', width:160, sort: false, fixed: 'left',align:'center',unresize:true},
-                            {field: 'signPWD', title: '密码', width:160, sort: false, fixed: 'left',align:'center',unresize:true},
-                            {field: 'roleName', title: '角色', width:160, sort: false, fixed: 'left',align:'center',unresize:true},
-                            {width:300,title:'操作',fixed: 'left',align:'center',toolbar:'#table_userlist_barDemo',unresize:true}
-                        ]
-                    ],
-                    done: function(res, curr, count){
-                        //如果是异步请求数据方式，res即为你接口返回的信息。
-                        //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
-                       
-                    }
-                })
-        //添加工具条的监听事件
-        table.on("tool(lay_table_userList)",function(obj){
-            let userData = obj.data;
-            let evtType = obj.event;
-            switch(evtType){
-                case "roleinfo_des":
-                    //查看角色详细描述
-                    let str = "";
-                    userData.authDesGroup.forEach((v,i)=>{
-                        str +="</br>" + v
-                    })
-                    layer.open({
-                        title: '拥有的的权限',
-                        type:0,
-                        content: str,
-                        resize:false
-                    });    
-                    break;
-                case "edit_userinfo":
-                    //编辑用户信息
-                    showEditUserPanel(form,layer,userData,laypage);
-                    break;
-                case "delete_userinfo":
-                    //删除用户信息
-                    layer.open({
-                        title:"删除用户",
-                        content:"确定要删除用户(" + userData.signName +")吗？",
-                        area:["300px","200px"],
-                        resize:false,
-                        btn:["确定","取消"],
-                        yes:(index,obj)=>{
-                            //确定操作
-                            deleteUser(userData.uid,(data,err)=>{
-                                if(data != null){
-                                    layer.alert(data.msg);
-                                    if(data.code == "0"){
-                                        //分页获取用户信息
-                                        if((userlistInfo || []).length == 1){
-                                            //如果删除的数据是本页的最后一条，则跳转至上一页
-                                            table_userListCurrentPageID-=1
+                                            //获取用户列表，并填充分页工具条
+                                            fillUserList(laypage);
+                                        } else {
+                                            console.error(data.msg);
                                         }
-                                        fillUserList(laypage);
+                                    } else {
+                                        console.error(err);
                                     }
-                                }else{
-                                    console.error(err)
-                                }
-                            })
-                        },
-                        btn2:(index,obj)=>{
-                            //取消操作,不用谢任何代码，即可默认关闭layer
-                        },
-                        btnAlign:"c"/*居中对齐*/
+                                })
+                            } else {
+                                console.error(data.msg)
+                            }
+                        } else {
+                            console.error(err);
+                        }
                     })
-                    break;
-                default:break;
-            }
-        })
-        return temp_table;
-    }
 
-    //显示用户信息编辑面板
-    function showEditUserPanel(form,layer,userData,laypage){
-        let addUser_commit = document.getElementById("addUser_commit");
+                } else if (index == 1) {
+                    //添加策略管理table
+                    table_conditionList = makeConditionListTable(table, layer, form, laypage);
+                    //获取策略类型信息
+                    getAllConditionTypeInfo((data, err) => {
+                        if (data != null) {
+                            if (data.code == "0") {
+                                conditionTypeInfoMap = {};
+                                let arr = data.data;
+                                arr.forEach((v, i) => {
+                                    conditionTypeInfoMap[v.id] = v
+                                })
+
+                                //填充条件列表
+                                fillConditionList(laypage)
+                            } else {
+                                console.error(data.msg);
+                            }
+                        } else {
+                            console.error(err);
+                        }
+                    })
+                } else if (index == 2) {
+                    //调用“获取全部策略接口”
+                }
+            })
+            ele.tabChange('mainTab', 'mUser');//默认选择第一选项"用户管理"
+        });
+
+        function fillUserList(laypage) {
+            //获取用户总数
+            getUserCount((data, err) => {
+                if (data != null) {
+                    if (data.code == "0") {
+                        userCount = parseInt(data.msg);
+                        //重新填充分页工具条
+                        laypage.render({
+                            elem: 'limitBottomBar' //注意，这里的 testlaypage1 是 ID，不用加 # 号
+                            , count: userCount //数据总数，从服务端得到
+                            , limit: maxUserListLineCount//每页显示maxUserListLineCount条数据
+                            , curr: table_userListCurrentPageID//当前页码
+                            , jump: function (pageobj, first) {
+                                //页面ID更改的监听处理
+                                //首次不执行
+                                if (!first) {
+                                    //do something
+                                    //换页操作
+                                    table_userListCurrentPageID = pageobj.curr;//设置当前页
+                                    userSelectPoint = (table_userListCurrentPageID - 1) * maxUserListLineCount;//重新计算用于查询数据的起始位置
+                                    fillUserList(laypage)
+                                } else {
+                                    //首次初始化，不做任何操作,避免无限调用fillUserList
+                                }
+                            }
+                        });
+                        //分页获取用户信息
+                        getAllUsers(userSelectPoint, maxUserListLineCount, (data, err) => {
+                            if (data != null) {
+                                if (data.code == "0") {
+                                    userlistInfo = makeUserInfo(data.data);
+                                    table_userList.reload({
+                                        data: userlistInfo
+                                    })
+                                } else {
+                                    console.error(data.msg);
+                                }
+                            } else {
+                                console.error(err)
+                            }
+                        })
+                    } else {
+                        console.error(data.msg)
+                    }
+                } else {
+                    console.error(err)
+                }
+            })
+        }
+
+        /**
+         * 创建用户管理列表
+        */
+        function makeUserManagerList(table, layer, form, laypage) {
+            let temp_table = table.render({
+                elem: "#table_userList",
+                loading: false,
+                title: "用户列表",
+                skin: "nob",
+                even: "true",
+                size: "sm",
+                width: 786,
+                limit: maxUserListLineCount,
+                cols: [
+                    [
+                        { field: 'signName', title: '用户名', width: 160, sort: false, fixed: 'left', align: 'center', unresize: true },
+                        { field: 'signPWD', title: '密码', width: 160, sort: false, fixed: 'left', align: 'center', unresize: true },
+                        { field: 'roleName', title: '角色', width: 160, sort: false, fixed: 'left', align: 'center', unresize: true },
+                        { width: 300, title: '操作', fixed: 'left', align: 'center', toolbar: '#table_userlist_barDemo', unresize: true }
+                    ]
+                ],
+                done: function (res, curr, count) {
+                    //如果是异步请求数据方式，res即为你接口返回的信息。
+                    //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+
+                }
+            })
+            //添加工具条的监听事件
+            table.on("tool(lay_table_userList)", function (obj) {
+                let userData = obj.data;
+                let evtType = obj.event;
+                switch (evtType) {
+                    case "roleinfo_des":
+                        //查看角色详细描述
+                        let str = "";
+                        userData.authDesGroup.forEach((v, i) => {
+                            str += "</br>" + v
+                        })
+                        layer.open({
+                            title: '拥有的的权限',
+                            type: 0,
+                            content: str,
+                            resize: false
+                        });
+                        break;
+                    case "edit_userinfo":
+                        //编辑用户信息
+                        showEditUserPanel(form, layer, userData, laypage);
+                        break;
+                    case "delete_userinfo":
+                        //删除用户信息
+                        layer.open({
+                            title: "删除用户",
+                            content: "确定要删除用户(" + userData.signName + ")吗？",
+                            area: ["300px", "200px"],
+                            resize: false,
+                            btn: ["确定", "取消"],
+                            yes: (index, obj) => {
+                                //确定操作
+                                deleteUser(userData.uid, (data, err) => {
+                                    if (data != null) {
+                                        layer.alert(data.msg);
+                                        if (data.code == "0") {
+                                            //分页获取用户信息
+                                            if ((userlistInfo || []).length == 1) {
+                                                //如果删除的数据是本页的最后一条，则跳转至上一页
+                                                table_userListCurrentPageID -= 1
+                                            }
+                                            fillUserList(laypage);
+                                        }
+                                    } else {
+                                        console.error(err)
+                                    }
+                                })
+                            },
+                            btn2: (index, obj) => {
+                                //取消操作,不用谢任何代码，即可默认关闭layer
+                            },
+                            btnAlign: "c"/*居中对齐*/
+                        })
+                        break;
+                    default: break;
+                }
+            })
+            return temp_table;
+        }
+
+        //显示用户信息编辑面板
+        function showEditUserPanel(form, layer, userData, laypage) {
+            let addUser_commit = document.getElementById("addUser_commit");
             addUser_commit.style.display = "none";
             let addUser_cancel = document.getElementById("addUser_cancel");
             addUser_cancel.style.display = "none";
@@ -318,265 +355,374 @@
             editUser_cancel.style.display = "inline-block";
             let editUser_commit = document.getElementById("editUser_commit");
             editUser_commit.style.display = "inline-block";
-        form.on("submit(editUser_commit)",function(reqData){
-            //提交用户修改后的数据
-                        let uname = tb_edit_name.value;
-                        let upwd = tb_edit_pwd.value;
-                        let rid = rolelist.value;
-                        layer.close(openidx);//关闭弹窗
-                        updateUserInfo(userData.uid,uname,upwd,rid,(data,err)=>{
-                            if(data != null){
-                                if(data.code == "0"){
-                                    layer.alert("更新用户信息成功")
-                                    //更新页面显示
-                                    //分页获取用户信息
+            form.on("submit(editUser_commit)", function (reqData) {
+                //提交用户修改后的数据
+                let uname = tb_edit_name.value;
+                let upwd = tb_edit_pwd.value;
+                let rid = rolelist.value;
+                layer.close(openidx);//关闭弹窗
+                updateUserInfo(userData.uid, uname, upwd, rid, (data, err) => {
+                    if (data != null) {
+                        if (data.code == "0") {
+                            layer.alert("更新用户信息成功")
+                            //更新页面显示
+                            //分页获取用户信息
+                            fillUserList(laypage)
+                        } else {
+                            layer.alert("跟新用户信息失败")
+                            console.error(data.msg);
+                        }
+                    } else {
+                        layer.alert("更新用户信息失败")
+                        console.error(err);
+                    }
+                })
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+            form.on("submit(editUser_cancel)", function (reqData) {
+                //取消修改
+                layer.close(openidx);//关闭弹窗
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+
+            //填充内容
+            let tb_edit_name = document.getElementById("tb_edit_name");
+            let tb_edit_pwd = document.getElementById("tb_edit_pwd");
+            let tb_edit_rolelist = document.getElementById("rolelist")
+            tb_edit_rolelist.innerText = "";
+            tb_edit_name.value = userData.signName;
+            tb_edit_pwd.value = userData.signPWD;
+            for (let rKey in roleInfoMap) {
+                let option = document.createElement("option");
+                if (rKey == userData.roleID)
+                    option.selected = true;//设置默认选中
+                option.setAttribute("value", rKey);
+                option.appendChild(document.createTextNode(roleInfoMap[rKey].roleName));
+                tb_edit_rolelist.appendChild(option);
+            }
+            form.render(null, "panel_editUserinfo");//刷新表单的内容
+
+            //弹出面板
+            let openidx = layer.open({
+                title: "编辑用户信息",
+                type: 1,
+                area: ['390px', '350px'],
+                content: $('#panel_editUserinfo'),
+                resize: false
+            });
+        }
+
+        /**
+         * 组装用户信息
+         * 
+        */
+        function makeUserInfo(sourceUserInfo) {
+            let arr = [];
+            sourceUserInfo.forEach((item, i) => {
+                let user = {};
+                user.uid = item.id;
+                user.roleID = item.roleID;
+                user.signName = item.signName;
+                user.signPWD = item.signPWD;
+                role = roleInfoMap[user.roleID];
+                if (role) {
+                    user.roleDes = role.roleDes;
+                    user.roleName = role.roleName;
+                    user.authDesGroup = [];
+                    role.authGroup.split(",").forEach((authid, ai) => {
+                        let auth = autoInfoMap[authid]
+                        if (auth)
+                            user.authDesGroup.push(auth.authDes);
+                    })
+                }
+                arr.push(user);
+            })
+            return arr;
+        }
+
+        /**
+         * 
+         * 绑定""新增用户"相关的功能
+        */
+        function bindAddUserEvent(form, layer, laypage) {
+            //清空原有表单的内容
+            let tb_edit_name = document.getElementById("tb_edit_name");
+            let tb_edit_pwd = document.getElementById("tb_edit_pwd");
+            let tb_edit_rolelist = document.getElementById("rolelist");
+            let openidx = -1;
+            form.on("submit(addUser_commit)", function (reqData) {
+                let uname = tb_edit_name.value;
+                let upwd = tb_edit_pwd.value;
+                let rid = rolelist.value;
+                layer.close(openidx);//关闭弹窗
+                //调用新增用户接口
+                addUser(uname, upwd, rid, function (data, err) {
+                    if (data != null) {
+                        layer.alert(data.msg);
+                        if (data.code == "0") {
+                            //更新用户列表
+                            table_userListCurrentPageID = 1;//新增用户成功后，需要返回至首页
+                            fillUserList(laypage);
+                        } else {
+                            console.error(data.msg);
+                        }
+                    } else {
+                        console.error(err);
+                    }
+                })
+                return false;
+            });
+            form.on("submit(addUser_cancel)", function (data) {
+                layer.close(openidx);//关闭弹窗
+                return false;
+            })
+            form.on("submit(addUser_show)", function (data) {
+                let addUser_commit = document.getElementById("addUser_commit");
+                addUser_commit.style.display = "inline-block";
+                let addUser_cancel = document.getElementById("addUser_cancel");
+                addUser_cancel.style.display = "inline-block";
+                let editUser_cancel = document.getElementById("editUser_cancel");
+                editUser_cancel.style.display = "none";
+                let editUser_commit = document.getElementById("editUser_commit");
+                editUser_commit.style.display = "none";
+                tb_edit_rolelist.innerText = "";
+                tb_edit_name.value = "";
+                tb_edit_pwd.value = "";
+                for (let rKey in roleInfoMap) {
+                    let option = document.createElement("option");
+                    option.setAttribute("value", rKey);
+                    option.appendChild(document.createTextNode(roleInfoMap[rKey].roleName));
+                    tb_edit_rolelist.appendChild(option);
+                }
+                form.render(null, "panel_editUserinfo");//刷新表单的内容
+                //弹出面板
+                openidx = layer.open({
+                    title: "新增用户信息",
+                    type: 1,
+                    area: ['390px', '350px'],
+                    content: $('#panel_editUserinfo'),
+                    resize: false
+                });
+                return false;
+            })
+        }
+
+        /**
+         * 创建条件信息列表
+        */
+        function makeConditionListTable(table, layer, form, laypage) {
+            let temp_table = table.render({
+                elem: "#table_conditionList",
+                loading: false,
+                title: "条件列表",
+                skin: "nob",
+                even: "true",
+                size: "sm",
+                width: 770,
+                limit: maxConditionListLineCount,
+                cols: [
+                    [
+                        {
+                            field: 'conditionTypeName', title: '条件类型', width: 160, sort: false, fixed: 'left', align: 'center', unresize: true, templet: function (d) {
+                                return '<span>' + d.zhName + "(" + d.enName + ")" + '</span>'
+                            }
+                        },
+                        { field: 'name', title: '条件名称', width: 160, sort: false, fixed: 'left', align: 'center', unresize: true },
+                        { field: 'value', title: '条件值', width: 100, sort: false, fixed: 'left', align: 'center', unresize: true },
+                        {
+                            field: 'probability', title: '生效几率', width: 100, sort: false, fixed: 'left', align: 'center', unresize: true, templet: function (d) {
+                                return '<span>' + (d.probability * 100).toFixed(2) + '%</span>'
+                            }
+                        },
+                        { width: 240, title: '操作', fixed: 'left', align: 'center', toolbar: '#table_condition_bar', unresize: true }
+                    ]
+                ]
+            })
+            //添加工具条的监听事件
+            table.on("tool(table_conditionList)", function (obj) {
+                // let userData = obj.data;
+                // let evtType = obj.event;
+                // switch(evtType){
+                //     case "roleinfo_des":
+                //         //查看角色详细描述
+                //         let str = "";
+                //         userData.authDesGroup.forEach((v,i)=>{
+                //             str +="</br>" + v
+                //         })
+                //         layer.open({
+                //             title: '拥有的的权限',
+                //             type:0,
+                //             content: str,
+                //             resize:false
+                //         });    
+                //         break;
+                //     case "edit_userinfo":
+                //         //编辑用户信息
+                //         showEditUserPanel(form,layer,userData,laypage);
+                //         break;
+                //     case "delete_userinfo":
+                //         //删除用户信息
+                //         layer.open({
+                //             title:"删除用户",
+                //             content:"确定要删除用户(" + userData.signName +")吗？",
+                //             area:["300px","200px"],
+                //             resize:false,
+                //             btn:["确定","取消"],
+                //             yes:(index,obj)=>{
+                //                 //确定操作
+                //                 deleteUser(userData.uid,(data,err)=>{
+                //                     if(data != null){
+                //                         layer.alert(data.msg);
+                //                         if(data.code == "0"){
+                //                             //分页获取用户信息
+                //                             if((userlistInfo || []).length == 1){
+                //                                 //如果删除的数据是本页的最后一条，则跳转至上一页
+                //                                 table_userListCurrentPageID-=1
+                //                             }
+                //                             fillUserList(laypage);
+                //                         }
+                //                     }else{
+                //                         console.error(err)
+                //                     }
+                //                 })
+                //             },
+                //             btn2:(index,obj)=>{
+                //                 //取消操作,不用谢任何代码，即可默认关闭layer
+                //             },
+                //             btnAlign:"c"/*居中对齐*/
+                //         })
+                //         break;
+                //     default:break;
+                // }
+            })
+            return temp_table;
+        }
+
+        /**
+         * 添加 新增条件类型和新增条件的处理
+        */
+        function bindAddConditionAboutEvent(form, layer, laypage) {
+            form.on("submit(btn_showAddConditionTypePanel)", (btnData) => {
+
+            });
+            form.on("submit(btn_showAddConditionPanel)", (btnData) => {
+
+            })
+            form.on("submit(btn_addConditionType_cancel)", (btnData) => {
+
+            })
+            form.on("submit(btn_addConditionType_commit)", (btnData) => {
+
+            })
+            form.on("submit(btn_edit_condition)", (btnData) => {
+
+            })
+            form.on("submit(btn_delete_condition)", (btnData) => {
+
+            })
+        }
+
+        /**
+         * 填充条件列表
+         * 
+        */
+        function fillConditionList(laypage) {
+            //获取条件总数
+            getConditionCount((data, err) => {
+                if (data != null) {
+                    if (data.code == "0") {
+                        conditionCount = parseInt(data.msg);
+                        //重新填充条件列表的分页工具条
+                        laypage.render({
+                            elem: 'conditionList_limitBottomBar' //注意，这里的 testlaypage1 是 ID，不用加 # 号
+                            , count: conditionCount //数据总数，从服务端得到
+                            , limit: maxConditionListLineCount//每页显示maxConditionListLineCount条数据
+                            , curr: table_conditionListCurrentPageID//当前页码
+                            , jump: function (pageobj, first) {
+                                //页面ID更改的监听处理
+                                //首次不执行
+                                if (!first) {
+                                    //do something
+                                    //换页操作
+                                    table_conditionListCurrentPageID = pageobj.curr;//设置当前页
+                                    conditionSelectPoint = (table_conditionListCurrentPageID - 1) * maxConditionListLineCount;//重新计算用于查询数据的起始位置
                                     fillUserList(laypage)
-                                }else{
-                                    layer.alert("跟新用户信息失败")
-                                    console.error(data.msg);
+                                } else {
+                                    //首次初始化，不做任何操作,避免无限调用fillUserList
                                 }
-                            }else{
-                                layer.alert("更新用户信息失败")
-                                console.error(err);
+                            }
+                        });
+                        // //分页获取条件信息
+                        getAllConditionInfo(conditionSelectPoint, maxConditionListLineCount, (data, err) => {
+                            if (data != null) {
+                                if (data.code == "0") {
+                                    conditionArr = makeConditionInfo(data.data);
+                                    table_conditionList.reload({
+                                        data: conditionArr
+                                    })
+                                } else {
+                                    console.error(err)
+                                }
+                            } else {
+                                console.error(err)
                             }
                         })
-                        return false;//禁止由于提交表单造成的页面刷新
-                    })
-                    form.on("submit(editUser_cancel)",function(reqData){
-                        //取消修改
-                        layer.close(openidx);//关闭弹窗
-                        return false;//禁止由于提交表单造成的页面刷新
-                    })
-        
-                    //填充内容
-                    let tb_edit_name = document.getElementById("tb_edit_name");
-                    let tb_edit_pwd = document.getElementById("tb_edit_pwd");
-                    let tb_edit_rolelist = document.getElementById("rolelist")
-                    tb_edit_rolelist.innerText = "";
-                    tb_edit_name.value = userData.signName;
-                    tb_edit_pwd.value = userData.signPWD;
-                    for(let rKey in roleInfoMap){
-                        let option=document.createElement("option");
-                        if(rKey == userData.roleID)
-                            option.selected = true;//设置默认选中
-                        option.setAttribute("value",rKey);
-                        option.appendChild(document.createTextNode(roleInfoMap[rKey].roleName));
-                        tb_edit_rolelist.appendChild(option);
-                    }
-                    form.render(null,"panel_editUserinfo");//刷新表单的内容
-
-                    //弹出面板
-                    let openidx = layer.open({
-                        title:"编辑用户信息",
-                        type:1,
-                        area:['390px','350px'],
-                        content: $('#panel_editUserinfo'),
-                        resize:false
-                    });
-    }
-
-    /**
-     * 组装用户信息
-     * 
-    */
-    function makeUserInfo(sourceUserInfo){
-        let arr = [];
-        sourceUserInfo.forEach((item,i)=>{
-            let user = {};
-            user.uid = item.id;
-            user.roleID = item.roleID;
-            user.signName = item.signName;
-            user.signPWD = item.signPWD;
-            role = roleInfoMap[user.roleID];
-            if(role){
-                user.roleDes = role.roleDes;
-                user.roleName = role.roleName;
-                user.authDesGroup = [];
-                role.authGroup.split(",").forEach((authid,ai)=>{
-                    let auth = autoInfoMap[authid]
-                    if(auth)
-                        user.authDesGroup.push(auth.authDes);
-                })
-            }
-            arr.push(user);
-        })
-        return arr;
-    }
-
-    /**
-     * 
-     * 绑定""新增用户"相关的功能
-    */
-    function bindAddUserEvent(form,layer,laypage){
-        //清空原有表单的内容
-        let tb_edit_name = document.getElementById("tb_edit_name");
-                    let tb_edit_pwd = document.getElementById("tb_edit_pwd");
-                    let tb_edit_rolelist = document.getElementById("rolelist");
-                    let openidx = -1;
-        form.on("submit(addUser_commit)",function(reqData){
-            let uname = tb_edit_name.value;
-                        let upwd = tb_edit_pwd.value;
-                        let rid = rolelist.value;
-                        layer.close(openidx);//关闭弹窗
-            //调用新增用户接口
-            addUser(uname,upwd,rid,function(data,err){
-                if(data != null){
-                    layer.alert(data.msg);
-                    if(data.code == "0"){
-                        //更新用户列表
-                        table_userListCurrentPageID = 1;//新增用户成功后，需要返回至首页
-                        fillUserList(laypage);
-                    }else{
+                    } else {
                         console.error(data.msg);
                     }
-                }else{
-                    console.error(err);
+                } else {
+                    console.error(err)
                 }
             })
-            return false;
-        });
-        form.on("submit(addUser_cancel)",function(data){
-            layer.close(openidx);//关闭弹窗
-            return false;
-        })
-        form.on("submit(addUser_show)",function(data){
-            let addUser_commit = document.getElementById("addUser_commit");
-            addUser_commit.style.display = "inline-block";
-            let addUser_cancel = document.getElementById("addUser_cancel");
-            addUser_cancel.style.display = "inline-block";
-            let editUser_cancel = document.getElementById("editUser_cancel");
-            editUser_cancel.style.display = "none";
-            let editUser_commit = document.getElementById("editUser_commit");
-            editUser_commit.style.display = "none";
-                    tb_edit_rolelist.innerText = "";
-                    tb_edit_name.value = "";
-                    tb_edit_pwd.value = "";
-                    for(let rKey in roleInfoMap){
-                        let option=document.createElement("option");
-                        option.setAttribute("value",rKey);
-                        option.appendChild(document.createTextNode(roleInfoMap[rKey].roleName));
-                        tb_edit_rolelist.appendChild(option);
-                    }
-                    form.render(null,"panel_editUserinfo");//刷新表单的内容
-            //弹出面板
-            openidx = layer.open({
-                        title:"新增用户信息",
-                        type:1,
-                        area:['390px','350px'],
-                        content: $('#panel_editUserinfo'),
-                        resize:false
-                    });
-            return false;
-        })
-    }
+        }
+        function makeConditionInfo(dataArr) {
+            let resultArr = [];
+            conditionMap = {};
+            dataArr.forEach((v, i) => {
+                let item = {};
+                item.des = v.des;
+                item.id = v.id;
+                item.name = v.name;
+                item.probability = v.probability;
+                item.value = v.value;
+                item.typeID = v.typeID;
+                let typeItem = conditionTypeInfoMap[v.typeID] || {};
+                item.zhName = typeItem["zhName"] || "";
+                item.enName = typeItem["enName"] || "";
+                item.typeDes = typeItem["des"];
+                resultArr.push(item);
+                conditionMap[item.id] = item;
+            })
+            return resultArr;
+        }
+    </script>
 
-    /**
-     * 创建条件信息列表
-    */
-    function makeConditionListTable(table,layer,form,laypage){
-        let temp_table = table.render({
-                    elem:"#table_conditionList",
-                    loading:false,
-                    title:"条件列表",
-                    skin:"nob",
-                    even:"true",
-                    size:"sm",
-                    width:770,
-                    limit:maxConditionListLineCount,
-                    cols:[
-                        [
-                            {field: 'conditionTypeName', title: '条件类型', width:160, sort: false, fixed: 'left',align:'center',unresize:true},
-                            {field: 'conditionName', title: '条件名称', width:160, sort: false, fixed: 'left',align:'center',unresize:true},
-                            {field: 'conditionValue', title: '条件值', width:100, sort: false, fixed: 'left',align:'center',unresize:true},
-                            {field: 'probability', title: '生效几率', width:100, sort: false, fixed: 'left',align:'center',unresize:true},
-                            {width:240,title:'操作',fixed: 'left',align:'center',toolbar:'#table_condition_bar',unresize:true}
-                        ]
-                    ]
-                })
-        //添加工具条的监听事件
-        table.on("tool(table_conditionList)",function(obj){
-            // let userData = obj.data;
-            // let evtType = obj.event;
-            // switch(evtType){
-            //     case "roleinfo_des":
-            //         //查看角色详细描述
-            //         let str = "";
-            //         userData.authDesGroup.forEach((v,i)=>{
-            //             str +="</br>" + v
-            //         })
-            //         layer.open({
-            //             title: '拥有的的权限',
-            //             type:0,
-            //             content: str,
-            //             resize:false
-            //         });    
-            //         break;
-            //     case "edit_userinfo":
-            //         //编辑用户信息
-            //         showEditUserPanel(form,layer,userData,laypage);
-            //         break;
-            //     case "delete_userinfo":
-            //         //删除用户信息
-            //         layer.open({
-            //             title:"删除用户",
-            //             content:"确定要删除用户(" + userData.signName +")吗？",
-            //             area:["300px","200px"],
-            //             resize:false,
-            //             btn:["确定","取消"],
-            //             yes:(index,obj)=>{
-            //                 //确定操作
-            //                 deleteUser(userData.uid,(data,err)=>{
-            //                     if(data != null){
-            //                         layer.alert(data.msg);
-            //                         if(data.code == "0"){
-            //                             //分页获取用户信息
-            //                             if((userlistInfo || []).length == 1){
-            //                                 //如果删除的数据是本页的最后一条，则跳转至上一页
-            //                                 table_userListCurrentPageID-=1
-            //                             }
-            //                             fillUserList(laypage);
-            //                         }
-            //                     }else{
-            //                         console.error(err)
-            //                     }
-            //                 })
-            //             },
-            //             btn2:(index,obj)=>{
-            //                 //取消操作,不用谢任何代码，即可默认关闭layer
-            //             },
-            //             btnAlign:"c"/*居中对齐*/
-            //         })
-            //         break;
-            //     default:break;
-            // }
-        })
-        return temp_table;
-    }
-</script>
-
-<div class="layui-tab layui-tab-brief" lay-filter="mainTab">
-    <ul class="layui-tab-title">
-      <li lay-id="mUser">用户管理</li>
-      <li lay-id="mCondition">维护策略条件</li>
-      <li lay-id="mStrategy">维护策略</li>
-    </ul>
-    <div class="layui-tab-content">
-      <div class="layui-tab-item">
-        <button class="layui-btn layui-btn-sm" lay-submit lay-filter="addUser_show">添加管理员</button>
-        <div id="table_userList" lay-filter="lay_table_userList"></div>
-        <div id="limitBottomBar"></div>
-      </div>
-      <div class="layui-tab-item">
-        <div class="layui-form-item">
-            <button class="layui-btn layui-btn-sm" lay-submit lay-filter="btn_showAddConditionTypePanel">新增条件类型</button>
-            <button class="layui-btn layui-btn-sm" lay-submit lay-filter="btn_showAddConditionPanel">新增条件</button>
+    <div class="layui-tab layui-tab-brief" lay-filter="mainTab">
+        <ul class="layui-tab-title">
+            <li lay-id="mUser">用户管理</li>
+            <li lay-id="mCondition">维护策略条件</li>
+            <li lay-id="mStrategy">维护策略</li>
+        </ul>
+        <div class="layui-tab-content">
+            <div class="layui-tab-item">
+                <button class="layui-btn layui-btn-sm" lay-submit lay-filter="addUser_show">添加管理员</button>
+                <div id="table_userList" lay-filter="lay_table_userList"></div>
+                <div id="limitBottomBar"></div>
+            </div>
+            <div class="layui-tab-item">
+                <div class="layui-form-item">
+                    <button class="layui-btn layui-btn-sm" lay-submit
+                        lay-filter="btn_showAddConditionTypePanel">新增条件类型</button>
+                    <button class="layui-btn layui-btn-sm" lay-submit
+                        lay-filter="btn_showAddConditionPanel">新增条件</button>
+                </div>
+                <div id="table_conditionList" lay-filter="table_conditionList"></div>
+                <div id="conditionList_limitBottomBar"></div>
+            </div>
+            <div class="layui-tab-item">内容3</div>
         </div>
-        <div id="table_conditionList" lay-filter="table_conditionList"></div>
-        <div id="conditionList_limitBottomBar"></div>
-      </div>
-      <div class="layui-tab-item">内容3</div>
     </div>
-  </div>
 
 </body>
+
 </html>
