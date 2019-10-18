@@ -290,13 +290,15 @@ function getAllConditionTypeInfo(callbackFunc){
  * http://localhost:8080/AddConditionType?zn=角色类型&en=RoleType
  * @param zn string 中文名
  * @param en string 英文名
+ * @param des string 描述
 */
-function addConditionType(zn,en,callbackFunc){
+function addConditionType(zn,en,des,callbackFunc){
     $.ajax({
         url:interfaceDomain + "AddConditionType",
         data:{
             zn:zn,
             en:en,
+            des:des,
             t:new Date().valueOf()
         },
         dataType:"json",

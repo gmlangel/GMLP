@@ -101,6 +101,57 @@
     </div>
 </form>
 
+<!-- 编辑/新增条件信息模板 -->
+<form style="display:none;width:300px;" class="layui-form" lay-filter="panel_addCondition" id="panel_addCondition">
+    <div class="layui-form-item" style="padding-top: 30px;">
+        <label class="layui-form-label">名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input"
+                id="tb_add_conditionName">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">条件类型</label>
+        <div class="layui-input-block">
+            <select lay-filter="cTypelist" id="cTypelist">
+                <option value="0">请选择</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">条件值</label>
+        <div class="layui-input-block">
+            <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input"
+                id="tb_add_conditionValue">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">生效几率</label>
+        <div class="layui-input-block">
+            <input type="text" name="" lay-verify="required|number" placeholder="请输入" autocomplete="off"
+                class="layui-input" id="tb_add_probability">
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">描述</label>
+        <div class="layui-input-block">
+            <textarea placeholder="描述..." class="layui-textarea" id="tb_add_condition_des"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_addCondition_cancel"
+                id="btn_addCondition_cancel">取消</button>
+            <button class="layui-btn" lay-submit lay-filter="btn_addCondition_commit"
+                id="btn_addCondition_commit">提交</button>
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_editCondition_cancel"
+                id="btn_editCondition_cancel">取消</button>
+            <button class="layui-btn" lay-submit lay-filter="btn_editCondition_commit"
+                id="btn_editCondition_commit">提交</button>
+        </div>
+    </div>
+</form>
+
 <body>
     <script src="./layui/layui.js"></script>
     <script>
@@ -182,7 +233,7 @@
                 } else if (index == 1) {
                     //添加策略管理table
                     table_conditionList = makeConditionListTable(table, layer, form, laypage);
-                    //获取策略类型信息
+                    //获取条件类型信息
                     getAllConditionTypeInfo((data, err) => {
                         if (data != null) {
                             if (data.code == "0") {
@@ -221,6 +272,7 @@
                             , limit: maxUserListLineCount//每页显示maxUserListLineCount条数据
                             , curr: table_userListCurrentPageID//当前页码
                             , jump: function (pageobj, first) {
+                                userSelectPoint = (table_userListCurrentPageID - 1) * maxUserListLineCount;//重新计算用于查询数据的起始位置
                                 //页面ID更改的监听处理
                                 //首次不执行
                                 if (!first) {
@@ -518,16 +570,20 @@
                 skin: "nob",
                 even: "true",
                 size: "sm",
-                width: 770,
+                width: 810,
                 limit: maxConditionListLineCount,
                 cols: [
                     [
                         {
-                            field: 'conditionTypeName', title: '条件类型', width: 160, sort: false, fixed: 'left', align: 'center', unresize: true, templet: function (d) {
-                                return '<span>' + d.zhName + "(" + d.enName + ")" + '</span>'
+                            field: 'conditionTypeName', title: '条件类型', width: 200, sort: false, fixed: 'left', align: 'center', unresize: true, templet: function (d) {
+                                return '<span>' + d.zhName + "(" + d.enName + ")" + '</span>' + '<button type="button" class="layui-btn layui-btn-sm layui-btn-primary" lay-filter="conditionItemShowTypeDes" id="cTypeitem_' + d.id + '" cid="' + d.id + '" lay-submit style="border:none;background:none;height:20px;line-height:20px;padding-left:4px;"><i class="layui-icon layui-icon-about"></i></button></span>'
                             }
                         },
-                        { field: 'name', title: '条件名称', width: 160, sort: false, fixed: 'left', align: 'center', unresize: true },
+                        {
+                            field: 'name', title: '条件名称', width: 160, sort: false, fixed: 'left', align: 'center', unresize: true, templet: function (d) {
+                                return d.name + '<button type="button" class="layui-btn layui-btn-sm layui-btn-primary" lay-filter="conditionItemShowDes" id="citem_' + d.id + '" cid="' + d.id + '" lay-submit style="border:none;background:none;height:20px;line-height:20px;padding-left:4px;"><i class="layui-icon layui-icon-about"></i></button></span>'
+                            }
+                        },
                         { field: 'value', title: '条件值', width: 100, sort: false, fixed: 'left', align: 'center', unresize: true },
                         {
                             field: 'probability', title: '生效几率', width: 100, sort: false, fixed: 'left', align: 'center', unresize: true, templet: function (d) {
@@ -540,60 +596,46 @@
             })
             //添加工具条的监听事件
             table.on("tool(table_conditionList)", function (obj) {
-                // let userData = obj.data;
-                // let evtType = obj.event;
-                // switch(evtType){
-                //     case "roleinfo_des":
-                //         //查看角色详细描述
-                //         let str = "";
-                //         userData.authDesGroup.forEach((v,i)=>{
-                //             str +="</br>" + v
-                //         })
-                //         layer.open({
-                //             title: '拥有的的权限',
-                //             type:0,
-                //             content: str,
-                //             resize:false
-                //         });    
-                //         break;
-                //     case "edit_userinfo":
-                //         //编辑用户信息
-                //         showEditUserPanel(form,layer,userData,laypage);
-                //         break;
-                //     case "delete_userinfo":
-                //         //删除用户信息
-                //         layer.open({
-                //             title:"删除用户",
-                //             content:"确定要删除用户(" + userData.signName +")吗？",
-                //             area:["300px","200px"],
-                //             resize:false,
-                //             btn:["确定","取消"],
-                //             yes:(index,obj)=>{
-                //                 //确定操作
-                //                 deleteUser(userData.uid,(data,err)=>{
-                //                     if(data != null){
-                //                         layer.alert(data.msg);
-                //                         if(data.code == "0"){
-                //                             //分页获取用户信息
-                //                             if((userlistInfo || []).length == 1){
-                //                                 //如果删除的数据是本页的最后一条，则跳转至上一页
-                //                                 table_userListCurrentPageID-=1
-                //                             }
-                //                             fillUserList(laypage);
-                //                         }
-                //                     }else{
-                //                         console.error(err)
-                //                     }
-                //                 })
-                //             },
-                //             btn2:(index,obj)=>{
-                //                 //取消操作,不用谢任何代码，即可默认关闭layer
-                //             },
-                //             btnAlign:"c"/*居中对齐*/
-                //         })
-                //         break;
-                //     default:break;
-                // }
+                let conditionData = obj.data;
+                let evtType = obj.event;
+                switch (evtType) {
+                    case "btn_edit_condition":
+                        //编辑条件信息
+                        showEditConditionPanel(form, layer, conditionData, laypage);
+                        break;
+                    case "btn_delete_condition":
+                        //删除条件信息
+                        layer.open({
+                            title: "删除条件",
+                            content: "确定要删除条件(" + conditionData.name + ")吗？",
+                            area: ["300px", "200px"],
+                            resize: false,
+                            btn: ["确定", "取消"],
+                            yes: (index, obj) => {
+                                deleteCondition(conditionData.id, (data, err) => {
+                                    if (data != null) {
+                                        layer.alert(data.msg);
+                                        if (data.code == "0") {
+                                            //分页获取条件信息
+                                            if ((conditionArr || []).length == 1) {
+                                                //如果删除的数据是本页的最后一条，则跳转至上一页
+                                                table_conditionListCurrentPageID -= 1
+                                            }
+                                            fillConditionList(laypage);
+                                        }
+                                    } else {
+                                        console.error(err)
+                                    }
+                                })
+                            },
+                            btn2: (index, obj) => {
+                                //取消操作,不用谢任何代码，即可默认关闭layer
+                            },
+                            btnAlign: "c"/*居中对齐*/
+                        })
+                        break;
+                    default: break;
+                }
             })
             return temp_table;
         }
@@ -603,22 +645,34 @@
         */
         function bindAddConditionAboutEvent(form, layer, laypage) {
             form.on("submit(btn_showAddConditionTypePanel)", (btnData) => {
-
+                showAddConditionTypePanel(form, layer, laypage);
             });
             form.on("submit(btn_showAddConditionPanel)", (btnData) => {
-
+                showAddConditionPanel(form, layer, laypage)
             })
-            form.on("submit(btn_addConditionType_cancel)", (btnData) => {
-
+            form.on("submit(conditionItemShowDes)", (btnData) => {
+                let cid = ((btnData.elem.attributes || {}).cid || {}).nodeValue;
+                if (!!cid) {
+                    cid = parseInt(cid);
+                    let o = conditionMap[cid];
+                    if (o) {
+                        layer.tips(o.des == "" ? "无" : o.des, "#" + btnData.elem.id, {
+                            tips: 3
+                        })
+                    }
+                }
             })
-            form.on("submit(btn_addConditionType_commit)", (btnData) => {
-
-            })
-            form.on("submit(btn_edit_condition)", (btnData) => {
-
-            })
-            form.on("submit(btn_delete_condition)", (btnData) => {
-
+            form.on("submit(conditionItemShowTypeDes)", (btnData) => {
+                let cid = ((btnData.elem.attributes || {}).cid || {}).nodeValue;
+                if (!!cid) {
+                    cid = parseInt(cid);
+                    let o = conditionMap[cid];
+                    if (o) {
+                        layer.tips(o.typeDes == "" ? "无" : o.typeDes, "#" + btnData.elem.id, {
+                            tips: 3
+                        })
+                    }
+                }
             })
         }
 
@@ -639,6 +693,7 @@
                             , limit: maxConditionListLineCount//每页显示maxConditionListLineCount条数据
                             , curr: table_conditionListCurrentPageID//当前页码
                             , jump: function (pageobj, first) {
+                                conditionSelectPoint = (table_conditionListCurrentPageID - 1) * maxConditionListLineCount;//重新计算用于查询数据的起始位置
                                 //页面ID更改的监听处理
                                 //首次不执行
                                 if (!first) {
@@ -646,7 +701,7 @@
                                     //换页操作
                                     table_conditionListCurrentPageID = pageobj.curr;//设置当前页
                                     conditionSelectPoint = (table_conditionListCurrentPageID - 1) * maxConditionListLineCount;//重新计算用于查询数据的起始位置
-                                    fillUserList(laypage)
+                                    fillConditionList(laypage)
                                 } else {
                                     //首次初始化，不做任何操作,避免无限调用fillUserList
                                 }
@@ -694,6 +749,235 @@
                 conditionMap[item.id] = item;
             })
             return resultArr;
+        }
+
+        //显示条件信息编辑面板
+        function showEditConditionPanel(form, layer, conditionData, laypage) {
+            //显示业务相关的按钮
+            let btn_addCondition_commit = document.getElementById("btn_addCondition_commit");
+            btn_addCondition_commit.style.display = "none";
+            let btn_addCondition_cancel = document.getElementById("btn_addCondition_cancel");
+            btn_addCondition_cancel.style.display = "none";
+            let btn_editCondition_commit = document.getElementById("btn_editCondition_commit");
+            btn_editCondition_commit.style.display = "inline-block";
+            let btn_editCondition_cancel = document.getElementById("btn_editCondition_cancel");
+            btn_editCondition_cancel.style.display = "inline-block";
+            //获取界面操作元素
+            let cTypelist = document.getElementById("cTypelist");
+            let tb_add_conditionName = document.getElementById("tb_add_conditionName");
+            let tb_add_conditionValue = document.getElementById("tb_add_conditionValue");
+            let tb_add_condition_des = document.getElementById("tb_add_condition_des");
+            let tb_add_probability = document.getElementById("tb_add_probability");
+
+            form.on("submit(btn_editCondition_commit)", function (reqData) {
+                //提交用户修改后的数据
+                let cName = tb_add_conditionName.value;
+                let cValue = tb_add_conditionValue.value;
+                let cDes = tb_add_condition_des.value;
+                let tmpProbility = parseFloat(tb_add_probability.value);
+                tmpProbility = tmpProbility < 0 ? 0 : tmpProbility;
+                tmpProbility = tmpProbility > 1 ? 1 : tmpProbility;
+                let cProbility = tmpProbility;
+                let cTypeID = cTypelist.value;
+                layer.close(openidx);//关闭弹窗
+                updateConditionInfo(cTypeID, cName, cValue, cProbility, cDes, conditionData.id, (data, err) => {
+                    if (data != null) {
+                        if (data.code == "0") {
+                            layer.alert("更新条件信息成功")
+                            //更新页面显示
+                            //分页获取用户信息
+                            fillConditionList(laypage)
+                        } else {
+                            layer.alert("更新条件信息失败")
+                            console.error(data.msg);
+                        }
+                    } else {
+                        layer.alert("更新条件信息失败")
+                        console.error(err);
+                    }
+                })
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+            form.on("submit(btn_editCondition_cancel)", function (reqData) {
+                //取消修改
+                layer.close(openidx);//关闭弹窗
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+
+            //重新填充内容
+            cTypelist.innerText = "";
+            tb_add_conditionName.value = conditionData.name;
+            tb_add_conditionValue.value = conditionData.value;
+            tb_add_condition_des.value = conditionData.des;
+            tb_add_probability.value = conditionData.probability;
+            let cTypeObj = null;
+            for (let cKey in conditionTypeInfoMap) {
+                let option = document.createElement("option");
+                if (cKey == conditionData.typeID)
+                    option.selected = true;//设置默认选中
+                option.setAttribute("value", cKey);
+                cTypeObj = conditionTypeInfoMap[cKey]
+                option.appendChild(document.createTextNode(cTypeObj.enName + "(" + cTypeObj.zhName + ")"));
+                cTypelist.appendChild(option);
+            }
+            form.render(null, "panel_addCondition");//刷新表单的内容
+
+            //弹出面板
+            let openidx = layer.open({
+                title: "编辑条件信息",
+                type: 1,
+                area: ['390px', '490px'],
+                content: $('#panel_addCondition'),
+                resize: false
+            });
+        }
+
+        //显示新增条件信息面板
+        function showAddConditionPanel(form, layer, laypage) {
+            //显示业务相关的按钮
+            let btn_addCondition_commit = document.getElementById("btn_addCondition_commit");
+            btn_addCondition_commit.style.display = "inline-block";
+            let btn_addCondition_cancel = document.getElementById("btn_addCondition_cancel");
+            btn_addCondition_cancel.style.display = "inline-block";
+            let btn_editCondition_commit = document.getElementById("btn_editCondition_commit");
+            btn_editCondition_commit.style.display = "none";
+            let btn_editCondition_cancel = document.getElementById("btn_editCondition_cancel");
+            btn_editCondition_cancel.style.display = "none";
+            //获取界面操作元素
+            let cTypelist = document.getElementById("cTypelist");
+            let tb_add_conditionName = document.getElementById("tb_add_conditionName");
+            let tb_add_conditionValue = document.getElementById("tb_add_conditionValue");
+            let tb_add_condition_des = document.getElementById("tb_add_condition_des");
+            let tb_add_probability = document.getElementById("tb_add_probability");
+
+            form.on("submit(btn_addCondition_commit)", function (reqData) {
+                //提交用户修改后的数据
+                let cName = tb_add_conditionName.value;
+                let cValue = tb_add_conditionValue.value;
+                let cDes = tb_add_condition_des.value;
+                let tmpProbility = parseFloat(tb_add_probability.value);
+                tmpProbility = tmpProbility < 0 ? 0 : tmpProbility;
+                tmpProbility = tmpProbility > 1 ? 1 : tmpProbility;
+                let cProbility = tmpProbility;
+                let cTypeID = cTypelist.value;
+                layer.close(openidx);//关闭弹窗
+                addCondition(cTypeID, cName, cValue, cProbility, cDes, (data, err) => {
+                    if (data != null) {
+                        if (data.code == "0") {
+                            layer.alert("新增条件信息成功")
+                            //更新页面显示
+                            table_conditionListCurrentPageID = 1;//回到条件列表首页
+                            //分页获取用户信息
+                            fillConditionList(laypage)
+                        } else {
+                            layer.alert("新增条件信息失败")
+                            console.error(data.msg);
+                        }
+                    } else {
+                        layer.alert("新增条件信息失败")
+                        console.error(err);
+                    }
+                })
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+            form.on("submit(btn_addCondition_cancel)", function (reqData) {
+                //取消修改
+                layer.close(openidx);//关闭弹窗
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+
+            //重新填充内容
+            cTypelist.innerText = "";
+            tb_add_conditionName.value = "";
+            tb_add_conditionValue.value = "";
+            tb_add_condition_des.value = "";
+            tb_add_probability.value = "1";
+            let cTypeObj = null;
+            for (let cKey in conditionTypeInfoMap) {
+                let option = document.createElement("option");
+                option.setAttribute("value", cKey);
+                cTypeObj = conditionTypeInfoMap[cKey]
+                option.appendChild(document.createTextNode(cTypeObj.enName + "(" + cTypeObj.zhName + ")"));
+                cTypelist.appendChild(option);
+            }
+            form.render(null, "panel_addCondition");//刷新表单的内容
+
+            //弹出面板
+            let openidx = layer.open({
+                title: "新增条件信息",
+                type: 1,
+                area: ['390px', '490px'],
+                content: $('#panel_addCondition'),
+                resize: false
+            });
+        }
+
+        /**
+         * 显示 新增条件类型信息面板
+        */
+        function showAddConditionTypePanel(form, layer, laypage) {
+            //获取界面操作元素
+            let tb_add_conditionType_zh = document.getElementById("tb_add_conditionType_zh");
+            let tb_add_conditionType_en = document.getElementById("tb_add_conditionType_en");
+            let tb_add_conditionType_des = document.getElementById("tb_add_conditionType_des");
+
+            form.on("submit(btn_addConditionType_commit)", function (reqData) {
+                //提交用户修改后的数据
+                let zhName = tb_add_conditionType_zh.value;
+                let enName = tb_add_conditionType_en.value;
+                let des = tb_add_conditionType_des.value;
+                layer.close(openidx);//关闭弹窗
+                addConditionType(zhName, enName, des, (data, err) => {
+                    if (data != null) {
+                        if (data.code == "0") {
+                            layer.alert("新增条件类型成功")
+                            //更新条件类型数组
+                            getAllConditionTypeInfo((data, err) => {
+                                if (data != null) {
+                                    if (data.code == "0") {
+                                        conditionTypeInfoMap = {};
+                                        let arr = data.data;
+                                        arr.forEach((v, i) => {
+                                            conditionTypeInfoMap[v.id] = v
+                                        })
+                                    } else {
+                                        console.error(data.msg);
+                                    }
+                                } else {
+                                    console.error(err);
+                                }
+                            })
+                        } else {
+                            layer.alert("新增条件类型失败")
+                            console.error(data.msg);
+                        }
+                    } else {
+                        layer.alert("新增条件类型失败")
+                        console.error(err);
+                    }
+                })
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+            form.on("submit(btn_addConditionType_cancel)", function (reqData) {
+                //取消修改
+                layer.close(openidx);//关闭弹窗
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+
+            //重新填充内容
+            tb_add_conditionType_zh.value = "";
+            tb_add_conditionType_en.value = "";
+            tb_add_conditionType_des.value = "";
+            form.render(null, "panel_addConditionType");//刷新表单的内容
+
+            //弹出面板
+            let openidx = layer.open({
+                title: "新增条件类型",
+                type: 1,
+                area: ['370px', '370px'],
+                content: $('#panel_addConditionType'),
+                resize: false
+            });
         }
     </script>
 

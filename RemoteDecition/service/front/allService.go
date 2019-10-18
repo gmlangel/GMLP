@@ -437,7 +437,7 @@ func (ser *AllService)DeleteCondition(ctx iris.Context){
 			res.Msg = "条件删除成功"
 		}else{
 			res.Code = "-1";
-			res.Msg = "条件删除失败，参数id对应的条件不存在"
+			res.Msg = "条件删除失败，参数id对应的条件不存在或者条件信息未变更导致更新失败"
 		}
 	}
 	resBytes,err := json.Marshal(res);
