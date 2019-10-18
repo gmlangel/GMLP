@@ -1,0 +1,25 @@
+.strategyTitleBar{
+    position: relative;
+    height: 30px;
+    line-height: 30px;
+    padding: 10px auto;
+    color: #fff;
+    background-color: #009688;
+    cursor: pointer;
+    font-size: 12px;
+    overflow: hidden;
+}
+.strategyTitleBar_title{
+    float: left;
+    margin-right: 5px;
+    margin-left:5px;
+}
+
+.strategyTitleBar_btn{
+    float: right;
+    margin-right: 10px;
+}
+
+.strategyTitleBar_btn:hover{
+    color: #333;
+}
