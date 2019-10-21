@@ -980,8 +980,39 @@
                 resize: false
             });
         }
-    </script>
 
+        /**
+         * 当策略类别toolbar上的按钮被点击时的处理
+         * 
+        */
+        function onStrategyTitleBar_btn_Click(sender) {
+            let execType = sender.getAttribute("execType")
+            let sid = sender.getAttribute("sid")
+            let tmpId = "";
+            switch (execType) {
+                case "zhedie":
+                    tmpId = "strategyContentList_" + sid;
+                    document.getElementById(tmpId).style.display = "none";
+                    sender.innerHTML = "&#xe619;";
+                    sender.setAttribute("execType", "zhankai");
+                    break;
+                case "zhankai":
+                    tmpId = "strategyContentList_" + sid;
+                    document.getElementById(tmpId).style.display = "block";
+                    sender.innerHTML = "&#xe61a;";
+                    sender.setAttribute("execType", "zhedie");
+                    break;
+            }
+        }
+
+        /**
+         * 
+         * 当策略item上的按钮被点击
+        */
+        function onStrategyItem_btn_Click(sender) {
+            console.log(sender.getAttribute("execType"));
+        }
+    </script>
     <div class="layui-tab layui-tab-brief" lay-filter="mainTab">
         <ul class="layui-tab-title">
             <li lay-id="mUser">用户管理</li>
@@ -1006,24 +1037,92 @@
             </div>
             <div class="layui-tab-item">
                 <div>
+                    <button class="layui-btn layui-btn-sm" lay-submit lay-filter="btn_add_strategycategroy"
+                        id="btn_add_strategycategroy">新增策略类别</button>
                     <div>
                         <div class="strategyTitleBar">
                             <span>
                                 <span class="strategyTitleBar_title">1对1教室策略</span>
-                                <i class="layui-icon layui-icon-about" style="float: left;"></i>
-                                <span class="strategyTitleBar_btn">折叠</span>
-                                <span class="strategyTitleBar_btn">编辑策略类别</span>
-                                <span class="strategyTitleBar_btn">删除策略类别</span>
-                                <span class="strategyTitleBar_btn">新增策略类别</span>
+                                <i class="layui-icon layui-icon-about" style="float: left;"
+                                    onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="des"
+                                    sid="0"></i>
+                                <i class="layui-icon" style="float: right;margin-right: 10px;"
+                                    onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="zhedie"
+                                    sid="0">&#xe61a;</i>
+                                <!-- <span class="strategyTitleBar_btn"
+                                    onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="zhedie"
+                                    sid="0">折叠</span> -->
+                                <span class="strategyTitleBar_btn"
+                                    onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="edit"
+                                    sid="0">编辑类别</span>
+                                <span class="strategyTitleBar_btn"
+                                    onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="delete"
+                                    sid="0">删除类别</span>
+                                <span class="strategyTitleBar_btn"
+                                    onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="add"
+                                    sid="0">新增策略</span>
                             </span>
                         </div>
-                        <div style="width: 100%;height:40px;background: #ff0000;clear:both;"></div>
+                        <div id="strategyContentList_0" class="strategyContentList">
+                            <div id="strategyListItem_0" class="strategyListItem">
+                                <div class="strategyListItem_left">
+                                    <div>
+                                        <label class="gml_label">策略名</label>
+                                        <label class="gml_label_v">1v1牛逼策略</label>
+                                    </div>
+                                    <div>
+                                        <label class="gml_label">过期时间</label>
+                                        <label class="gml_label_v">2019-01-11 18:30:00</label>
+                                    </div>
+                                    <div>
+                                        <div class="layui-form">
+                                            <label class="gml_label" style="height:40px;line-height:40px;">是否启用</label>
+                                            <div class="gml_label_v"><input type="checkbox" name="switch"
+                                                    lay-skin="switch"></div>
+                                            <div style="clear: both;"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="gml_label">匹配条件</label>
+                                        <label class="gml_label_v">用户类型 = 学生 概率50.00%</label>
+                                    </div>
+                                    <div>
+                                        <label class="gml_label"></label>
+                                        <label class="gml_label_v">课程类型 = 1v1青少课 概率100.00%</label>
+                                    </div>
+                                    <div>
+                                        <label class="gml_label"></label>
+                                        <label class="gml_label_v">课程类型 = 1v1青少课 概率100.00%</label>
+                                    </div>
+                                    <div>
+                                        <label class="gml_label"></label>
+                                        <label class="gml_label_v">课程类型 = 1v1青少课 概率100.00%</label>
+                                    </div>
+                                </div>
+                                <div class="strategyListItem_right">
+                                    <div class="strategyListItem_right_btn"
+                                        onclick="javascript:void(0);onStrategyItem_btn_Click(this);" execType="select"
+                                        sid="0">预览策略</div>
+                                    <div class="strategyListItem_right_btn"
+                                        onclick="javascript:void(0);onStrategyItem_btn_Click(this);"
+                                        execType="editStrategy" sid="0">编辑策略</div>
+                                    <div class="strategyListItem_right_btn"
+                                        onclick="javascript:void(0);onStrategyItem_btn_Click(this);"
+                                        execType="editCondition" sid="0">编辑条件</div>
+                                    <div class="strategyListItem_right_btn_delete"
+                                        onclick="javascript:void(0);onStrategyItem_btn_Click(this);" execType="delete"
+                                        sid="0">删除策略</div>
+                                    <button class="layui-btn layui-btn-sm" style="float:right;margin:10px 20px;"
+                                        lay-submit lay-filter="btn_forceUseage" id="btn_forceUseage">强制即时生效</button>
+                                </div>
+                                <div class="strategyListItem_bottom"></div>
+                            </div>
+                        </div>
                     </div>
-                   
+
                 </div>
             </div>
         </div>
-    </div>
 
 </body>
 

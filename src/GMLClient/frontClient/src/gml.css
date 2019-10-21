@@ -8,6 +8,7 @@
     cursor: pointer;
     font-size: 12px;
     overflow: hidden;
+    margin-top:5px;
 }
 .strategyTitleBar_title{
     float: left;
@@ -22,4 +23,76 @@
 
 .strategyTitleBar_btn:hover{
     color: #333;
+}
+span .layui-icon-about:hover{
+    color: #333;
+}
+
+.strategyContentList{
+    width: 100%;
+    background-color: #f2f2f2;
+    clear:both;
+}
+
+.strategyListItem{
+    margin-top: 5px;
+    color:#666;
+    font-size: 12px;
+}
+
+.strategyListItem_left{
+    width: 500px;
+    float: left;
+}
+
+.gml_label{
+    float:left;
+    display: block;
+    padding: 2px 5px;
+    width: 80px;
+    font-weight: 400;
+    line-height: 20px;
+    text-align: right;
+}
+.gml_label_v{
+    float:left;
+    display: block;
+    padding: 2px 5px;
+    width: 400px;
+    font-weight: 400;
+    line-height: 20px;
+    text-align: left;
+}
+
+.strategyListItem_right{
+    width: 100px;
+    float: right;
+    line-height: 20px;
+    font-weight: 400;
+    display: block;
+}
+
+.strategyListItem_right_btn{
+    text-align: right;
+    cursor: pointer;
+    margin:2px 20px 2px 0px;
+    color: #009688;
+}
+
+.strategyListItem_right_btn_delete{
+    text-align: right;
+    cursor: pointer;
+    margin:2px 20px 2px 0px;
+    color: #ff5722;
+}
+
+.strategyListItem_right_btn:hover{
+    color: #666666;
+}
+.strategyListItem_right_btn_delete:hover{
+    color: #666666;
+}
+
+.strategyListItem_bottom{
+    clear: both;
 }
