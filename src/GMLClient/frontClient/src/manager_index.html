@@ -189,11 +189,11 @@
     </div>
     <div class="layui-form-item">
         <div class="layui-input-block">
-            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_addSC_cancel"
-                id="btn_addSC_cancel" style="margin-left:120px;">取消</button>
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_addSC_cancel" id="btn_addSC_cancel"
+                style="margin-left:120px;">取消</button>
             <button class="layui-btn" lay-submit lay-filter="btn_addSC_commit" id="btn_addSC_commit">提交</button>
-            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_editSC_cancel"
-                id="btn_editSC_cancel" style="margin-left:120px;">取消</button>
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_editSC_cancel" id="btn_editSC_cancel"
+                style="margin-left:120px;">取消</button>
             <button class="layui-btn" lay-submit lay-filter="btn_editSC_commit" id="btn_editSC_commit">提交</button>
         </div>
     </div>
@@ -202,6 +202,7 @@
 <body>
     <script src="./layui/layui.js"></script>
     <script>
+        var layer = null, form = null, ele = null, table = null, laypage = null;
         var table_userList = null;
         var maxUserListLineCount = 15;
         var table_userListCurrentPageID = 1;//用户列表的当前页， 注意这里不要用索引
@@ -219,9 +220,19 @@
         var conditionArr = [];//条件信息数组
         var conditionCount = 0;//总条件数
         var conditionSelectPoint = 0;//条件信息数据的分页起始查询点
+
+        var staticResourceDomain = "http://localhost:8080/"
+        var strategyCategroyMap = {};//策略类别字典
+        var strategyCategroyTemplateMap = {};//策略类别的模板存储字典
+        var strategyMap = {};//策略信息字典
+        var strategyContentMap = {};
         //一般直接写在一个js文件中
         layui.use(['layer', 'form', 'element', 'table', 'laypage'], function () {
-            var layer = layui.layer, form = layui.form, ele = layui.element, table = layui.table, laypage = layui.laypage;
+            layer = layui.layer
+            form = layui.form
+            ele = layui.element
+            table = layui.table
+            laypage = layui.laypage;
             //自定义正则验证
             form.verify({
                 pwdreg: [
@@ -302,10 +313,55 @@
                     })
                 } else if (index == 2) {
                     //调用“获取全部策略接口”
+                    getAllStrategyCategroy((data, err) => {
+                        if (data != null) {
+                            if (data.code == "0") {
+                                //填充strategyCategroyMap
+                                strategyCategroyMap = {};
+                                let arr = data.data;
+                                arr.forEach((v, i) => {
+                                    let sc = {};
+                                    sc.name = v.name;
+                                    sc.id = v.id;
+                                    sc.des = v.des;
+                                    sc.baseTemplatePath = v.baseTemplatePath;
+                                    strategyCategroyMap[sc.id] = sc;
+                                    loadStrategyCategroyContent(sc.baseTemplatePath);//加载模板内容
+                                })
+                                fillStrategyCategroyList();
+                            } else {
+                                console.error(data.msg);
+                            }
+                        } else {
+                            console.error(err)
+                        }
+                    })
                 }
             })
             ele.tabChange('mainTab', 'mUser');//默认选择第一选项"用户管理"
         });
+
+        /**
+         * 加载策略类型模板
+        */
+        function loadStrategyCategroyContent(path) {
+            $.ajax({
+                url: path.replace("./", staticResourceDomain),
+                data: {
+                    t: new Date().valueOf()
+                },
+                dataType: "json",
+                method: "GET",
+                success: function (data) {
+                    if (data) {
+                        strategyCategroyTemplateMap[path] = data;//填充策略类型模板字典
+                    }
+                },
+                error: function (err) {
+                    console.error(err);
+                }
+            })
+        }
 
         function fillUserList(laypage) {
             //获取用户总数
@@ -1079,6 +1135,19 @@
                     sender.innerHTML = "&#xe61a;";
                     sender.setAttribute("execType", "zhedie");
                     break;
+                case "edit":
+                    showEditStrategyCategroyPanel(sid);//
+                    break;
+                case "des":
+                    layer.tips(strategyCategroyMap[sid] ? strategyCategroyMap[sid].des : "无", '#' + sender.id, {
+                        tips: 2
+                    });
+                    break;
+                case "delete":
+                    deleteSC(sid);
+                    break;
+                case "add":
+                    break;
             }
         }
 
@@ -1107,19 +1176,43 @@
                 let sname = tb_add_scName.value;
                 let templateContent = tb_add_sc_template.value;
                 let jsonObj = JSON.parse(templateContent);
-                if(!jsonObj){
+                if (!jsonObj) {
                     layer.alert("templateContent转json失败，请检查templateContent");
                     return false;
                 }
                 let scDes = tb_add_sc_des.value;
                 layer.close(openidx);//关闭弹窗
-                addStrategyCategroy(sname,scDes,templateContent, (data, err) => {
+                addStrategyCategroy(sname, scDes, templateContent, (data, err) => {
                     if (data != null) {
                         if (data.code == "0") {
                             layer.alert("新增策略类别成功")
                             //更新页面显示
-                            //分页获取用户信息
-                            fillStrategyCategroyList(laypage)
+                            //调用“获取全部策略接口”
+                            getAllStrategyCategroy((data, err) => {
+                                if (data != null) {
+                                    if (data.code == "0") {
+                                        let arr = data.data;
+                                        arr.forEach((v, i) => {
+                                            //增量更新
+                                            if (!strategyCategroyMap[v.id]) {
+                                                let sc = {};
+                                                sc.name = v.name;
+                                                sc.id = v.id;
+                                                sc.des = v.des;
+                                                sc.baseTemplatePath = v.baseTemplatePath;
+                                                strategyCategroyMap[sc.id] = sc;
+                                                loadStrategyCategroyContent(sc.baseTemplatePath);//加载模板内容
+                                            }
+                                        })
+                                        //更新显示列表
+                                        fillStrategyCategroyList();
+                                    } else {
+                                        console.error(data.msg);
+                                    }
+                                } else {
+                                    console.error(err)
+                                }
+                            })
                         } else {
                             layer.alert("新增策略类别失败")
                             console.error(data.msg);
@@ -1155,10 +1248,193 @@
                 resize: false
             });
         }
+
+        /**
+         * 显示编辑策略类别 的面板
+        */
+        function showEditStrategyCategroyPanel(sid) {
+            let btn_editSC_cancel = document.getElementById("btn_editSC_cancel");
+            btn_editSC_cancel.style.display = "inline-block";
+            let btn_editSC_commit = document.getElementById("btn_editSC_commit");
+            btn_editSC_commit.style.display = "inline-block";
+            let btn_addSC_cancel = document.getElementById("btn_addSC_cancel");
+            btn_addSC_cancel.style.display = "none";
+            let btn_addSC_commit = document.getElementById("btn_addSC_commit");
+            btn_addSC_commit.style.display = "none";
+            form.on("submit(btn_editSC_commit)", function (reqData) {
+                //新增 策略类型
+                let sname = tb_add_scName.value;
+                let templateContent = tb_add_sc_template.value;
+                let jsonObj = JSON.parse(templateContent);
+                if (!jsonObj) {
+                    layer.alert("templateContent转json失败，请检查templateContent");
+                    return false;
+                }
+                let scDes = tb_add_sc_des.value;
+                layer.close(openidx);//关闭弹窗
+                updateStrategyCategroy(sname, scDes, templateContent, sid, (data, err) => {
+                    if (data != null) {
+                        if (data.code == "0") {
+                            layer.alert("更新策略类别成功")
+                            //更新页面显示
+                            //调用“获取全部策略接口”
+                            getAllStrategyCategroy((data, err) => {
+                                if (data != null) {
+                                    if (data.code == "0") {
+                                        //填充strategyCategroyMap
+                                        let arr = data.data;
+                                        arr.forEach((v, i) => {
+                                            //增量更新
+                                            if (v.id == sid) {
+                                                let sc = {};
+                                                sc.name = v.name;
+                                                sc.id = v.id;
+                                                sc.des = v.des;
+                                                sc.baseTemplatePath = v.baseTemplatePath;
+                                                strategyCategroyMap[sc.id] = sc;
+                                                loadStrategyCategroyContent(sc.baseTemplatePath);//加载模板内容
+                                            }
+                                        })
+                                        //更新显示列表
+                                        fillStrategyCategroyList();
+                                    } else {
+                                        console.error(data.msg);
+                                    }
+                                } else {
+                                    console.error(err)
+                                }
+                            })
+                        } else {
+                            layer.alert("更新策略类别失败")
+                            console.error(data.msg);
+                        }
+                    } else {
+                        layer.alert("更新策略类别失败")
+                        console.error(err);
+                    }
+                })
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+            form.on("submit(btn_editSC_cancel)", function (reqData) {
+                //取消修改
+                layer.close(openidx);//关闭弹窗
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+            let strategyCategroyInfo = strategyCategroyMap[sid];//获取类别信息
+            if (!strategyCategroyInfo) {
+                layer.alert("未获取到策略类别信息");
+                return
+            }
+            //加载模板信息
+            //填充内容
+            let tb_add_scName = document.getElementById("tb_add_scName");
+            let tb_add_sc_template = document.getElementById("tb_add_sc_template");
+            let tb_add_sc_des = document.getElementById("tb_add_sc_des")
+            tb_add_scName.value = strategyCategroyInfo.name;
+            let tmpO = strategyCategroyTemplateMap[strategyCategroyInfo.baseTemplatePath]
+            tb_add_sc_template.value = tmpO ? JSON.stringify(tmpO) : "";
+            tb_add_sc_des.value = strategyCategroyInfo.des;
+            form.render(null, "panel_addStrategyCategroy");//刷新表单的内容
+
+            //弹出面板
+            let openidx = layer.open({
+                title: "编辑策略类别信息",
+                type: 1,
+                area: ['590px', '550px'],
+                content: $('#panel_addStrategyCategroy'),
+                resize: false
+            });
+
+
+        }
         /**
          * 填充 策略类别信息列表
         */
-        function fillStrategyCategroyList(){
+        function fillStrategyCategroyList(selectSid = -1) {
+            let baseNode = document.getElementById("strategyCategroyContainer");
+            //移除原有的
+            while (baseNode.children.length > 0)
+                baseNode.removeChild(baseNode.children[0]);
+            //填充新的
+            let titleNode = null, listNode = null, sid, name;
+            for (k in strategyCategroyMap) {
+                sid = k;
+                name = strategyCategroyMap[k].name;
+                titleNode = document.createElement("div");
+                titleNode.setAttribute("id", "strategyTitleBar_" + sid)
+                titleNode.setAttribute("class", "strategyTitleBar");
+                titleNode.innerHTML = `<span>
+                                <span class="strategyTitleBar_title">` + name + `</span>
+                                <i id="strategyTitleBar_titleDes_`+ sid + `" class="layui-icon layui-icon-about"
+                                    style="float: left;"
+                                    onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="des"
+                                    sid="`+ sid + `"></i>
+                                <i class="layui-icon" style="float: right;margin-right: 10px;"
+                                    onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="zhedie"
+                                    sid="`+ sid + `">&#xe61a;</i>
+                                <span class="strategyTitleBar_btn"
+                                    onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="edit"
+                                    sid="`+ sid + `">编辑类别</span>
+                                <span class="strategyTitleBar_btn"
+                                    onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="delete"
+                                    sid="`+ sid + `">删除类别</span>
+                                <span class="strategyTitleBar_btn"
+                                    onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="add"
+                                    sid="`+ sid + `">新增策略</span>
+                            </span>`
+                listNode = document.createElement("div");
+                listNode.setAttribute("id", "strategyContentList_" + sid);
+                listNode.setAttribute("class", "strategyContentList");
+                baseNode.appendChild(titleNode);//添加title
+                baseNode.appendChild(listNode);//添加列表
+            }
+        }
+
+        /**
+         * 删除策略类别
+         * 
+        */
+        function deleteSC(sid) {
+            //删除用户信息
+            layer.open({
+                title: "删除策略类别",
+                content: "确定要删除吗？",
+                area: ["300px", "200px"],
+                resize: false,
+                btn: ["确定", "取消"],
+                yes: (index, obj) => {
+                    //确定操作
+                    deleteStrategyCategroy(sid, (data, err) => {
+                        if (data != null) {
+                            layer.alert(data.msg);
+                            if (data.code == "0") {
+                                console.log("更新策略类型列表")
+                                //更新数据集合
+                                let path = strategyCategroyMap[sid].baseTemplatePath || "";
+                                delete strategyCategroyMap[sid];
+                                delete strategyCategroyTemplateMap[path];
+                                //更新显示列表
+                                fillStrategyCategroyList()
+                            } else {
+                                console.error(data.msg);
+                            }
+                        } else {
+                            console.error(err)
+                        }
+                    })
+                },
+                btn2: (index, obj) => {
+                    //取消操作,不用谢任何代码，即可默认关闭layer
+                },
+                btnAlign: "c"/*居中对齐*/
+            })
+
+        }
+
+        /**
+         * 显示新增策略面板
+        */
+        function showAddStrategyPanel(form, layui, laypage) {
 
         }
     </script>
@@ -1188,19 +1464,17 @@
                 <div>
                     <button class="layui-btn layui-btn-sm" lay-submit lay-filter="btn_add_strategycategroy"
                         id="btn_add_strategycategroy">新增策略类别</button>
-                    <div>
+                    <div id="strategyCategroyContainer">
                         <div class="strategyTitleBar">
                             <span>
                                 <span class="strategyTitleBar_title">1对1教室策略</span>
-                                <i class="layui-icon layui-icon-about" style="float: left;"
+                                <i id="strategyTitleBar_titleDes_0" class="layui-icon layui-icon-about"
+                                    style="float: left;"
                                     onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="des"
                                     sid="0"></i>
                                 <i class="layui-icon" style="float: right;margin-right: 10px;"
                                     onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="zhedie"
                                     sid="0">&#xe61a;</i>
-                                <!-- <span class="strategyTitleBar_btn"
-                                    onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="zhedie"
-                                    sid="0">折叠</span> -->
                                 <span class="strategyTitleBar_btn"
                                     onclick="javascript:void(0);onStrategyTitleBar_btn_Click(this);" execType="edit"
                                     sid="0">编辑类别</span>

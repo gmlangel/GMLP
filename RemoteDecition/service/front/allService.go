@@ -576,6 +576,40 @@ func(ser *AllService)AddStrategyCategroy(ctx iris.Context){
 }
 
 /**
+获取所有的策略类型
+*/
+func(ser *AllService)GetAllStrategyCategroyInfo(ctx iris.Context){
+	queryStr := "select * from `StrategyCategroy`";
+	res := &m.DataResponse{};
+	resultList,err := ser.SQL.Query(queryStr)
+	if err == nil{
+		res.Code = "0";
+		dataArr := []map[string]interface{}{};
+		for _,v := range(resultList){
+			item := map[string]interface{}{};
+			for k,nv := range(v){
+				if k == "id"{
+					item[k],err = strconv.ParseUint(string(nv),10,32);
+				}else{
+					item[k] = string(nv);
+				}
+			}
+			dataArr = append(dataArr,item);
+		}
+		res.Data = dataArr;
+	}else{
+		res.Code = "-1";
+		res.Msg = fmt.Sprintf("查询策略类别信息失败,%s",err.Error());
+	}
+	resBytes,err := json.Marshal(res);
+	if err != nil{
+		ctx.Write([]byte(""));
+	}else{
+		ctx.Write(resBytes);
+	}
+}
+
+/**
 编辑策略组信息
 */
 func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){

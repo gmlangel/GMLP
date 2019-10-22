@@ -43,6 +43,7 @@ span .layui-icon-about:hover{
 .strategyListItem_left{
     width: 500px;
     float: left;
+    margin: 20px auto;
 }
 
 .gml_label{
@@ -70,6 +71,7 @@ span .layui-icon-about:hover{
     line-height: 20px;
     font-weight: 400;
     display: block;
+    margin: 20px auto;
 }
 
 .strategyListItem_right_btn{

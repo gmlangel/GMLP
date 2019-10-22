@@ -427,6 +427,26 @@ function addStrategyCategroy(name,des,templateContent,callbackFunc){
 }
 
 /**
+ * 获取所有的 策略类别信息
+*/
+function getAllStrategyCategroy(callbackFunc){
+    $.ajax({
+        url:interfaceDomain + "GetAllStrategyCategroyInfo",
+        data:{
+            t:new Date().valueOf()
+        },
+        dataType:"json",
+        method:"GET",
+        success:function(data){
+            callbackFunc(data,null);
+        },
+        error:function(err){
+            callbackFunc(null,err);
+        }
+    })
+}
+
+/**
  * 更新策略类别信息
  * http://localhost:8080/UpdateStrategyCategroy?name=测试策略4&des=这是444&templateContent={"name":"郭明龙4"}&id=3
  * @param name string 策略类别名称

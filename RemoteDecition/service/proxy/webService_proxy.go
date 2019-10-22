@@ -3,7 +3,6 @@ package proxy;
 import(
 	"../front"
 	"github.com/kataras/iris"
-	"github.com/iris-contrib/middleware/cors"
 	"github.com/kataras/iris/sessions"
 	"time"
 )
@@ -43,13 +42,6 @@ func (webs *WebServiceProxy)init(){
 }
 
 func (webs *WebServiceProxy)Start(){
-	//修改跨域访问限制
-	crs := cors.New(cors.Options{
-        AllowedOrigins:   []string{"*"}, // allows everything, use that to change the hosts."*"代表允许所有域访问，这是一个数组，可以添加多个域名
-		AllowCredentials: true,
-		AllowedMethods:[]string{"HEAD","GET","POST"},
-	})
-	webs.app.Use(crs)
 	//开启前端服务监听
 	frontSignGroup := webs.app.Party("/front/sign");//前端需要验证签名的服务组
 	f_loginProxy := front.LoginService{SqlPro:sqlpro,App:webs.app,SignGroup:&frontSignGroup,Sm:sm};
@@ -72,7 +64,8 @@ func (webs *WebServiceProxy)Start(){
 	webs.app.Get("UpdateConditionInfo",allser.UpdateConditionInfo);//更新条件信息接口
 	webs.app.Get("DeleteCondition",allser.DeleteCondition);//删除策略条件接口
 	webs.app.Post("AddStrategyCategroy",allser.AddStrategyCategroy);//新增策略组
-	webs.app.Post("UpdateStrategyCategroy",allser.UpdateStrategyCategroy);//新增策略组
+	webs.app.Get("GetAllStrategyCategroyInfo",allser.GetAllStrategyCategroyInfo);//获取所有的策略类别信息
+	webs.app.Post("UpdateStrategyCategroy",allser.UpdateStrategyCategroy);//更新策略组
 	webs.app.Get("DeleteStrategyCategroy",allser.DeleteStrategyCategroy);//删除策略组信息
 	webs.app.Post("AddStrategy",allser.AddStrategy);//新建策略
 	webs.app.Get("EditConditionForStrategy",allser.EditConditionForStrategy);//为策略添加匹配条件
