@@ -534,12 +534,9 @@ func(ser *AllService)writeToFile(templateContent string,basePath string)(filePat
 新增策略组
 */
 func(ser *AllService)AddStrategyCategroy(ctx iris.Context){
-	// name := ctx.PostValue("name");
-	// des := ctx.PostValue("des");
-	// templateContent := ctx.PostValue("templateContent");
-	name := ctx.URLParam("name");
-	des := ctx.URLParam("des");
-	templateContent := ctx.URLParam("templateContent");
+	name := ctx.PostValue("name");
+	des := ctx.PostValue("des");
+	templateContent := ctx.PostValue("templateContent");
 	res := &m.CurrentResponse{};
 	if "" != name && "" != templateContent{
 		//校验templateContent是否是JSON内容
@@ -582,10 +579,14 @@ func(ser *AllService)AddStrategyCategroy(ctx iris.Context){
 编辑策略组信息
 */
 func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
-	id,err1 := strconv.ParseUint(ctx.URLParam("id"),10,32);
-	name := ctx.URLParam("name");
-	des := ctx.URLParam("des");
-	templateContent := ctx.URLParam("templateContent");
+	// id,err1 := strconv.ParseUint(ctx.URLParam("id"),10,32);
+	// name := ctx.URLParam("name");
+	// des := ctx.URLParam("des");
+	// templateContent := ctx.URLParam("templateContent");
+	id,err1 := strconv.ParseUint(ctx.PostValue("id"),10,32);
+	name := ctx.PostValue("name");
+	des := ctx.PostValue("des");
+	templateContent := ctx.PostValue("templateContent");
 	res := &m.CurrentResponse{}
 	if nil == err1 && "" != name && "" != des && "" != templateContent{
 		//校验模板格式
@@ -695,11 +696,16 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
  新增策略
  */
  func(ser *AllService)AddStrategy(ctx iris.Context){
-	sid,err1 := strconv.ParseUint(ctx.URLParam("sid"),10,32);//策略组ID
-	strategyContext := ctx.URLParam("strategyContext");//策略内容
-	expire,err2 := strconv.ParseUint(ctx.URLParam("expire"),10,32);//过期时间戳
-	isEnabled,err3:= strconv.ParseUint(ctx.URLParam("enabled"),10,32);//是否为开启状态
-	name := ctx.URLParam("name");//策略名称
+	// sid,err1 := strconv.ParseUint(ctx.URLParam("sid"),10,32);//策略组ID
+	// strategyContext := ctx.URLParam("strategyContext");//策略内容
+	// expire,err2 := strconv.ParseUint(ctx.URLParam("expire"),10,32);//过期时间戳
+	// isEnabled,err3:= strconv.ParseUint(ctx.URLParam("enabled"),10,32);//是否为开启状态
+	// name := ctx.URLParam("name");//策略名称
+	sid,err1 := strconv.ParseUint(ctx.PostValue("sid"),10,32);//策略组ID
+	strategyContext := ctx.PostValue("strategyContext");//策略内容
+	expire,err2 := strconv.ParseUint(ctx.PostValue("expire"),10,32);//过期时间戳
+	isEnabled,err3:= strconv.ParseUint(ctx.PostValue("enabled"),10,32);//是否为开启状态
+	name := ctx.PostValue("name");//策略名称
 	res := &m.CurrentResponse{};
 	if nil == err3 && nil == err1 && nil == err2 && "" != strategyContext && "" != name{
 		//校验strategyContext是否为json
@@ -871,11 +877,16 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
  更新策略信息
  */
  func(ser *AllService)UpdateStrategyInfo(ctx iris.Context){
-	id,err1 := strconv.ParseUint(ctx.URLParam("id"),10,32);//策略ID
-	strategyContext := ctx.URLParam("strategyContext");//策略内容
-	expire,err2 := strconv.ParseUint(ctx.URLParam("expire"),10,32);//过期时间戳
-	isEnabled,err3:= strconv.ParseUint(ctx.URLParam("enabled"),10,32);//是否为开启状态
-	name := ctx.URLParam("name");//策略名称
+	// id,err1 := strconv.ParseUint(ctx.URLParam("id"),10,32);//策略ID
+	// strategyContext := ctx.URLParam("strategyContext");//策略内容
+	// expire,err2 := strconv.ParseUint(ctx.URLParam("expire"),10,32);//过期时间戳
+	// isEnabled,err3:= strconv.ParseUint(ctx.URLParam("enabled"),10,32);//是否为开启状态
+	// name := ctx.URLParam("name");//策略名称
+	id,err1 := strconv.ParseUint(ctx.PostValue("id"),10,32);//策略ID
+	strategyContext := ctx.PostValue("strategyContext");//策略内容
+	expire,err2 := strconv.ParseUint(ctx.PostValue("expire"),10,32);//过期时间戳
+	isEnabled,err3:= strconv.ParseUint(ctx.PostValue("enabled"),10,32);//是否为开启状态
+	name := ctx.PostValue("name");//策略名称
 	res := &m.CurrentResponse{};
 	if nil == err3 && nil == err1 && nil == err2 && "" != strategyContext && "" != name{
 		//校验strategyContext是否为json

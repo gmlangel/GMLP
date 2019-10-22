@@ -153,6 +153,52 @@
     </div>
 </form>
 
+<!-- 编辑/新增策略类别信息模板 -->
+<form style="display:none;width:500px;" class="layui-form" lay-filter="panel_addStrategyCategroy"
+    id="panel_addStrategyCategroy">
+    <div class="layui-form-item" style="padding-top: 30px;">
+        <label class="layui-form-label">类别名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input"
+                id="tb_add_scName">
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">类别模板</label>
+        <div class="layui-input-block">
+            <textarea placeholder='策略模板内容,如：
+        {
+                 "strategyName":{
+                      "type":"string",
+                      "def_v":"1对1教室策略",
+                      "des":"策略名称"
+                 },
+                 "canSendImg":{
+                      "type":"bool",
+                      "def_v":1,
+                      "des":"是否允许发送图片"
+                 }
+        }' class="layui-textarea" lay-verify="required" style="height: 220px;" id="tb_add_sc_template"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item layui-form-text">
+        <label class="layui-form-label">描述</label>
+        <div class="layui-input-block">
+            <textarea placeholder="描述..." class="layui-textarea" id="tb_add_sc_des"></textarea>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_addSC_cancel"
+                id="btn_addSC_cancel" style="margin-left:120px;">取消</button>
+            <button class="layui-btn" lay-submit lay-filter="btn_addSC_commit" id="btn_addSC_commit">提交</button>
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_editSC_cancel"
+                id="btn_editSC_cancel" style="margin-left:120px;">取消</button>
+            <button class="layui-btn" lay-submit lay-filter="btn_editSC_commit" id="btn_editSC_commit">提交</button>
+        </div>
+    </div>
+</form>
+
 <body>
     <script src="./layui/layui.js"></script>
     <script>
@@ -186,6 +232,7 @@
             //添加 新增条件类型和新增条件的处理
             bindAddConditionAboutEvent(form, layer, laypage)
             bindAddUserEvent(form, layer, laypage);//绑定"添加用户"的相关事件
+            bindStrategyEvent(form, layer, laypage);//绑定 决策相关 的处理事件
             //添加tab的相关处理
             ele.on('tab(mainTab)', function (data) {
                 let index = data.index;
@@ -491,6 +538,36 @@
                 arr.push(user);
             })
             return arr;
+        }
+
+        /**
+         * 绑定策略相关的处理事件
+        */
+        function bindStrategyEvent(form, layer, laypage) {
+            form.on("submit(btn_add_strategycategroy)", function (reqData) {
+                showAddStrategyCategroyPanel(form, layer, laypage);//显示添加策略类别面板
+                return false;
+            });
+
+            form.on("submit(btn_forceUseage)", function (reqData) {
+                let sender = reqData.elem;
+                let strategyId = sender.getAttribute("sid") || "-1";
+                strategyId = parseInt(strategyId);
+                if (isNaN(strategyId) == false && strategyId > -1) {
+                    forceStrategyBeUseage(strategyId, function (data, err) {
+                        if (data != null) {
+                            if (data.code == "0") {
+                                layer.alert(data.msg);
+                            } else {
+                                console.error(data.msg);
+                            }
+                        } else {
+                            console.error(err);
+                        }
+                    })
+                }
+                return false;
+            });
         }
 
         /**
@@ -1012,6 +1089,78 @@
         function onStrategyItem_btn_Click(sender) {
             console.log(sender.getAttribute("execType"));
         }
+
+        /**
+         * 显示添加策略类别 的面板
+        */
+        function showAddStrategyCategroyPanel(form, layer, laypage) {
+            let btn_editSC_cancel = document.getElementById("btn_editSC_cancel");
+            btn_editSC_cancel.style.display = "none";
+            let btn_editSC_commit = document.getElementById("btn_editSC_commit");
+            btn_editSC_commit.style.display = "none";
+            let btn_addSC_cancel = document.getElementById("btn_addSC_cancel");
+            btn_addSC_cancel.style.display = "inline-block";
+            let btn_addSC_commit = document.getElementById("btn_addSC_commit");
+            btn_addSC_commit.style.display = "inline-block";
+            form.on("submit(btn_addSC_commit)", function (reqData) {
+                //新增 策略类型
+                let sname = tb_add_scName.value;
+                let templateContent = tb_add_sc_template.value;
+                let jsonObj = JSON.parse(templateContent);
+                if(!jsonObj){
+                    layer.alert("templateContent转json失败，请检查templateContent");
+                    return false;
+                }
+                let scDes = tb_add_sc_des.value;
+                layer.close(openidx);//关闭弹窗
+                addStrategyCategroy(sname,scDes,templateContent, (data, err) => {
+                    if (data != null) {
+                        if (data.code == "0") {
+                            layer.alert("新增策略类别成功")
+                            //更新页面显示
+                            //分页获取用户信息
+                            fillStrategyCategroyList(laypage)
+                        } else {
+                            layer.alert("新增策略类别失败")
+                            console.error(data.msg);
+                        }
+                    } else {
+                        layer.alert("新增策略类别失败")
+                        console.error(err);
+                    }
+                })
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+            form.on("submit(btn_addSC_cancel)", function (reqData) {
+                //取消修改
+                layer.close(openidx);//关闭弹窗
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+
+            //填充内容
+            let tb_add_scName = document.getElementById("tb_add_scName");
+            let tb_add_sc_template = document.getElementById("tb_add_sc_template");
+            let tb_add_sc_des = document.getElementById("tb_add_sc_des")
+            tb_add_scName.value = "";
+            tb_add_sc_template.value = "";
+            tb_add_sc_des.value = "";
+            form.render(null, "panel_addStrategyCategroy");//刷新表单的内容
+
+            //弹出面板
+            let openidx = layer.open({
+                title: "新增策略类别信息",
+                type: 1,
+                area: ['590px', '550px'],
+                content: $('#panel_addStrategyCategroy'),
+                resize: false
+            });
+        }
+        /**
+         * 填充 策略类别信息列表
+        */
+        function fillStrategyCategroyList(){
+
+        }
     </script>
     <div class="layui-tab layui-tab-brief" lay-filter="mainTab">
         <ul class="layui-tab-title">
@@ -1113,7 +1262,8 @@
                                         onclick="javascript:void(0);onStrategyItem_btn_Click(this);" execType="delete"
                                         sid="0">删除策略</div>
                                     <button class="layui-btn layui-btn-sm" style="float:right;margin:10px 20px;"
-                                        lay-submit lay-filter="btn_forceUseage" id="btn_forceUseage">强制即时生效</button>
+                                        lay-submit lay-filter="btn_forceUseage" id="btn_forceUseage"
+                                        sid="0">强制即时生效</button>
                                 </div>
                                 <div class="strategyListItem_bottom"></div>
                             </div>

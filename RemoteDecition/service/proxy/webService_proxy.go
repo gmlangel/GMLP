@@ -46,7 +46,8 @@ func (webs *WebServiceProxy)Start(){
 	//修改跨域访问限制
 	crs := cors.New(cors.Options{
         AllowedOrigins:   []string{"*"}, // allows everything, use that to change the hosts."*"代表允许所有域访问，这是一个数组，可以添加多个域名
-        AllowCredentials: true,
+		AllowCredentials: true,
+		AllowedMethods:[]string{"HEAD","GET","POST"},
 	})
 	webs.app.Use(crs)
 	//开启前端服务监听
@@ -70,14 +71,14 @@ func (webs *WebServiceProxy)Start(){
 	webs.app.Get("AddCondition",allser.AddCondition);//新增条件
 	webs.app.Get("UpdateConditionInfo",allser.UpdateConditionInfo);//更新条件信息接口
 	webs.app.Get("DeleteCondition",allser.DeleteCondition);//删除策略条件接口
-	webs.app.Get("AddStrategyCategroy",allser.AddStrategyCategroy);//新增策略组
-	webs.app.Get("UpdateStrategyCategroy",allser.UpdateStrategyCategroy);//新增策略组
+	webs.app.Post("AddStrategyCategroy",allser.AddStrategyCategroy);//新增策略组
+	webs.app.Post("UpdateStrategyCategroy",allser.UpdateStrategyCategroy);//新增策略组
 	webs.app.Get("DeleteStrategyCategroy",allser.DeleteStrategyCategroy);//删除策略组信息
-	webs.app.Get("AddStrategy",allser.AddStrategy);//新建策略
+	webs.app.Post("AddStrategy",allser.AddStrategy);//新建策略
 	webs.app.Get("EditConditionForStrategy",allser.EditConditionForStrategy);//为策略添加匹配条件
 	webs.app.Get("GetConditionInfoByStrategyID",allser.GetConditionInfoByStrategyID);//查询指定策略对应的匹配条件
 	webs.app.Get("GetStrategyByStrategyCategroyID",allser.GetStrategyByStrategyCategroyID)//根据策略组ID，获取对应的所有策略信息
-	webs.app.Get("UpdateStrategyInfo",allser.UpdateStrategyInfo);//更新策略信息
+	webs.app.Post("UpdateStrategyInfo",allser.UpdateStrategyInfo);//更新策略信息
 	webs.app.Get("DeleteStrategyByID",allser.DeleteStrategyByID);//删除指定id对应的策略
 	webs.app.Get("ForceStrategyBeUseage",allser.ForceStrategyBeUseage);//使策略强制即时生效，即所有在线用户即时更新指定ID对应的策略
 	// //开启后端服务监听
