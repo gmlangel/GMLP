@@ -540,7 +540,7 @@ func(ser *AllService)AddStrategyCategroy(ctx iris.Context){
 	res := &m.CurrentResponse{};
 	if "" != name && "" != templateContent{
 		//校验templateContent是否是JSON内容
-		var tmpJson map[string]interface{}
+		var tmpJson []map[string]interface{}
 		jsonErr := json.Unmarshal([]byte(templateContent),&tmpJson);
 		if nil != jsonErr{
 			res.Code = "-1";
@@ -624,7 +624,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 	res := &m.CurrentResponse{}
 	if nil == err1 && "" != name && "" != des && "" != templateContent{
 		//校验模板格式
-		var jsonObj map[string]interface{};
+		var jsonObj []map[string]interface{};
 		jsonErr := json.Unmarshal([]byte(templateContent),&jsonObj);
 		if nil != jsonErr{
 			res.Code = "-1";

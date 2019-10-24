@@ -199,10 +199,48 @@
     </div>
 </form>
 
+<!-- 新增/编辑策略信息 的模板 -->
+<form style="display:none;width:500px;" class="layui-form" lay-filter="panel_addStrategy" id="panel_addStrategy">
+    <div class="layui-form-item" style="padding-top: 30px;">
+        <label class="layui-form-label">策略名称</label>
+        <div class="layui-input-block">
+            <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input"
+                id="tb_add_SName">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">过期时间</label>
+        <div class="layui-inline">
+            <input type="text" class="layui-input" lay-verify="required" id="tb_add_SDate">
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <label class="layui-form-label">是否启用</label>
+        <div class="layui-input-block">
+            <input type="checkbox" lay-skin="switch" id="tb_add_SEnabled" checked>
+        </div>
+    </div>
+    <div id="StrategyCustomData">
+
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_addStrategy_cancel"
+                id="btn_addStrategy_cancel" style="margin-left:120px;">取消</button>
+            <button class="layui-btn" lay-submit lay-filter="btn_addStrategy_commit"
+                id="btn_addStrategy_commit">提交</button>
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_editStrategy_cancel"
+                id="btn_editStrategy_cancel" style="margin-left:120px;">取消</button>
+            <button class="layui-btn" lay-submit lay-filter="btn_editStrategy_commit"
+                id="btn_editStrategy_commit">提交</button>
+        </div>
+    </div>
+</form>
+
 <body>
     <script src="./layui/layui.js"></script>
     <script>
-        var layer = null, form = null, ele = null, table = null, laypage = null;
+        var layer = null, form = null, ele = null, table = null, laypage = null, laydate = null;
         var table_userList = null;
         var maxUserListLineCount = 15;
         var table_userListCurrentPageID = 1;//用户列表的当前页， 注意这里不要用索引
@@ -227,18 +265,34 @@
         var strategyMap = {};//策略信息字典
         var strategyContentMap = {};
         //一般直接写在一个js文件中
-        layui.use(['layer', 'form', 'element', 'table', 'laypage'], function () {
+        layui.use(['layer', 'form', 'element', 'table', 'laypage', 'laydate'], function () {
             layer = layui.layer
             form = layui.form
             ele = layui.element
             table = layui.table
             laypage = layui.laypage;
+            laydate = layui.laydate;
+
+            laydate.render({
+                elem: '#tb_add_SDate' //指定元素
+                , type: 'datetime'
+            });
             //自定义正则验证
             form.verify({
                 pwdreg: [
                     /^[\S]{6,12}$/
                     , '密码必须6到12位，且不能出现空格'
-                ]
+                ],
+                qujianNumber: function (value, item) {
+                    let v = parseFloat(value);
+                    let mi = item.min || 0;
+                    let ma = item.max || 10000000000;
+                    if (isNaN(v)) {
+                        return "请输入指定范围内的数字"
+                    } else if (v < mi || v > ma) {
+                        return "数值超出范围:" + mi + " - " + ma;
+                    }
+                }
             });
             //添加 新增条件类型和新增条件的处理
             bindAddConditionAboutEvent(form, layer, laypage)
@@ -1147,6 +1201,7 @@
                     deleteSC(sid);
                     break;
                 case "add":
+                    showAddStrategyPanel(sid)
                     break;
             }
         }
@@ -1434,8 +1489,440 @@
         /**
          * 显示新增策略面板
         */
-        function showAddStrategyPanel(form, layui, laypage) {
+        function showAddStrategyPanel(sid) {
+            let strategyCategroyObj = strategyCategroyMap[sid] || {};
+            let key = strategyCategroyObj["baseTemplatePath"] || "";
+            let templateObj = strategyCategroyTemplateMap[key];
+            if (templateObj) {
+                makeAndRefillStrategyForm(templateObj);//重新填充表单的内容
+            } else {
+                layer.alert("策略模板正在加载中，请稍后重试");
+                return;
+            }
+            let btn_editStrategy_cancel = document.getElementById("btn_editStrategy_cancel");
+            btn_editStrategy_cancel.style.display = "none";
+            let btn_editStrategy_commit = document.getElementById("btn_editStrategy_commit");
+            btn_editStrategy_commit.style.display = "none";
+            let btn_addStrategy_cancel = document.getElementById("btn_addStrategy_cancel");
+            btn_addStrategy_cancel.style.display = "inline-block";
+            let btn_addStrategy_commit = document.getElementById("btn_addStrategy_commit");
+            btn_addStrategy_commit.style.display = "inline-block";
+            form.on("submit(btn_addStrategy_commit)", function (reqData) {
+                ////新增 策略类型
+                // let sname = tb_add_scName.value;
+                // let templateContent = tb_add_sc_template.value;
+                // let jsonObj = JSON.parse(templateContent);
+                // if (!jsonObj) {
+                //     layer.alert("templateContent转json失败，请检查templateContent");
+                //     return false;
+                // }
+                // let scDes = tb_add_sc_des.value;
+                layer.close(openidx);//关闭弹窗
+                // addStrategyCategroy(sname, scDes, templateContent, (data, err) => {
+                //     if (data != null) {
+                //         if (data.code == "0") {
+                //             layer.alert("新增策略类别成功")
+                //             //更新页面显示
+                //             //调用“获取全部策略接口”
+                //             getAllStrategyCategroy((data, err) => {
+                //                 if (data != null) {
+                //                     if (data.code == "0") {
+                //                         let arr = data.data;
+                //                         arr.forEach((v, i) => {
+                //                             //增量更新
+                //                             if (!strategyCategroyMap[v.id]) {
+                //                                 let sc = {};
+                //                                 sc.name = v.name;
+                //                                 sc.id = v.id;
+                //                                 sc.des = v.des;
+                //                                 sc.baseTemplatePath = v.baseTemplatePath;
+                //                                 strategyCategroyMap[sc.id] = sc;
+                //                                 loadStrategyCategroyContent(sc.baseTemplatePath);//加载模板内容
+                //                             }
+                //                         })
+                //                         //更新显示列表
+                //                         fillStrategyCategroyList();
+                //                     } else {
+                //                         console.error(data.msg);
+                //                     }
+                //                 } else {
+                //                     console.error(err)
+                //                 }
+                //             })
+                //         } else {
+                //             layer.alert("新增策略类别失败")
+                //             console.error(data.msg);
+                //         }
+                //     } else {
+                //         layer.alert("新增策略类别失败")
+                //         console.error(err);
+                //     }
+                // })
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+            form.on("submit(btn_addStrategy_cancel)", function (reqData) {
+                //取消修改
+                layer.close(openidx);//关闭弹窗
+                return false;//禁止由于提交表单造成的页面刷新
+            })
 
+            //填充内容
+            let tb_add_SName = document.getElementById("tb_add_SName");
+            let tb_add_SDate = document.getElementById("tb_add_SDate");
+            let tb_add_SEnabled = document.getElementById("tb_add_SEnabled")
+            tb_add_SName.value = "";
+            tb_add_SDate.value = "";
+            tb_add_SEnabled.checked = false;
+            form.render(null, "panel_addStrategy");//刷新表单的内容
+
+            //弹出面板
+            let openidx = layer.open({
+                title: "新增策略信息",
+                type: 1,
+                area: '590px',
+                content: $('#panel_addStrategy'),
+                resize: false
+            });
+        }
+
+        //生成并重新填充panel_addStrategy表单的StrategyCustomData容器 的内容
+        function makeAndRefillStrategyForm(templateObj) {
+            let arr = templateObj;
+            let baseContainer = document.getElementById("StrategyCustomData");
+            baseContainer.innerHTML = "";//清空原有内容
+            let nodeType = ""
+            let d1 = null;
+            arr.forEach((v, i) => {
+                nodeType = v.type;
+                switch (nodeType) {
+                    case "string":
+                        d1 = makeStringNode(v);
+                        break;
+                    case "bool":
+                        d1 = makeBoolNode(v);
+                        break;
+                    case "int":
+                        d1 = makeIntNode(v);
+                        break;
+                    case "float":
+                        d1 = makeFloatNode(v);
+                        break;
+                    case "map":
+                        d1 = makeMapNode(v);
+                        break;
+                    case "array<string>":
+                        d1 = makeArrayNode(v, "string");
+                        break;
+                    case "array<int>":
+                        d1 = makeArrayNode(v, "int");
+                        break;
+                    case "array<float>":
+                        d1 = makeArrayNode(v, "float");
+                        break;
+                    case "array<map>":
+                        d1 = makeArrayNode(v, "map");
+                        break;
+                }
+                if (d1) {
+                    baseContainer.appendChild(d1);
+                }
+                d1 = null;
+            })
+        }
+
+        function makeArrayNode(v, t) {
+            let d1 = document.createElement("div");
+            d1.setAttribute("class", "layui-form-item");
+            let l1 = document.createElement("label");
+            l1.innerText = v.des;
+            l1.setAttribute("title", v.name);
+            l1.setAttribute("class", "gml-form-label");//采用多行模式
+            let sd1 = document.createElement("div");
+            sd1.setAttribute("class", "gml-input-block");
+            //遍历v.def_v
+            let arr = v.def_v || [];
+            let sub = null, sub_tb = null;
+            arr.forEach((sv, i) => {
+                switch (t) {
+                    case "string":
+                        sub = document.createElement("div");
+                        sub.setAttribute("class", "gml-input-block");
+                        sub.setAttribute("style", "margin-top:5px;");
+                        sub_tb = document.createElement("input");
+                        sub_tb.setAttribute("type", "text");
+                        sub_tb.setAttribute("lay-verify", "required");
+                        sub_tb.setAttribute("placeholder", sv);
+                        sub_tb.setAttribute("autocomplete", "off");
+                        sub_tb.setAttribute("class", "layui-input");
+                        sub_tb.setAttribute("id", "s_" + v.name + "_" + i);
+                        sub.appendChild(sub_tb);
+                        break;
+                    case "int":
+                        sub = document.createElement("div");
+                        sub.setAttribute("class", "gml-input-block");
+                        sub.setAttribute("style", "margin-top:5px;");
+                        sub_tb = document.createElement("input");
+                        sub_tb.setAttribute("type", "text");
+                        sub_tb.setAttribute("lay-verify", "required|number");
+                        sub_tb.setAttribute("placeholder", sv);
+                        sub_tb.setAttribute("autocomplete", "off");
+                        sub_tb.setAttribute("class", "layui-input");
+                        sub_tb.setAttribute("id", "s_" + v.name + "_" + i);
+                        sub.appendChild(sub_tb);
+                        break;
+                    case "float":
+                        sub = document.createElement("div");
+                        sub.setAttribute("class", "gml-input-block");
+                        sub.setAttribute("style", "margin-top:5px;");
+                        sub_tb = document.createElement("input");
+                        sub_tb.setAttribute("type", "text");
+                        sub_tb.setAttribute("lay-verify", "required|number");
+                        sub_tb.setAttribute("placeholder", sv);
+                        sub_tb.setAttribute("autocomplete", "off");
+                        sub_tb.setAttribute("class", "layui-input");
+                        sub_tb.setAttribute("id", "s_" + v.name + "_" + i);
+                        sub.appendChild(sub_tb);
+                        break;
+                    case "map":
+                        sub = makeSuperMapNode(sv);
+                        break;
+                }
+                if (sub) {
+                    sd1.appendChild(sub);
+                    sub = null;
+                }
+            })
+            d1.appendChild(l1);
+            d1.appendChild(sd1);
+            return d1;
+        }
+        function makeSuperMapNode(v){
+            let sd1 = document.createElement("div");
+            sd1.style.borderRight = "3px";
+            sd1.style.borderRightColor = "#009688"
+            sd1.style.borderRightStyle = "solid";
+            //遍历v.def_v
+            let arr = v || [];
+            let sub = null;
+            arr.forEach((sv, i) => {
+                nodeType = sv.type;
+                switch (nodeType) {
+                    case "string":
+                        sub = makeStringNode(sv);
+                        break;
+                    case "bool":
+                        sub = makeBoolNode(sv);
+                        break;
+                    case "int":
+                        sub = makeIntNode(sv);
+                        break;
+                    case "float":
+                        sub = makeFloatNode(sv);
+                        break;
+                    case "map":
+                        sub = makeMapNode(sv);
+                        break;
+                    case "array<string>":
+                        sub = makeArrayNode(sv, "string");
+                        break;
+                    case "array<bool>":
+                        sub = makeArrayNode(sv, "bool");
+                        break;
+                    case "array<int>":
+                        sub = makeArrayNode(sv, "int");
+                        break;
+                    case "array<float>":
+                        sub = makeArrayNode(sv, "float");
+                        break;
+                    case "array<map>":
+                        sub = makeArrayNode(sv, "map");
+                        break;
+                }
+                if (sub) {
+                    sd1.appendChild(sub);
+                }
+                sub = null;
+            })
+            return sd1;
+        }
+
+        function makeMapNode(v) {
+            let d1 = document.createElement("div");
+            d1.setAttribute("class", "layui-form-item");
+            let l1 = document.createElement("label");
+            l1.innerText = v.des;
+            l1.setAttribute("title", v.name);
+            l1.setAttribute("class", "gml-form-label");//采用多行模式
+            let sd1 = document.createElement("div");
+            sd1.setAttribute("class", "gml-input-block");
+            //遍历v.def_v
+            let arr = v.def_v || [];
+            let sub = null;
+            arr.forEach((sv, i) => {
+                nodeType = sv.type;
+                switch (nodeType) {
+                    case "string":
+                        sub = makeStringNode(sv);
+                        break;
+                    case "bool":
+                        sub = makeBoolNode(sv);
+                        break;
+                    case "int":
+                        sub = makeIntNode(sv);
+                        break;
+                    case "float":
+                        sub = makeFloatNode(sv);
+                        break;
+                    case "map":
+                        sub = makeMapNode(sv);
+                        break;
+                    case "array<string>":
+                        sub = makeArrayNode(sv, "string");
+                        break;
+                    case "array<bool>":
+                        sub = makeArrayNode(sv, "bool");
+                        break;
+                    case "array<int>":
+                        sub = makeArrayNode(sv, "int");
+                        break;
+                    case "array<float>":
+                        sub = makeArrayNode(sv, "float");
+                        break;
+                    case "array<map>":
+                        sub = makeArrayNode(sv, "map");
+                        break;
+                }
+                if (sub) {
+                    sd1.appendChild(sub);
+                }
+                sub = null;
+            })
+            d1.appendChild(l1);
+            d1.appendChild(sd1);
+            return d1;
+        }
+
+        function makeFloatNode(v) {
+            let d1 = document.createElement("div");
+            d1.setAttribute("class", "layui-form-item");
+            let l1 = document.createElement("label");
+            l1.innerText = v.des;
+            l1.setAttribute("title", v.name);
+            let sd1 = document.createElement("div");
+            if (v.des && v.des.length > 4) {
+                l1.setAttribute("class", "gml-form-label");//采用多行模式
+                sd1.setAttribute("class", "gml-input-block");
+            }
+            else {
+                l1.setAttribute("class", "layui-form-label");//采用单行模式
+                sd1.setAttribute("class", "layui-input-block");
+            }
+            let tb1 = document.createElement("input");
+            let min = v.min_v || 0;
+            let max = v.max_v || 1.0;
+            tb1.setAttribute("type", "text");
+            tb1.setAttribute("lay-verify", "required|qujianNumber");
+            tb1.setAttribute("placeholder", v.def_v);
+            tb1.setAttribute("autocomplete", "off");
+            tb1.setAttribute("class", "layui-input");
+            tb1.setAttribute("id", "s_" + v.name);
+            tb1.setAttribute("min", min);
+            tb1.setAttribute("max", max);
+            tb1.value = v.def_v;
+            sd1.appendChild(tb1);
+            d1.appendChild(l1);
+            d1.appendChild(sd1);
+            return d1;
+        }
+
+        function makeIntNode(v) {
+            let d1 = document.createElement("div");
+            d1.setAttribute("class", "layui-form-item");
+            let l1 = document.createElement("label");
+            l1.innerText = v.des;
+            l1.setAttribute("title", v.name);
+            let sd1 = document.createElement("div");
+            if (v.des && v.des.length > 4) {
+                l1.setAttribute("class", "gml-form-label");//采用多行模式
+                sd1.setAttribute("class", "gml-input-block");
+            }
+            else {
+                l1.setAttribute("class", "layui-form-label");//采用单行模式
+                sd1.setAttribute("class", "layui-input-block");
+            }
+            let tb1 = document.createElement("input");
+            let min = v.min_v || 0;
+            let max = v.max_v || 100000000;
+            tb1.setAttribute("type", "text");
+            tb1.setAttribute("lay-verify", "required|qujianNumber");
+            tb1.setAttribute("placeholder", v.def_v);
+            tb1.setAttribute("autocomplete", "off");
+            tb1.setAttribute("class", "layui-input");
+            tb1.setAttribute("id", "s_" + v.name);
+            tb1.setAttribute("min", min);
+            tb1.setAttribute("max", max);
+            tb1.value = v.def_v;
+            sd1.appendChild(tb1);
+            d1.appendChild(l1);
+            d1.appendChild(sd1);
+            return d1;
+        }
+
+        function makeBoolNode(v) {
+            let d1 = document.createElement("div");
+            d1.setAttribute("class", "layui-form-item");
+            let l1 = document.createElement("label");
+            l1.innerText = v.des;
+            l1.setAttribute("title", v.name);
+            let sd1 = document.createElement("div");
+            if (v.des && v.des.length > 40) {
+                l1.setAttribute("class", "gml-form-label");//采用多行模式
+                sd1.setAttribute("class", "gml-input-block");
+            }
+            else {
+                l1.setAttribute("class", "gml-form-label");//采用单行模式
+                l1.setAttribute("style", "float:left;width:auto;padding-right:15px;");//采用单行模式
+                sd1.setAttribute("class", "layui-input-block");
+            }
+            let tb1 = document.createElement("input");
+            tb1.setAttribute("type", "checkbox");
+            tb1.setAttribute("lay-skin", "switch");
+            tb1.setAttribute("id", "s_" + v.name);
+            if (v.def_v == 1) {
+                tb1.setAttribute("checked", "checked");
+            }
+            sd1.appendChild(tb1);
+            d1.appendChild(l1);
+            d1.appendChild(sd1);
+            return d1;
+        }
+
+        function makeStringNode(v) {
+            let d1 = document.createElement("div");
+            d1.setAttribute("class", "layui-form-item");
+            let l1 = document.createElement("label");
+            l1.innerText = v.des;
+            l1.setAttribute("title", v.name);
+            let sd1 = document.createElement("div");
+            if (v.des && v.des.length > 4) {
+                l1.setAttribute("class", "gml-form-label");//采用多行模式
+                sd1.setAttribute("class", "gml-input-block");
+            }
+            else {
+                l1.setAttribute("class", "layui-form-label");//采用单行模式
+                sd1.setAttribute("class", "layui-input-block");
+            }
+            let tb1 = document.createElement("input");
+            tb1.setAttribute("type", "text");
+            tb1.setAttribute("lay-verify", "required");
+            tb1.setAttribute("placeholder", v.def_v);
+            tb1.setAttribute("autocomplete", "off");
+            tb1.setAttribute("class", "layui-input");
+            tb1.setAttribute("id", "s_" + v.name);
+            sd1.appendChild(tb1);
+            d1.appendChild(l1);
+            d1.appendChild(sd1);
+            return d1;
         }
     </script>
     <div class="layui-tab layui-tab-brief" lay-filter="mainTab">
