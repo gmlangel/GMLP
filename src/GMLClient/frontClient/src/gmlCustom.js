@@ -1,3 +1,184 @@
+//根据TemplateObj与StrategyContent重新填充Form
+function reFillStrategyFormByTemplateObjAndStrategyContent(templateObj, StrategyContent) {
+
+    let arr = templateObj;
+    let baseContainer = document.getElementById("StrategyCustomData");
+    baseContainer.innerHTML = "";//清空原有内容
+    let nodeType = "", tmpValue = "";
+    let d1 = null;
+    arr.forEach((v, i) => {
+        nodeType = v.type;
+        tmpValue = StrategyContent[v.name];
+        switch (nodeType) {
+            case "string":
+                d1 = makeStringNode(v, "s_", tmpValue);
+                break;
+            case "bool":
+                d1 = makeBoolNode(v, "s_", tmpValue);
+                break;
+            case "int":
+                d1 = makeIntNode(v, "s_", tmpValue);
+                break;
+            case "float":
+                d1 = makeFloatNode(v, "s_", tmpValue);
+                break;
+            case "map":
+                d1 = makeMapNode(v, "s_",tmpValue);
+                break;
+            case "array<string>":
+                d1 = makeAndRefillArrayNode(v, "string", "s_", tmpValue);
+                break;
+            case "array<int>":
+                d1 = makeAndRefillArrayNode(v, "int", "s_", tmpValue);
+                break;
+            case "array<float>":
+                d1 = makeAndRefillArrayNode(v, "float", "s_", tmpValue);
+                break;
+            case "array<map>":
+                d1 = makeAndRefillArrayNode(v, "map", "s_", tmpValue);
+                break;
+        }
+        if (d1) {
+            baseContainer.appendChild(d1);
+        }
+        d1 = null;
+    })
+
+}
+
+function makeAndRefillArrayNode(v, t, parentName, defValue) {
+    let d1 = document.createElement("div");
+    d1.setAttribute("class", "layui-form-item");
+    let l1 = document.createElement("label");
+    l1.innerText = v.des;
+    l1.setAttribute("title", v.name);
+    l1.setAttribute("class", "gml-form-label");//采用多行模式
+    let sd1 = document.createElement("div");
+    sd1.setAttribute("class", "gml-input-block");
+    //遍历v.def_v
+    let sub = null, sub_tb = null;
+    let arr = null;
+    if (t == "map") {
+        if (defValue && v.def_v[0]) {
+            //有值，则用值与模板进行填充
+            arr = defValue;
+            let sv = v.def_v[0];
+            arr.forEach((dv, i) => {
+                sub = makeAndRefillSuperMapNode(sv, v.name, parentName, dv);
+                if (sub) {
+                    sd1.appendChild(sub);
+                    sub = null;
+                }
+            })
+        } else {
+            //无值，则用模板默认数据填充
+            arr = v.def_v || [];
+            arr.forEach((sv, i) => {
+                sub = makeSuperMapNode(sv, v.name, parentName);
+                if (sub) {
+                    sd1.appendChild(sub);
+                    sub = null;
+                }
+            })
+        }
+    } else {
+        arr = defValue || (v.def_v || []);
+        arr.forEach((sv, i) => {
+            switch (t) {
+                case "string":
+                    sub = document.createElement("div");
+                    sub.setAttribute("class", "gml-input-block");
+                    sub.setAttribute("style", "margin-top:5px;");
+                    sub_tb = document.createElement("input");
+                    sub_tb.setAttribute("type", "text");
+                    sub_tb.setAttribute("lay-verify", "required");
+                    sub_tb.setAttribute("placeholder", sv);
+                    sub_tb.setAttribute("autocomplete", "off");
+                    sub_tb.setAttribute("class", "layui-input");
+                    sub_tb.setAttribute("name", parentName + v.name);
+                    sub_tb.value = sv;
+                    sub.appendChild(sub_tb);
+                    break;
+                case "int":
+                    sub = document.createElement("div");
+                    sub.setAttribute("class", "gml-input-block");
+                    sub.setAttribute("style", "margin-top:5px;");
+                    sub_tb = document.createElement("input");
+                    sub_tb.setAttribute("type", "text");
+                    sub_tb.setAttribute("lay-verify", "required|number");
+                    sub_tb.setAttribute("placeholder", sv);
+                    sub_tb.setAttribute("autocomplete", "off");
+                    sub_tb.setAttribute("class", "layui-input");
+                    sub_tb.setAttribute("name", parentName + v.name);
+                    sub_tb.value = sv;
+                    sub.appendChild(sub_tb);
+                    break;
+                case "float":
+                    sub = document.createElement("div");
+                    sub.setAttribute("class", "gml-input-block");
+                    sub.setAttribute("style", "margin-top:5px;");
+                    sub_tb = document.createElement("input");
+                    sub_tb.setAttribute("type", "text");
+                    sub_tb.setAttribute("lay-verify", "required|number");
+                    sub_tb.setAttribute("placeholder", sv);
+                    sub_tb.setAttribute("autocomplete", "off");
+                    sub_tb.setAttribute("class", "layui-input");
+                    sub_tb.setAttribute("name", parentName + v.name);
+                    sub_tb.value = sv;
+                    sub.appendChild(sub_tb);
+                    break;
+            }
+            if (sub) {
+                sd1.appendChild(sub);
+                sub = null;
+            }
+        })
+    }
+
+    d1.appendChild(l1);
+    d1.appendChild(sd1);
+    return d1;
+}
+function makeAndRefillSuperMapNode(v, name, parentName, defaultValue) {
+    let sd1 = document.createElement("div");
+    sd1.style.borderRight = "3px";
+    sd1.style.borderRightColor = "#009688"
+    sd1.style.borderRightStyle = "solid";
+    let baseKey = parentName + name
+    sd1.setAttribute("name", baseKey);
+    baseKey += "_"
+    //遍历v.def_v
+    let arr = v || [];
+    let sub = null, nodeType = "", tValue = null;
+    arr.forEach((sv, i) => {
+        nodeType = sv.type;
+        tValue = defaultValue[sv.name]
+        switch (nodeType) {
+            case "string":
+                sub = makeStringNode(sv, baseKey, tValue);
+                break;
+            case "bool":
+                sub = makeBoolNode(sv, baseKey, tValue);
+                break;
+            case "int":
+                sub = makeIntNode(sv, baseKey, tValue);
+                break;
+            case "float":
+                sub = makeFloatNode(sv, baseKey, tValue);
+                break;
+            case "map":
+                sub = makeMapNode(sv, baseKey, tValue);
+                break;
+        }
+        if (sub) {
+            sd1.appendChild(sub);
+        }
+        sub = null;
+    })
+    return sd1;
+}
+
+
 //根据TemplateObj生成StrategyContent内容
 function createStrategyContentByTemplateObj(templateObj) {
     let arr = templateObj;
@@ -232,7 +413,7 @@ function makeArrayNode(v, t, parentName) {
     let sub = null, sub_tb = null;
     arr.forEach((sv, i) => {
         switch (t) {
-            case "string": document.getElementsByName
+            case "string":
                 sub = document.createElement("div");
                 sub.setAttribute("class", "gml-input-block");
                 sub.setAttribute("style", "margin-top:5px;");
@@ -294,7 +475,7 @@ function makeSuperMapNode(v, name, parentName) {
     baseKey += "_"
     //遍历v.def_v
     let arr = v || [];
-    let sub = null;
+    let sub = null, nodeType = "";
     arr.forEach((sv, i) => {
         nodeType = sv.type;
         switch (nodeType) {
@@ -322,7 +503,9 @@ function makeSuperMapNode(v, name, parentName) {
     return sd1;
 }
 
-function makeMapNode(v, parentName) {
+function makeMapNode(v, parentName, defValue) {
+    let arrayType = (!!defValue) ? "refill" : "make";
+    let def = defValue || {};
     let d1 = document.createElement("div");
     d1.setAttribute("class", "layui-form-item");
     let baseKey = parentName + v.name
@@ -336,39 +519,55 @@ function makeMapNode(v, parentName) {
     sd1.setAttribute("class", "gml-input-block");
     //遍历v.def_v
     let arr = v.def_v || [];
-    let sub = null;
+    let sub = null, tValue = null;
     arr.forEach((sv, i) => {
         nodeType = sv.type;
+        tValue = def[sv.name];
         switch (nodeType) {
             case "string":
-                sub = makeStringNode(sv, baseKey);
+                sub = makeStringNode(sv, baseKey, tValue);
                 break;
             case "bool":
-                sub = makeBoolNode(sv, baseKey);
+                sub = makeBoolNode(sv, baseKey, tValue);
                 break;
             case "int":
-                sub = makeIntNode(sv, baseKey);
+                sub = makeIntNode(sv, baseKey, tValue);
                 break;
             case "float":
-                sub = makeFloatNode(sv, baseKey);
+                sub = makeFloatNode(sv, baseKey, tValue);
                 break;
             case "map":
-                sub = makeMapNode(sv, baseKey);
+                sub = makeMapNode(sv, baseKey, tValue);
                 break;
             case "array<string>":
-                sub = makeArrayNode(sv, "string", baseKey);
+                if (arrayType == "refill")
+                    sub = makeAndRefillArrayNode(sv, "string", baseKey, tValue);//创建并用值进行填充
+                else
+                    sub = makeArrayNode(sv, "string", baseKey);//创建并用 模板默认值填充
                 break;
             case "array<bool>":
-                sub = makeArrayNode(sv, "bool", baseKey);
+                if (arrayType == "refill")
+                    sub = makeAndRefillArrayNode(sv, "bool", baseKey, tValue);//创建并用值进行填充
+                else
+                    sub = makeArrayNode(sv, "bool", baseKey);//创建并用 模板默认值填充
                 break;
             case "array<int>":
-                sub = makeArrayNode(sv, "int", baseKey);
+                if (arrayType == "refill")
+                    sub = makeAndRefillArrayNode(sv, "int", baseKey, tValue);//创建并用值进行填充
+                else
+                    sub = makeArrayNode(sv, "int", baseKey);//创建并用 模板默认值填充
                 break;
             case "array<float>":
-                sub = makeArrayNode(sv, "float", baseKey);
+                if (arrayType == "refill")
+                    sub = makeAndRefillArrayNode(sv, "float", baseKey, tValue);//创建并用值进行填充
+                else
+                    sub = makeArrayNode(sv, "float", baseKey);//创建并用 模板默认值填充
                 break;
             case "array<map>":
-                sub = makeArrayNode(sv, "map", baseKey);
+                if (arrayType == "refill")
+                    sub = makeAndRefillArrayNode(sv, "map", baseKey, tValue);//创建并用值进行填充
+                else
+                    sub = makeArrayNode(sv, "map", baseKey);//创建并用 模板默认值填充
                 break;
         }
         if (sub) {
@@ -381,7 +580,7 @@ function makeMapNode(v, parentName) {
     return d1;
 }
 
-function makeFloatNode(v, parentName) {
+function makeFloatNode(v, parentName, defValue) {
     let d1 = document.createElement("div");
     d1.setAttribute("class", "layui-form-item");
     let l1 = document.createElement("label");
@@ -408,14 +607,15 @@ function makeFloatNode(v, parentName) {
     tb1.setAttribute("name", parentName + v.name);
     tb1.setAttribute("min", min);
     tb1.setAttribute("max", max);
-    tb1.value = v.def_v;
+    if (defValue)
+        tb1.value = defValue;
     sd1.appendChild(tb1);
     d1.appendChild(l1);
     d1.appendChild(sd1);
     return d1;
 }
 
-function makeIntNode(v, parentName) {
+function makeIntNode(v, parentName, defValue) {
     let d1 = document.createElement("div");
     d1.setAttribute("class", "layui-form-item");
     let l1 = document.createElement("label");
@@ -442,14 +642,15 @@ function makeIntNode(v, parentName) {
     tb1.setAttribute("name", parentName + v.name);
     tb1.setAttribute("min", min);
     tb1.setAttribute("max", max);
-    tb1.value = v.def_v;
+    if (defValue)
+        tb1.value = defValue;
     sd1.appendChild(tb1);
     d1.appendChild(l1);
     d1.appendChild(sd1);
     return d1;
 }
 
-function makeBoolNode(v, parentName) {
+function makeBoolNode(v, parentName, defValue) {
     let d1 = document.createElement("div");
     d1.setAttribute("class", "layui-form-item");
     let l1 = document.createElement("label");
@@ -470,7 +671,9 @@ function makeBoolNode(v, parentName) {
     tb1.setAttribute("lay-skin", "switch");
     tb1.setAttribute("id", parentName + v.name);
     tb1.setAttribute("name", parentName + v.name);
-    if (v.def_v == 1) {
+    if (defValue != undefined) {
+        tb1.checked = defValue == 1;
+    } else if (v.def_v == 1) {
         tb1.setAttribute("checked", "checked");
     }
     sd1.appendChild(tb1);
@@ -479,7 +682,7 @@ function makeBoolNode(v, parentName) {
     return d1;
 }
 
-function makeStringNode(v, parentName) {
+function makeStringNode(v, parentName, defValue) {
     let d1 = document.createElement("div");
     d1.setAttribute("class", "layui-form-item");
     let l1 = document.createElement("label");
@@ -502,8 +705,40 @@ function makeStringNode(v, parentName) {
     tb1.setAttribute("class", "layui-input");
     tb1.setAttribute("id", parentName + v.name);
     tb1.setAttribute("name", parentName + v.name);
+    if (defValue)
+        tb1.value = defValue;
     sd1.appendChild(tb1);
     d1.appendChild(l1);
     d1.appendChild(sd1);
     return d1;
 }
+
+/**
+ * 
+ * 生成 2019-10-11 18:30:00的日期字符传
+*/
+function makeDateTimeStr(date, fmt) {
+    if(!date){
+        return "1900-01-01 00:00:00"
+    }
+    var o = {
+        "M+": date.getMonth() + 1,
+        "d+": date.getDate(),
+        "H+": date.getHours(),
+        "m+": date.getMinutes(),
+        "s+": date.getSeconds(),
+        "S+": date.getMilliseconds()
+    };
+    //因为date.getFullYear()出来的结果是number类型的,所以为了让结果变成字符串型，下面有两种方法：
+    if (/(y+)/.test(fmt)) {
+        //第一种：利用字符串连接符“+”给date.getFullYear()+""，加一个空字符串便可以将number类型转换成字符串。
+        fmt = fmt.replace(RegExp.$1, (date.getFullYear() + "").substr(4 - RegExp.$1.length));
+    }
+    for (var k in o) {
+        if (new RegExp("(" + k + ")").test(fmt)) {
+            //第二种：使用String()类型进行强制数据类型转换String(date.getFullYear())，这种更容易理解。
+            fmt = fmt.replace(RegExp.$1, (RegExp.$1.length == 1) ? (o[k]) : (("00" + o[k]).substr(String(o[k]).length)));
+        }
+    }
+    return fmt;
+};

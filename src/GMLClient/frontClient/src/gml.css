@@ -30,7 +30,6 @@ span .layui-icon-about:hover{
 
 .strategyContentList{
     width: 100%;
-    background-color: #f2f2f2;
     clear:both;
 }
 
@@ -38,6 +37,7 @@ span .layui-icon-about:hover{
     margin-top: 5px;
     color:#666;
     font-size: 12px;
+    background-color: #f2f2f2;
 }
 
 .strategyListItem_left{

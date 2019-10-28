@@ -884,7 +884,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 			for _,v:=range(result){
 				item := map[string]interface{}{};
 				for key,nv:=range(v){
-					if "id" == key || "sid" == key || "expireDate" == key || "enabled" == key{
+					if "id" == key || "sid" == key || "expireDate" == key ||"enabled" == key{
 						item[key],err= strconv.ParseUint(string(nv),10,32);
 					}else{
 						item[key] = string(nv);
