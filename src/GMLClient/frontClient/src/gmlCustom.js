@@ -23,7 +23,7 @@ function reFillStrategyFormByTemplateObjAndStrategyContent(templateObj, Strategy
                 d1 = makeFloatNode(v, "s_", tmpValue);
                 break;
             case "map":
-                d1 = makeMapNode(v, "s_",tmpValue);
+                d1 = makeMapNode(v, "s_", tmpValue);
                 break;
             case "array<string>":
                 d1 = makeAndRefillArrayNode(v, "string", "s_", tmpValue);
@@ -50,7 +50,7 @@ function makeAndRefillArrayNode(v, t, parentName, defValue) {
     let d1 = document.createElement("div");
     d1.setAttribute("class", "layui-form-item");
     let l1 = document.createElement("label");
-    l1.innerText = v.des;
+    l1.innerHTML = v.des + '<i class="layui-icon layui-icon-add-circle-fine" style="cursor: pointer;margin-left:5px;font-size: 20px;line-height:20px; color: #009688;" onClick="javascript:void(0);onArrayAdd(this);"  gstruct="' + encodeURI((JSON.stringify(v))) + '" pn="' + parentName + '" gtype="' + t + '"></i>';
     l1.setAttribute("title", v.name);
     l1.setAttribute("class", "gml-form-label");//采用多行模式
     let sd1 = document.createElement("div");
@@ -66,6 +66,13 @@ function makeAndRefillArrayNode(v, t, parentName, defValue) {
             arr.forEach((dv, i) => {
                 sub = makeAndRefillSuperMapNode(sv, v.name, parentName, dv);
                 if (sub) {
+                    //添加操作按钮
+                    sub_btn = document.createElement("i");
+                    sub_btn.setAttribute("class", "layui-icon layui-icon-close-fill");
+                    sub_btn.setAttribute("style", "cursor: pointer;font-size: 24px;line-height:38px; color: #ff5722;float:left;");
+                    sub_btn.setAttribute("onClick", "javascript:void(0);onArrayDel(this);");
+                    sd1.appendChild(sub_btn);
+
                     sd1.appendChild(sub);
                     sub = null;
                 }
@@ -76,6 +83,13 @@ function makeAndRefillArrayNode(v, t, parentName, defValue) {
             arr.forEach((sv, i) => {
                 sub = makeSuperMapNode(sv, v.name, parentName);
                 if (sub) {
+                    //添加操作按钮
+                    sub_btn = document.createElement("i");
+                    sub_btn.setAttribute("class", "layui-icon layui-icon-close-fill");
+                    sub_btn.setAttribute("style", "cursor: pointer;font-size: 24px;line-height:38px; color: #ff5722;float:left;");
+                    sub_btn.setAttribute("onClick", "javascript:void(0);onArrayDel(this);");
+                    sd1.appendChild(sub_btn);
+
                     sd1.appendChild(sub);
                     sub = null;
                 }
@@ -129,6 +143,13 @@ function makeAndRefillArrayNode(v, t, parentName, defValue) {
                     break;
             }
             if (sub) {
+                //添加操作按钮
+                sub_btn = document.createElement("i");
+                sub_btn.setAttribute("class", "layui-icon layui-icon-close-fill");
+                sub_btn.setAttribute("style", "cursor: pointer;font-size: 24px;line-height:38px; color: #ff5722;float:left;");
+                sub_btn.setAttribute("onClick", "javascript:void(0);onArrayDel(this);");
+                sd1.appendChild(sub_btn);
+
                 sd1.appendChild(sub);
                 sub = null;
             }
@@ -399,18 +420,141 @@ function makeAndRefillStrategyForm(templateObj) {
     })
 }
 
+/**
+ * 响应用户点击
+ * 向数组中添加元素
+*/
+function onArrayAdd(sender) {
+
+    let gstruct = sender.getAttribute("gstruct");
+    if (!gstruct)
+        return;
+    gstruct = decodeURI(gstruct);
+    let parentName = sender.getAttribute("pn");//获取父级名称
+    let t = sender.getAttribute("gtype");
+    let v = JSON.parse(gstruct)//获取模板数据结构
+    if (v && parentName) {
+        console.log("arrayAdd===>v=", v, "  parentName=", parentName);
+        let sd1 = sender.parentNode.parentNode.children[1];
+        if (!sd1)
+            return;
+        //遍历v.def_v
+        let arr = (v.def_v && v.def_v.length > 0) ? [v.def_v[0]] : [];
+        let sub = null, sub_tb = null, sub_btn = null;
+        arr.forEach((sv, i) => {
+            switch (t) {
+                case "string":
+                    sub = document.createElement("div");
+                    sub.setAttribute("class", "gml-input-block");
+                    sub.setAttribute("style", "margin-top:5px;");
+                    sub_tb = document.createElement("input");
+                    sub_tb.setAttribute("type", "text");
+                    sub_tb.setAttribute("lay-verify", "required");
+                    sub_tb.setAttribute("placeholder", sv);
+                    sub_tb.setAttribute("autocomplete", "off");
+                    sub_tb.setAttribute("class", "layui-input");
+                    sub_tb.setAttribute("name", parentName + v.name);
+                    sub.appendChild(sub_tb);
+                    break;
+                case "int":
+                    sub = document.createElement("div");
+                    sub.setAttribute("class", "gml-input-block");
+                    sub.setAttribute("style", "margin-top:5px;");
+                    sub_tb = document.createElement("input");
+                    sub_tb.setAttribute("type", "text");
+                    sub_tb.setAttribute("lay-verify", "required|number");
+                    sub_tb.setAttribute("placeholder", sv);
+                    sub_tb.setAttribute("autocomplete", "off");
+                    sub_tb.setAttribute("class", "layui-input");
+                    sub_tb.setAttribute("name", parentName + v.name);
+                    sub.appendChild(sub_tb);
+                    break;
+                case "float":
+                    sub = document.createElement("div");
+                    sub.setAttribute("class", "gml-input-block");
+                    sub.setAttribute("style", "margin-top:5px;");
+                    sub_tb = document.createElement("input");
+                    sub_tb.setAttribute("type", "text");
+                    sub_tb.setAttribute("lay-verify", "required|number");
+                    sub_tb.setAttribute("placeholder", sv);
+                    sub_tb.setAttribute("autocomplete", "off");
+                    sub_tb.setAttribute("class", "layui-input");
+                    sub_tb.setAttribute("name", parentName + v.name);
+                    sub.appendChild(sub_tb);
+                    break;
+                case "map":
+                    sub = makeSuperMapNode(sv, v.name, parentName);
+                    break;
+            }
+            if (sub) {
+                //添加操作按钮
+                sub_btn = document.createElement("i");
+                sub_btn.setAttribute("class", "layui-icon layui-icon-close-fill");
+                sub_btn.setAttribute("style", "cursor: pointer;font-size: 24px;line-height:38px; color: #ff5722;float:left;");
+                sub_btn.setAttribute("onClick", "javascript:void(0);onArrayDel(this);");
+                sd1.appendChild(sub_btn);
+
+                sd1.appendChild(sub);//添加元素
+                sub = null;
+            }
+        })
+        //刷新表单UI的渲染
+        form.render();
+    }
+}
+
+/**
+ * 响应用户点击
+ * 从数组中删除元素
+*/
+function onArrayDel(sender) {
+    //删除用户信息
+    layer.open({
+        title: "删除选项",
+        content: "确定要删除吗？",
+        area: ["300px", "200px"],
+        resize: false,
+        btn: ["确定", "取消"],
+        yes: (index, obj) => {
+            //确定操作
+            let arr = sender.parentNode.children;
+            if (arr) {
+                let j = arr.length;
+                let waitDelNode = null;
+                for (i = 0; i < j; i++) {
+                    if (arr[i] == sender) {
+                        waitDelNode = arr[i + 1];
+                        if (waitDelNode)
+                            sender.parentNode.removeChild(waitDelNode);//移除 item项
+                        sender.parentNode.removeChild(sender);//移除 “删除按钮”
+                        layer.alert("删除成功")
+                        break;
+                    }
+                }
+            }
+        },
+        btn2: (index, obj) => {
+            //取消操作,不用谢任何代码，即可默认关闭layer
+        },
+        btnAlign: "c"/*居中对齐*/
+    })
+
+}
+
+
 function makeArrayNode(v, t, parentName) {
     let d1 = document.createElement("div");
     d1.setAttribute("class", "layui-form-item");
     let l1 = document.createElement("label");
-    l1.innerText = v.des;
+
+    l1.innerHTML = v.des + '<i class="layui-icon layui-icon-add-circle-fine" style="cursor: pointer;margin-left:5px;font-size: 20px;line-height:20px; color: #009688;" onClick="javascript:void(0);onArrayAdd(this);" gstruct="' + encodeURI((JSON.stringify(v))) + '" pn="' + parentName + '" gtype="' + t + '"></i>';
     l1.setAttribute("title", v.name);
     l1.setAttribute("class", "gml-form-label");//采用多行模式
     let sd1 = document.createElement("div");
     sd1.setAttribute("class", "gml-input-block");
     //遍历v.def_v
     let arr = v.def_v || [];
-    let sub = null, sub_tb = null;
+    let sub = null, sub_tb = null, sub_btn = null;
     arr.forEach((sv, i) => {
         switch (t) {
             case "string":
@@ -457,7 +601,14 @@ function makeArrayNode(v, t, parentName) {
                 break;
         }
         if (sub) {
-            sd1.appendChild(sub);
+            //添加操作按钮
+            sub_btn = document.createElement("i");
+            sub_btn.setAttribute("class", "layui-icon layui-icon-close-fill");
+            sub_btn.setAttribute("style", "cursor: pointer;font-size: 24px;line-height:38px; color: #ff5722;float:left;");
+            sub_btn.setAttribute("onClick", "javascript:void(0);onArrayDel(this);");
+            sd1.appendChild(sub_btn);
+
+            sd1.appendChild(sub);//添加元素
             sub = null;
         }
     })
@@ -718,7 +869,7 @@ function makeStringNode(v, parentName, defValue) {
  * 生成 2019-10-11 18:30:00的日期字符传
 */
 function makeDateTimeStr(date, fmt) {
-    if(!date){
+    if (!date) {
         return "1900-01-01 00:00:00"
     }
     var o = {
