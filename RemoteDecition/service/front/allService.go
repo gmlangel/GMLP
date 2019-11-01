@@ -785,7 +785,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 	id,err1:= strconv.ParseUint(ctx.URLParam("id"),10,32); //策略id
 	conditionStr := ctx.URLParam("conditionGroup");//条件id的组合字符传
 	res := &m.CurrentResponse{}
-	if nil  == err1 && "" != conditionStr{
+	if nil  == err1{
 		_,err:= ser.SQL.Exec(fmt.Sprintf("update `Strategy` set `conditionGroup`='%s' where `id`=%d",conditionStr,id))
 		if nil != err{
 			res.Code = "-1";

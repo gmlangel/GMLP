@@ -238,6 +238,51 @@
     </div>
 </form>
 
+
+<!-- 策略信息的条件编辑模板 -->
+<form style="display:none;width:496px;padding-top: 15px;" class="layui-form" lay-filter="panel_bindConditiontoStrategy"
+    id="panel_bindConditiontoStrategy">
+
+    <div class="layui-form-item">
+        <div class="gml-input-block" style="width: 394px;float:left;">
+            <select lay-filter="cTypelist" id="cTypelist">
+                <option value="0">用户组(group)=菲律宾老师 概率100% 1v1教师策略</option>
+                <option value="1">1</option>
+                <option value="1">2</option>
+            </select>
+        </div>
+        <i class="layui-icon layui-icon-face-smile"
+            style="font-size: 26px; color: #1E9FFF;margin-left: 10px;line-height: 36px;"></i>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <select lay-filter="cTypelist" id="cTypelist">
+                <option value="0">请选择</option>
+                <option value="1">1</option>
+                <option value="1">2</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <select lay-filter="cTypelist" id="cTypelist">
+                <option value="0">请选择</option>
+                <option value="1">1</option>
+                <option value="1">2</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_addStrategyCondition_cancel"
+                id="btn_addStrategy_cancel" style="margin-left:70px;">取消</button>
+            <button class="layui-btn" lay-submit lay-filter="btn_addStrategyCondition_commit"
+                id="btn_addStrategy_commit">提交</button>
+        </div>
+    </div>
+</form>
+
+
 <body>
     <script src="./layui/layui.js"></script>
     <script>
@@ -265,6 +310,8 @@
         var strategyCategroyTemplateMap = {};//策略类别的模板存储字典
         var strategyMap = {};//策略信息字典
         var strategyContentMap = {};
+
+        var divTemplateStr = "";
         //一般直接写在一个js文件中
         layui.use(['layer', 'form', 'element', 'table', 'laypage', 'laydate'], function () {
             layer = layui.layer
@@ -1299,10 +1346,16 @@
             if (strategyInfo) {
                 switch (type) {
                     case "editStrategy":
-                        showEditStrategyPanel(strategyInfo.sid,strategyInfo,strategyContentMap[strategyInfo.valuePath]);
+                        showEditStrategyPanel(strategyInfo.sid, strategyInfo, strategyContentMap[strategyInfo.valuePath]);
+                        break;
+                    case "editCondition":
+                        showBindConditionToSrategyPanel(strategyInfo.sid, strategyInfo.id, strategyInfo.conditionGroup);
+                        break;
+                    case "delete":
+                        deleteStrategy(strategyInfo.sid, strategyInfo.id)
                         break;
                 }
-            }else{
+            } else {
                 layui.alert("未找到对应的策略信息")
             }
         }
@@ -1665,6 +1718,142 @@
             });
         }
 
+        //删除策略
+        function deleteStrategy(sid, id) {
+            //删除用户信息
+            layer.open({
+                title: "删除选项",
+                content: "确定要删除吗？",
+                area: ["300px", "200px"],
+                resize: false,
+                btn: ["确定", "取消"],
+                yes: (index, obj) => {
+                    //确定操作
+                    deleteStrategyByID(id, (data, err) => {
+                        if (data != null) {
+                            if (data.code == "0") {
+                                layer.alert("删除成功");
+                                //更新删除对应数据
+                                delete strategyMap[id];
+                                //更新显示列表
+                                fillStrategyList(sid);
+                            } else {
+                                console.error(data.msg);
+                                layer.alert("删除失败");
+                            }
+                        } else {
+                            console.error(err)
+                            layer.alert("删除失败");
+                        }
+                    })
+                },
+                btn2: (index, obj) => {
+                    //取消操作,不用谢任何代码，即可默认关闭layer
+                },
+                btnAlign: "c"/*居中对齐*/
+            })
+        }
+
+        /**
+         * 绑定条件到策略
+        */
+        function showBindConditionToSrategyPanel(sid, id, group) {
+
+            form.on("submit(btn_addStrategyCondition_commit)", function (reqData) {
+                layer.close(openidx);//关闭弹窗
+                let reqConditionArr = [];
+                let nodeArr = document.getElementsByName("panel_bindConditiontoStrategy_combbox");
+                nodeArr.forEach((node, i) => {
+                    if (node.value != "-1" && node.value != undefined && reqConditionArr.indexOf(node.value) < 0) {
+                        reqConditionArr.push(node.value);
+                    }
+                })
+                //更新策略对应的条件信息
+                editConditionForStrategy(id, (reqConditionArr.length > 0 ? reqConditionArr.join(",") : ""), (data, err) => {
+                    if (data != null) {
+                        if (data.code == "0") {
+                            layer.alert("条件绑定成功");
+                            //更新页面显示
+                            let selectedNode = document.getElementById("strategyTitleBar_titleIcon_" + sid)
+                            if (selectedNode) {
+                                selectedNode.setAttribute("execType", "zhedie");
+                                onStrategyTitleBar_btn_Click(selectedNode);//展开选中项
+                            }
+                        } else {
+                            console.error(data.msg);
+                        }
+                    } else {
+                        console.error(err)
+                    }
+                })
+
+
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+            form.on("submit(btn_addStrategyCondition_cancel)", function (reqData) {
+                //取消修改
+                layer.close(openidx);//关闭弹窗
+                return false;//禁止由于提交表单造成的页面刷新
+            })
+            //弹出面板
+            let openidx = layer.open({
+                title: "绑定条件",
+                type: 1,
+                area: '500px',
+                content: $('#panel_bindConditiontoStrategy'),
+                resize: false
+            });
+            //重新填充内容
+            let baseNode = document.getElementById("panel_bindConditiontoStrategy");
+            baseNode.innerHTML = "";
+
+            let listNode = document.createElement("div");
+            listNode.setAttribute("id", "panel_bindConditiontoStrategy_list");
+            baseNode.appendChild(listNode);
+
+            let arr = group.split(",");
+            let conditionID = null, conInfo = null, subItme = null, str = "";
+
+            let gmlCombboxContainer = createCombbox();
+            divTemplateStr = gmlCombboxContainer.innerHTML;//获取div的模板
+
+            //遍历，生成最终界面
+            arr.forEach((v, i) => {
+                if (v.trim() == "")
+                    return;
+                let conditionID = parseInt(v);
+                if (conditionID != undefined) {
+                    subItme = document.createElement("div");
+                    subItme.setAttribute("class", "layui-form-item");
+                    subItme.innerHTML = divTemplateStr.replace('bj=\"' + conditionID + '\"', " selected");
+                    listNode.appendChild(subItme);
+                }
+                subItme = null;
+            })
+
+            //添加按钮
+            let d1 = document.createElement("div");
+            d1.setAttribute("class", "layui-form-item");
+            let l1 = document.createElement("label");
+            l1.innerHTML = '添加条件' + '<i class="layui-icon layui-icon-add-circle-fine" style="cursor: pointer;margin-left:5px;font-size: 20px;line-height:20px; color: #009688;" onClick="javascript:void(0);onArrayAdd2(this);"></i>';
+            l1.setAttribute("class", "gml-form-label");//采用多行模式
+            l1.setAttribute("style", "color:#666;width:300px;");
+            d1.appendChild(l1);
+            baseNode.appendChild(d1);
+
+            let btnToolBar = document.createElement("div");
+            btnToolBar.setAttribute("class", "layui-form-item")
+            btnToolBar.innerHTML = `
+        <div class="layui-input-block">
+            <button class="layui-btn layui-btn-primary" lay-submit lay-filter="btn_addStrategyCondition_cancel"
+                id="btn_addStrategy_cancel" style="margin-left:70px;">取消</button>
+            <button class="layui-btn" lay-submit lay-filter="btn_addStrategyCondition_commit"
+                id="btn_addStrategy_commit">提交</button>
+        </div>`
+            baseNode.appendChild(btnToolBar);
+            //重新渲染表单
+            form.render(null, "panel_bindConditiontoStrategy");
+        }
         /**
          * 显示新增策略面板
         */
@@ -1792,6 +1981,15 @@
                     strategyItem_bottom = document.createElement("div");
                     strategyItem_bottom.setAttribute("class", "strategyListItem_bottom");
                     strategyItem.appendChild(strategyItem_left)
+                    //显示条件信息
+                    if (sgy.conditionGroup.trim() != "") {
+                        let groupArr = sgy.conditionGroup.split(",");
+                        let sssstr = "";
+                        groupArr.forEach((ssv, ssi) => {
+                            sssstr += createConditionDes(ssv, ssi);
+                        })
+                        strategyItem_left.innerHTML += sssstr;
+                    }
                     strategyItem.appendChild(strategyItem_right)
                     strategyItem.appendChild(strategyItem_bottom);
                     baseNode.appendChild(strategyItem);
@@ -1832,7 +2030,7 @@
                 <div>
                     <button class="layui-btn layui-btn-sm" lay-submit lay-filter="btn_add_strategycategroy"
                         id="btn_add_strategycategroy">新增策略类别</button>
-                    <div id="strategyCategroyContainer">
+                    <div id="strategyCategroyContainer" style="width: 786px;">
                         <div class="strategyTitleBar">
                             <span>
                                 <span class="strategyTitleBar_title">1对1教室策略</span>

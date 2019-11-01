@@ -420,12 +420,21 @@ function makeAndRefillStrategyForm(templateObj) {
     })
 }
 
+
+function onArrayAdd2(){
+    let baseNode = document.getElementById("panel_bindConditiontoStrategy_list");
+    subItme = document.createElement("div");
+    subItme.setAttribute("class", "layui-form-item");
+    subItme.innerHTML = divTemplateStr;
+    baseNode.appendChild(subItme);
+    //重新渲染表单
+    form.render(null, "panel_bindConditiontoStrategy");
+}
 /**
  * 响应用户点击
  * 向数组中添加元素
 */
 function onArrayAdd(sender) {
-
     let gstruct = sender.getAttribute("gstruct");
     if (!gstruct)
         return;
@@ -532,6 +541,32 @@ function onArrayDel(sender) {
                     }
                 }
             }
+        },
+        btn2: (index, obj) => {
+            //取消操作,不用谢任何代码，即可默认关闭layer
+        },
+        btnAlign: "c"/*居中对齐*/
+    })
+
+}
+
+
+/**
+ * 响应用户点击
+ * 从数组中删除元素
+*/
+function onArrayDel2(sender) {
+    //删除用户信息
+    layer.open({
+        title: "删除选项",
+        content: "确定要删除吗？",
+        area: ["300px", "200px"],
+        resize: false,
+        btn: ["确定", "取消"],
+        yes: (index, obj) => {
+            //确定操作
+            sender.parentNode.parentNode.removeChild(sender.parentNode);
+            layer.alert("删除成功");
         },
         btn2: (index, obj) => {
             //取消操作,不用谢任何代码，即可默认关闭layer
@@ -893,3 +928,75 @@ function makeDateTimeStr(date, fmt) {
     }
     return fmt;
 };
+
+function createCombbox() {
+    let gmlCombboxContainer = document.createElement("div");
+    gmlCombboxContainer.setAttribute("class", "layui-form-item");
+
+    let btn = document.createElement("i")
+    btn.setAttribute("class", "layui-icon layui-icon-close-fill");
+    btn.setAttribute("style", "cursor: pointer;font-size: 24px; color: #ff5722;margin-left: 10px;line-height: 36px;")
+    btn.setAttribute("onClick", "javascript:void(0);onArrayDel2(this);");
+                
+
+    let gmlCombbox = document.createElement("div");
+    gmlCombbox.setAttribute("class", "gml-input-block");
+    gmlCombbox.setAttribute("style", "width: 394px;float:left;");
+
+    let optionContainer = document.createElement("select");
+    optionContainer.setAttribute("lay-filter", "cTypelist")
+    optionContainer.setAttribute("name", "panel_bindConditiontoStrategy_combbox");
+
+    subItme = document.createElement("option");
+    subItme.setAttribute("value", -1);
+    subItme.innerHTML = "请选择";
+    optionContainer.appendChild(subItme);
+
+    let groupMap = {}, groupDis = null;
+    for (key in conditionMap) {
+        conInfo = conditionMap[key];
+        if (!groupMap[conInfo.zhName]) {
+            //创建新的组
+            groupDis = document.createElement("optgroup")
+            groupDis.setAttribute("label", conInfo.zhName)
+            optionContainer.appendChild(groupDis);//添加到显示列表
+            //记录
+            groupMap[conInfo.zhName] = groupDis;
+        } else {
+            groupDis = groupMap[conInfo.zhName];
+        }
+        subItme = document.createElement("option");
+        subItme.setAttribute("value", key);
+        subItme.setAttribute("bj", conInfo.id);
+        // str = conInfo.zhName + "(" + conInfo.enName + ")&nbsp;=&nbsp;" + conInfo.name + "(" + conInfo.value + ")&nbsp;概率" + (conInfo.probability * 100).toFixed(2) + "%&nbsp;";//样式一
+        str = conInfo.zhName + "&nbsp;&nbsp;" + conInfo.name + "&nbsp;&nbsp;" + conInfo.enName + "=" + conInfo.value + "&nbsp;&nbsp;概率" + (conInfo.probability * 100).toFixed(2) + "%";//样式二 
+        subItme.innerHTML = str;
+        groupDis.appendChild(subItme);
+    }
+    gmlCombbox.appendChild(optionContainer);
+    gmlCombboxContainer.appendChild(gmlCombbox);
+    gmlCombboxContainer.appendChild(btn);
+    return gmlCombboxContainer;
+}
+
+function createConditionDes(value,idx){
+    let result = "";
+    let cid = parseInt(value);
+    if(cid != undefined){
+        let cinfo = conditionMap[cid];
+        if(cinfo){
+            if(idx == 0){
+                result = `<div>
+                <label class="gml_label">匹配条件</label>
+                <label class="gml_label_v">`+cinfo.zhName + `&nbsp;&nbsp;` + cinfo.name + `&nbsp;&nbsp;` + cinfo.enName + `=` + cinfo.value + `&nbsp;&nbsp;概率` + (cinfo.probability * 100).toFixed(2) + `%</label>
+            </div>`
+            }else{
+                result = `<div>
+                <label class="gml_label"></label>
+                <label class="gml_label_v">`+cinfo.zhName + `&nbsp;&nbsp;` + cinfo.name + `&nbsp;&nbsp;` + cinfo.enName + `=` + cinfo.value + `&nbsp;&nbsp;概率` + (cinfo.probability * 100).toFixed(2) + `%</label>
+            </div>`
+            }
+        }
+    }
+    return result;
+}
