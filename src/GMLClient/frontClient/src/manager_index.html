@@ -121,6 +121,14 @@
         </div>
     </div>
     <div class="layui-form-item">
+        <label class="layui-form-label">操作符</label>
+        <div class="layui-input-block">
+            <select lay-filter="cOperatorlist" id="cOperatorlist">
+                <option value="=" title="x等于a">=</option>
+            </select>
+        </div>
+    </div>
+    <div class="layui-form-item">
         <label class="layui-form-label">条件值</label>
         <div class="layui-input-block">
             <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input"
@@ -302,6 +310,15 @@
         var conditionTypeInfoMap = {};//条件信息字典
         var conditionMap = {};//条件数组的条件ID与数组索引的映射表
         var conditionArr = [];//条件信息数组
+        var operatorMap = {
+            "=": "x等于a",
+            ">": "x大于a",
+            "<": "x小于a",
+            ">=": "x大于等于a",
+            "<=": "x小于等于a",
+            "between": "x>=a并且小于等于b",
+            "in": "存在于a,b,c,d,e中"
+        }
         var conditionCount = 0;//总条件数
         var conditionSelectPoint = 0;//条件信息数据的分页起始查询点
 
@@ -857,7 +874,7 @@
                 skin: "nob",
                 even: "true",
                 size: "sm",
-                width: 810,
+                width: 890,
                 limit: maxConditionListLineCount,
                 cols: [
                     [
@@ -870,7 +887,7 @@
                             field: 'name', title: '条件名称', width: 160, sort: false, fixed: 'left', align: 'center', unresize: true, templet: function (d) {
                                 return d.name + '<button type="button" class="layui-btn layui-btn-sm layui-btn-primary" lay-filter="conditionItemShowDes" id="citem_' + d.id + '" cid="' + d.id + '" lay-submit style="border:none;background:none;height:20px;line-height:20px;padding-left:4px;"><i class="layui-icon layui-icon-about"></i></button></span>'
                             }
-                        },
+                        },{ field: 'operator', title: '操作符', width: 80, sort: false, fixed: 'left', align: 'center', unresize: true },
                         { field: 'value', title: '条件值', width: 100, sort: false, fixed: 'left', align: 'center', unresize: true },
                         {
                             field: 'probability', title: '生效几率', width: 100, sort: false, fixed: 'left', align: 'center', unresize: true, templet: function (d) {
@@ -1025,6 +1042,7 @@
                 item.des = v.des;
                 item.id = v.id;
                 item.name = v.name;
+                item.operator = v.operator;
                 item.probability = v.probability;
                 item.value = v.value;
                 item.typeID = v.typeID;
@@ -1055,6 +1073,7 @@
             let tb_add_conditionValue = document.getElementById("tb_add_conditionValue");
             let tb_add_condition_des = document.getElementById("tb_add_condition_des");
             let tb_add_probability = document.getElementById("tb_add_probability");
+            let cOperatorlist = document.getElementById("cOperatorlist");
 
             form.on("submit(btn_editCondition_commit)", function (reqData) {
                 //提交用户修改后的数据
@@ -1066,8 +1085,9 @@
                 tmpProbility = tmpProbility > 1 ? 1 : tmpProbility;
                 let cProbility = tmpProbility;
                 let cTypeID = cTypelist.value;
+                let operator = cOperatorlist.value;
                 layer.close(openidx);//关闭弹窗
-                updateConditionInfo(cTypeID, cName, cValue, cProbility, cDes, conditionData.id, (data, err) => {
+                updateConditionInfo(cTypeID,operator, cName, cValue, cProbility, cDes, conditionData.id, (data, err) => {
                     if (data != null) {
                         if (data.code == "0") {
                             layer.alert("更新条件信息成功")
@@ -1107,6 +1127,15 @@
                 option.appendChild(document.createTextNode(cTypeObj.enName + "(" + cTypeObj.zhName + ")"));
                 cTypelist.appendChild(option);
             }
+            cOperatorlist.innerHTML = "";
+            for (let cKey in operatorMap) {
+                let option = document.createElement("option");
+                if (cKey == conditionData.operator)
+                    option.selected = true;//设置默认选中
+                option.setAttribute("value", cKey);
+                option.appendChild(document.createTextNode(cKey));
+                cOperatorlist.appendChild(option);
+            }
             form.render(null, "panel_addCondition");//刷新表单的内容
 
             //弹出面板
@@ -1136,6 +1165,7 @@
             let tb_add_conditionValue = document.getElementById("tb_add_conditionValue");
             let tb_add_condition_des = document.getElementById("tb_add_condition_des");
             let tb_add_probability = document.getElementById("tb_add_probability");
+            let cOperatorlist = document.getElementById("cOperatorlist");
 
             form.on("submit(btn_addCondition_commit)", function (reqData) {
                 //提交用户修改后的数据
@@ -1147,8 +1177,9 @@
                 tmpProbility = tmpProbility > 1 ? 1 : tmpProbility;
                 let cProbility = tmpProbility;
                 let cTypeID = cTypelist.value;
+                let operator = cOperatorlist.value;
                 layer.close(openidx);//关闭弹窗
-                addCondition(cTypeID, cName, cValue, cProbility, cDes, (data, err) => {
+                addCondition(cTypeID, operator, cName, cValue, cProbility, cDes, (data, err) => {
                     if (data != null) {
                         if (data.code == "0") {
                             layer.alert("新增条件信息成功")
@@ -1187,6 +1218,16 @@
                 option.appendChild(document.createTextNode(cTypeObj.enName + "(" + cTypeObj.zhName + ")"));
                 cTypelist.appendChild(option);
             }
+            cOperatorlist.innerHTML = "";
+            for (let cKey in operatorMap) {
+                let option = document.createElement("option");
+                option.setAttribute("value", cKey);
+                if (cKey == "=")
+                    option.setAttribute("selected", true);
+                    option.appendChild(document.createTextNode(cKey));
+                cOperatorlist.appendChild(option);
+            }
+
             form.render(null, "panel_addCondition");//刷新表单的内容
 
             //弹出面板

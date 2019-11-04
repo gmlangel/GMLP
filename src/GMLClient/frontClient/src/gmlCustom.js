@@ -969,7 +969,7 @@ function createCombbox() {
         subItme.setAttribute("value", key);
         subItme.setAttribute("bj", conInfo.id);
         // str = conInfo.zhName + "(" + conInfo.enName + ")&nbsp;=&nbsp;" + conInfo.name + "(" + conInfo.value + ")&nbsp;概率" + (conInfo.probability * 100).toFixed(2) + "%&nbsp;";//样式一
-        str = conInfo.zhName + "&nbsp;&nbsp;" + conInfo.name + "&nbsp;&nbsp;" + conInfo.enName + "=" + conInfo.value + "&nbsp;&nbsp;概率" + (conInfo.probability * 100).toFixed(2) + "%";//样式二 
+        str = conInfo.zhName + "&nbsp;&nbsp;" + conInfo.name + "&nbsp;&nbsp;" + conInfo.enName + `&nbsp;`+conInfo.operator + `&nbsp;`+ conInfo.value + "&nbsp;&nbsp;概率" + (conInfo.probability * 100).toFixed(2) + "%";//样式二 
         subItme.innerHTML = str;
         groupDis.appendChild(subItme);
     }
@@ -988,12 +988,12 @@ function createConditionDes(value,idx){
             if(idx == 0){
                 result = `<div>
                 <label class="gml_label">匹配条件</label>
-                <label class="gml_label_v">`+cinfo.zhName + `&nbsp;&nbsp;` + cinfo.name + `&nbsp;&nbsp;` + cinfo.enName + `=` + cinfo.value + `&nbsp;&nbsp;概率` + (cinfo.probability * 100).toFixed(2) + `%</label>
+                <label class="gml_label_v">`+cinfo.zhName + `&nbsp;&nbsp;` + cinfo.name + `&nbsp;&nbsp;` + cinfo.enName + `&nbsp;`+cinfo.operator + `&nbsp;`+cinfo.value + `&nbsp;&nbsp;概率` + (cinfo.probability * 100).toFixed(2) + `%</label>
             </div>`
             }else{
                 result = `<div>
                 <label class="gml_label"></label>
-                <label class="gml_label_v">`+cinfo.zhName + `&nbsp;&nbsp;` + cinfo.name + `&nbsp;&nbsp;` + cinfo.enName + `=` + cinfo.value + `&nbsp;&nbsp;概率` + (cinfo.probability * 100).toFixed(2) + `%</label>
+                <label class="gml_label_v">`+cinfo.zhName + `&nbsp;&nbsp;` + cinfo.name + `&nbsp;&nbsp;` + cinfo.enName + `&nbsp;`+cinfo.operator + `&nbsp;`+cinfo.value + `&nbsp;&nbsp;概率` + (cinfo.probability * 100).toFixed(2) + `%</label>
             </div>`
             }
         }

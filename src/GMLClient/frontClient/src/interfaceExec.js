@@ -316,16 +316,18 @@ function addConditionType(zn,en,des,callbackFunc){
  * 添加策略条件
  * http://localhost:8080/AddCondition?cType=1&name=国内用户&value=13&probability=0.5&des=这是描述
  * @param cType int 条件类型
+ * @param operator string 逻辑判断符
  * @param name string 条件名称
  * @param value string 条件值
  * @param probability number 生效几率 0-1之间任意小数
  * @param des string 条件描述
 */
-function addCondition(cType,name,value,probability,des,callbackFunc){
+function addCondition(cType,operator,name,value,probability,des,callbackFunc){
     $.ajax({
         url:interfaceDomain + "AddCondition",
         data:{
             cType:cType,
+            operator:operator,
             name:name,
             value:value,
             probability:probability,
@@ -347,17 +349,19 @@ function addCondition(cType,name,value,probability,des,callbackFunc){
  * 更新策略条件信息
  * http://localhost:8080/UpdateConditionInfo?cType=2&name=%E5%9B%BD%E5%86%85%E7%94%A8%E6%88%B72&value=2&probability=2&id=8
  * @param cType int 条件类型
+ * @param operator string 操作符
  * @param name string 条件名称
  * @param value string 条件值
  * @param probability number 生效几率 0-1之间任意小数
  * @param des string 条件描述
  * @param id int 条件ID
 */
-function updateConditionInfo(cType,name,value,probability,des,id,callbackFunc){
+function updateConditionInfo(cType,operator,name,value,probability,des,id,callbackFunc){
     $.ajax({
         url:interfaceDomain + "UpdateConditionInfo",
         data:{
             cType:cType,
+            operator:operator,
             name:name,
             value:value,
             probability:probability,

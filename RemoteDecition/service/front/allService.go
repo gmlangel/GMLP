@@ -289,10 +289,10 @@ func (ser *AllService)GetAllConditionInfo(ctx iris.Context){
 	res := &m.DataResponse{};
 	if nil == err1 && nil == err2{
 		//开始分页查询
-		queryStr = fmt.Sprintf("select `Condition`.`id`,`Condition`.`typeID`,`ConditionType`.`zhName` ,`ConditionType`.`des` AS `typeDes` ,`Condition`.`value` ,`Condition`.`name` ,`Condition`.`probability` ,`Condition`.`des`    from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` ORDER BY `Condition`.`id` DESC LIMIT %d,%d;",startPoint,readCount)
+		queryStr = fmt.Sprintf("select `Condition`.`id`,`Condition`.`typeID`,`ConditionType`.`zhName` ,`ConditionType`.`des` AS `typeDes` ,`Condition`.`value` ,`Condition`.`name` ,`Condition`.`probability`,`Condition`.`operator` ,`Condition`.`des`    from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` ORDER BY `Condition`.`id` DESC LIMIT %d,%d;",startPoint,readCount)
 	}else{
 		//查询前20条
-		queryStr = fmt.Sprintf("select `Condition`.`id`,`Condition`.`typeID`,`ConditionType`.`zhName` ,`ConditionType`.`des` AS `typeDes` ,`Condition`.`value` ,`Condition`.`name` ,`Condition`.`probability` ,`Condition`.`des`    from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` ORDER BY `Condition`.`id` DESC")
+		queryStr = fmt.Sprintf("select `Condition`.`id`,`Condition`.`typeID`,`ConditionType`.`zhName` ,`ConditionType`.`des` AS `typeDes` ,`Condition`.`value` ,`Condition`.`name` ,`Condition`.`probability`,`Condition`.`operator` ,`Condition`.`des`    from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` ORDER BY `Condition`.`id` DESC")
 	}
 	result,err := ser.SQL.Query(queryStr);
 	if nil != err{
@@ -392,12 +392,13 @@ func (ser *AllService)AddCondition(ctx iris.Context){
 	cType,err1:= ctx.URLParamInt("cType");//条件类型
 	name := ctx.URLParam("name");//条件名称
 	val:= ctx.URLParam("value");//条件对应的值
+	operator := ctx.URLParam("operator");//操作符
 	probability,err2 := strconv.ParseFloat(ctx.URLParam("probability"),32);//条件生效几率
 	des := ctx.URLParam("des");//条件描述
 	res := &m.CurrentResponse{};
 	if nil == err1 && nil == err2 && "" != name && "" != val{
 		//写入数据库
-		_,err:= ser.SQL.Exec(fmt.Sprintf("insert into `Condition`(`typeID`,`value`,`name`,`probability`,`des`) values(%d,'%s','%s',%f,'%s')",cType,val,name,probability,des))
+		_,err:= ser.SQL.Exec(fmt.Sprintf("insert into `Condition`(`typeID`,`value`,`operator`,`name`,`probability`,`des`) values(%d,'%s','%s','%s',%f,'%s')",cType,val,operator,name,probability,des))
 		if nil != err{
 			res.Code = "-1";
 			res.Msg = fmt.Sprintf("新增条件失败,%v",err)
@@ -456,11 +457,12 @@ func (ser *AllService)UpdateConditionInfo(ctx iris.Context){
 	cType,err2:=strconv.ParseUint(ctx.URLParam("cType"),10,32);
 	name := ctx.URLParam("name");
 	val := ctx.URLParam("value");
+	operator := ctx.URLParam("operator");
 	probability,err3 := strconv.ParseFloat(ctx.URLParam("probability"),32);
 	des := ctx.URLParam("des");
 	res := &m.CurrentResponse{}
 	if nil == err1 && nil == err2 && nil == err3 && "" != name && "" != val{
-		result,err := ser.SQL.Exec(fmt.Sprintf("update `Condition` set `typeID`=%d,`value`='%s',`name`='%s',`probability`=%f,`des`='%s' where `id`=%d",cType,val,name,probability,des,id))
+		result,err := ser.SQL.Exec(fmt.Sprintf("update `Condition` set `typeID`=%d,`value`='%s',`operator`='%s',`name`='%s',`probability`=%f,`des`='%s' where `id`=%d",cType,val,operator,name,probability,des,id))
 		if nil != err{
 			res.Code = "-1";
 			res.Msg = fmt.Sprintf("条件信息更新失败,%v",err);
@@ -830,7 +832,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 				 }
 			 }
 			 cidStr := strings.Join(cidArr,",");
-			 result,err=ser.SQL.Query(fmt.Sprintf("select `Condition`.`id` as `ConditionID`,`Condition`.`value`,`Condition`.`name` as `ConditionName`,`Condition`.`probability`,`ConditionType`.`enName`,`ConditionType`.`zhName` from `Condition` left join `ConditionType`  on  `Condition`.`typeID` = `ConditionType`.`id` where `Condition`.`id` in(%s)",cidStr))
+			 result,err=ser.SQL.Query(fmt.Sprintf("select `Condition`.`id` as `ConditionID`,`Condition`.`value`,`Condition`.`operator`,`Condition`.`name` as `ConditionName`,`Condition`.`probability`,`ConditionType`.`enName`,`ConditionType`.`zhName` from `Condition` left join `ConditionType`  on  `Condition`.`typeID` = `ConditionType`.`id` where `Condition`.`id` in(%s)",cidStr))
 			 if nil != err{
 				 res.Code = "-1";
 				 res.Msg = fmt.Sprintf("查询村略对应的条件，失败。%s",err.Error());
