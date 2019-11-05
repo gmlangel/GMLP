@@ -3,6 +3,8 @@ package proxy;
 import(
 	server "../luboService"
 	model "../models"
+	"fmt"
+	"time"
 )
 
 /**
@@ -23,6 +25,7 @@ func NewLoBoSocket()(* LoboSocketProxy){
 启动服务
 */
 func (pro *LoboSocketProxy)GInit(){
+	fmt.Println("I'm LoboSocket, time:",uint32(time.Now().Unix())," version = ","1.0.2");
 	if pro.isInited == true{
 		return;
 	}

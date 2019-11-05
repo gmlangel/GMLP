@@ -1,23 +1,22 @@
 package main;
 
 import(
-	"fmt"
 	"./proxy"
-	"time"
-	"./luboService"
-	//"strings"
+	//"./luboService"
 )
 
 func main(){
 	runloopChan := make(chan int);
-	fmt.Println("I'm Socket's main, time:",uint32(time.Now().Unix())," version = ","1.0.2");
 
-	//开启录播服务
-	socketPro := proxy.NewLoBoSocket();
-	socketPro.GInit();
+	// //开启录播服务
+	// socketPro := proxy.NewLoBoSocket();
+	// socketPro.GInit();
 
-	//开启定时删除过去数据的任务
-	go luboService.ExecDeadLineTask();
-	
+	// //开启定时删除过去数据的任务
+	// go luboService.ExecDeadLineTask();
+
+	//开启RemoteDecition服务
+	rdSocketPro := proxy.NewRemoteDecitionSocket();
+	rdSocketPro.GInit();
 	runloopChan  <- 1;//启动runloop
 }
