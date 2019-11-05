@@ -34,6 +34,8 @@ type RemoteDecitionConnection struct{
 	OnTimeout func (*RemoteDecitionConnection);/*当当前socket超时时触发*/
 	OnError func (*RemoteDecitionConnection);/*当当前socket 发生除了Timeout错误以外，如EOF时触发*/
 	OnSocketCloseComplete func();//当当前socket连接被close完毕后触发的处理函数。
+	CurrentStrategyConfigPath string;
+	CurrentConditionConfigPath string;
 }
 
 
@@ -302,6 +304,9 @@ func (client *RemoteDecitionConnection)_execPackage(jsonByte []byte){
 			case model.C_REQ_S_LEAVEROOM:
 				c2s_logout(client,jsonByte);
 				break;
+			case model.C_REQ_S_STRATEGYCHANGED:
+				c2s_StrategyChanaged(client,jsonByte);
+				break;
 			default:
 				break;
 			}
@@ -362,11 +367,34 @@ func login(client *RemoteDecitionConnection,req model.JoinRoom_c2s){
 			res.FaildMsg = "";
 			client.Write(res);
 			result = true;
+
+			if client.CurrentStrategyConfigPath != "" && client.CurrentConditionConfigPath != ""{
+				//发送策略变更协议，便于客户端更新策略
+				strategyRes := &model.StrategyChanged_s2c_notify{ConditionPath:client.CurrentConditionConfigPath,StrategyPath:client.CurrentStrategyConfigPath,Msg:"{}"}
+				//通知所有客户端
+				client.Write(strategyRes);
+			}
+			
 		}
 	}
 	if result == true{
 		//全新的用户进入教室
 		NewUserClientlogin(client.SID,req.Uid,client);
+	}
+}
+
+
+func c2s_StrategyChanaged(client *RemoteDecitionConnection,jsonByte []byte){
+	var req model.StrategyChanged_c2s;
+	err := json.Unmarshal(jsonByte,&req);
+	if err == nil{
+		client.CurrentStrategyConfigPath = req.ConditionPath;
+		client.CurrentConditionConfigPath = req.StrategyPath;
+		res := &model.StrategyChanged_s2c_notify{ConditionPath:req.ConditionPath,StrategyPath:req.StrategyPath,Msg:req.Msg}
+		//通知所有客户端
+		for _,sock := range ownedConnect{
+			sock.Write(res)
+		}
 	}
 }
 

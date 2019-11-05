@@ -152,17 +152,17 @@ func (sev *RemoteDecitionServer)_openServer(){
 			continue;
 		}
 		//生成socket的管理器
-		luboclient := NewRemoteDecitionConn(sid,newClient);
-		luboclient.OnTimeout = func(cli * RemoteDecitionConnection){
+		remoteDecitionclient := NewRemoteDecitionConn(sid,newClient);
+		remoteDecitionclient.OnTimeout = func(cli * RemoteDecitionConnection){
 			DestroySocket(cli,nil);//释放socket
 		}
-		luboclient.OnError = func(cli * RemoteDecitionConnection){
+		remoteDecitionclient.OnError = func(cli * RemoteDecitionConnection){
 			DestroySocket(cli,nil);//释放socket
 		}
 		//塞入无主socket记录集
-		UnOwnedConnect_SetValue(sid,luboclient);
+		UnOwnedConnect_SetValue(sid,remoteDecitionclient);
 		//打印客户端信息
-		fmt.Println("new Client join,Address:",newClient.RemoteAddr().String(), " discription:",luboclient);
+		fmt.Println("new Client join,Address:",newClient.RemoteAddr().String(), " discription:",remoteDecitionclient);
 	}
 }
 
@@ -183,7 +183,7 @@ func DestroySocket(cli * RemoteDecitionConnection,completeFunc func()){
 	res.Reason = "您已经被踢";
 	cli.OnSocketCloseComplete = completeFunc;//设置 cli完成关闭后的处理函数
 	cli.DestroySocket(res);
-	fmt.Println(fmt.Sprintf("sev.unOwnedConnect = %v, sev.ownedConnect = %v, sev.ownedConnectUIDMap = %v",unOwnedConnect,ownedConnect,ownedConnectUIDMap))
+	//fmt.Println(fmt.Sprintf("sev.unOwnedConnect = %v, sev.ownedConnect = %v, sev.ownedConnectUIDMap = %v",unOwnedConnect,ownedConnect,ownedConnectUIDMap))
 	<- destroyChan
 }
 
