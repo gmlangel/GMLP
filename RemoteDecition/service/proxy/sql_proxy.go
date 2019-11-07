@@ -29,7 +29,8 @@ type SQLProxy struct{
 	LogLevel core.LogLevel//日志级别
 	SqlHeartOffset time.Duration//心跳间隔
 	sqlEngine *xorm.Engine//数据库引擎
-	isConnected bool//是否已经连接成功
+	IsConnected bool//是否已经连接成功
+	OnLinkComplete func()
 }
 
 func (sp *SQLProxy)sqlHeart(){
@@ -50,7 +51,11 @@ func (sp *SQLProxy)Start(){
 		sp.sqlEngine.Logger().SetLevel(sp.LogLevel);//控制台打印sql日志
 		sp.sqlEngine.SetMaxIdleConns(sp.MaxIdleConns);//设置连接池的空闲数大小
 		sp.sqlEngine.SetMaxOpenConns(sp.MaxOpenConns);//设置最大打开连接数
-		sp.isConnected = true;
+		sp.IsConnected = true;
+		if nil != sp.OnLinkComplete{
+			sp.OnLinkComplete();
+			sp.OnLinkComplete = nil;
+		}
 		_,err := sp.sqlEngine.DBMetas();
 		if err != nil{
 			fmt.Printf("错误信息%v",err);
@@ -67,7 +72,7 @@ func (sp *SQLProxy)Start(){
 关闭数据库连接
 */
 func (sp *SQLProxy)Stop(){
-	if sp.isConnected == true{
+	if sp.IsConnected == true{
 		sp.sqlEngine.Close();
 	}
 }

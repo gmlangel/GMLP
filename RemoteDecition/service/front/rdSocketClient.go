@@ -7,10 +7,12 @@ import(
 	"strings"
 	"encoding/json"
 	models "../models"
+	"log"
 )
 
 var(
 	socketTimeoutSecond time.Duration= time.Second * 60;
+	heartBeatTimeSecond time.Duration= time.Second * 50
 	 pkgHead = "<gmlb>";//包头
 	 pkgFoot = "<gmle>";//包尾
 )
@@ -54,7 +56,7 @@ func(rd *RDSocket)startHeartBeat(){
 		//发送心跳数据到远端
 		req := models.HeartBeat_c2s{Cmd:0x00FF0001};
 		rd.Write(req);
-		time.Sleep(socketTimeoutSecond-10);
+		time.Sleep(heartBeatTimeSecond);
 	}
 }
 
@@ -90,7 +92,7 @@ func (rd *RDSocket)runLoopRead(){
 	for rd.isConnected{
 		n,err := sock.Read(buffer);//调用这行代码后，当前read 携程会默认阻塞，直到读取到数据或者timeout或者err之后才会执行下面的代码
 		if err != nil{
-			fmt.Println("socket:,数据读取错误",sock.RemoteAddr().String(), " connection error: ", err.Error());
+			log.Println("socket:,数据读取错误",sock.RemoteAddr().String(), " connection error: ", err.Error());
 			rd.close();
 			go rd.relink();//延时重连
 			// if operr,ok :=err.(*net.OpError);ok == true{
@@ -204,35 +206,40 @@ func (rd *RDSocket)writeToSocket(){
 	if j <= 0{
 		return;
 	}
+	currentIdx := 0;
 	//取一条被写数据
-	arg := rd.waitSendMSGBuffer[0];
-	rd.waitSendMSGBuffer = rd.waitSendMSGBuffer[1:j];
-	//执行写入
-	sock.SetDeadline(time.Now().Add(socketTimeoutSecond));//延长超时时间
-	data,err := json.Marshal(arg);
-	tj := len(data);
-	if err != nil || tj <= 2{
-		fmt.Println("数据转换出错:",err.Error())
-		return;
+	for i,arg := range rd.waitSendMSGBuffer{
+		currentIdx = i+1;
+		//执行写入
+		sock.SetDeadline(time.Now().Add(socketTimeoutSecond));//延长超时时间
+		data,err := json.Marshal(arg);
+		tj := len(data);
+		if err != nil || tj <= 2{
+			fmt.Println("数据转换出错:",err.Error())
+			break;;
+		}
+		data = append([]byte(pkgHead),data...);
+		data = append(data,[]byte(pkgFoot)...);
+		log.Println(" 准备写入socket的数据:",string(data));
+		n,err := sock.Write(data);
+		_ = n;
+		if err != nil{
+			// if operr,ok :=err.(*net.OpError);ok == true{
+			// 	if operr.Timeout() == true && rd.OnTimeout != nil{
+			// 		rd.OnTimeout(lbc);//socket超时， 通知管理器，进行处理
+			// 	}else if rd.OnError != nil{
+			// 		rd.OnError(lbc);//socket错误时， 通知管理器，进行处理
+			// 	}
+			// }else if rd.OnError != nil{
+			// 	rd.OnError(lbc);//socket错误时， 通知管理器，进行处理
+			// }
+			fmt.Println("socket:,数据写入错误",sock.RemoteAddr().String(), " connection error: ", err.Error());
+			rd.close();
+			go rd.relink();//延时重连
+			break;
+		}
 	}
-	data = append([]byte(pkgHead),data...);
-	data = append(data,[]byte(pkgFoot)...);
-	fmt.Println(" 准备写入socket的数据:",string(data));
-	n,err := sock.Write(data);
-	_ = n;
-	if err != nil{
-		// if operr,ok :=err.(*net.OpError);ok == true{
-		// 	if operr.Timeout() == true && rd.OnTimeout != nil{
-		// 		rd.OnTimeout(lbc);//socket超时， 通知管理器，进行处理
-		// 	}else if rd.OnError != nil{
-		// 		rd.OnError(lbc);//socket错误时， 通知管理器，进行处理
-		// 	}
-		// }else if rd.OnError != nil{
-		// 	rd.OnError(lbc);//socket错误时， 通知管理器，进行处理
-		// }
-		fmt.Println("socket:,数据写入错误",sock.RemoteAddr().String(), " connection error: ", err.Error());
-		rd.close();
-		go rd.relink();//延时重连
-		return;
-	}
+
+	rd.waitSendMSGBuffer = rd.waitSendMSGBuffer[currentIdx:j];
+	
 }

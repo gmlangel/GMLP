@@ -27,3 +27,30 @@ type HeartBeat_c2s struct{
     Seq uint32 `json:"seq"`;//数据包的序号，可以为0
     LocalTimeinterval uint32 `json:"lt"`;//客户端发送请求时的UTC时间的秒值
 }
+
+/*策略变更协议*/
+type StrategyChanged_c2s struct{
+	Cmd uint32 `json:"cmd"`
+	ConditionPath string `json:"conditionPath"`
+	StrategyPath string `json:"strategyPath"`
+	Msg string `json:"msg"`
+}
+
+type StrategyInfo struct{
+	Id uint64 `json:"id"`
+	Sid uint64 `json:"sid"`
+	Cgroup string `json:"conditionGroup"`
+	ValuePath string `json:"strategyPath"`
+	Enabled uint64 `json:"enabled"`
+	ExpireDate uint64 `json:"expireDate"`
+	Name string `json:"name"`
+}
+
+type ConditionInfo struct{
+	Id uint64 `json:"id"`
+	Typeid uint64 `json:"typeID"`
+	TypeName string `json:"typeName"`
+	Value string `json:"value"`
+	Operator string `json:"operator"`
+	Probability string `json:"probability"`
+}

@@ -8,12 +8,14 @@ const(
 )
 
 type StrategyChanged_c2s struct{
+	Cmd uint32 `json:"cmd"`
 	ConditionPath string `json:"conditionPath"`
 	StrategyPath string `json:"strategyPath"`
 	Msg string `json:"msg"`
 }
 
 type StrategyChanged_s2c_notify struct{
+	Cmd uint32 `json:"cmd"`
 	ConditionPath string `json:"conditionPath"`
 	StrategyPath string `json:"strategyPath"`
 	Msg string `json:"msg"`

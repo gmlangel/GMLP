@@ -53,6 +53,15 @@ func (webs *WebServiceProxy)Start(){
 	f_loginProxy.Start();//启动login相关服务
 
 	allser := &front.AllService{SQL:sqlpro,Sock:rdsock}
+	if sqlpro.IsConnected{
+		allser.InitData();//直接初始化数据
+	}else{
+		//等待sql启动完成后，加载数据
+		sqlpro.OnLinkComplete = func (){
+			allser.InitData();//直接初始化数据
+		}
+	}
+	
 	webs.app.Get("AddUser",allser.AddUser);//新增后台管理账号
 	webs.app.Get("GetAllRoleType",allser.GetAllRoleType);//查询后台管理账号可选角色
 	webs.app.Get("GetAllAuth",allser.GetAllAuth);//查询后台角色的权限说明

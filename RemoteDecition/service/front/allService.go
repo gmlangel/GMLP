@@ -15,7 +15,65 @@ import(
 type AllService struct{
 	SQL m.SQLInterface;
 	Sock *RDSocket
+	StrategyConfigPath string
+	ConditionConfigPath string
+	strategyArr []m.StrategyInfo
+	conditionArr []m.ConditionInfo
 } 
+
+/**
+初始化数据*/
+func (ser *AllService)InitData(){
+	//请求所有的策略信息，并生成配置文件
+	ser._getAllStrategyInfo();
+	//请求所有的条件信息，并生成配置文件
+	ser._getAllConditionInfo();
+
+	 //通知长连接服务器，策略文件与条件配置文件有更新
+	req := &m.StrategyChanged_c2s{Cmd:0x00FF003C,ConditionPath:"",StrategyPath:"",Msg:""}
+	ser.Sock.Write(req)
+}
+
+func (ser *AllService)_getAllStrategyInfo(){
+	queryStr := "select * from `Strategy`";
+	res,err := ser.SQL.Query(queryStr);
+	var item map[string][]byte;
+	ser.strategyArr = []m.StrategyInfo{}
+	if nil == err{
+		for _,v := range res{
+			item = v;
+			si := m.StrategyInfo{};
+			si.Id,err = strconv.ParseUint(string(item["id"]),10,32);
+			si.Sid,err = strconv.ParseUint(string(item["sid"]),10,32);
+			si.Cgroup = string(item["conditionGroup"])
+			si.ValuePath = string(item["valuePath"])
+			si.Enabled,err = strconv.ParseUint(string(item["enabled"]),10,32);
+			si.ExpireDate,err = strconv.ParseUint(string(item["expireDate"]),10,32);
+			si.Name = string(item["name"])
+			ser.strategyArr = append(ser.strategyArr,si);
+		}
+	}
+	//写入本地文件
+	content,err1 := json.Marshal(ser.strategyArr)
+	if nil == err1{
+		//删除旧的策略配置文件
+		err3 := os.RemoveAll("./static/strategyConfig/");
+		if nil != err3{
+			fmt.Println(err3.Error());
+		}
+		//更新策略的配置文件
+		filepath,err2 := ser.writeToFile(string(content),"./static/strategyConfig/")
+		if nil == err2{
+			ser.StrategyConfigPath = filepath;
+		}
+	}
+	
+}
+
+func (ser *AllService)_getAllConditionInfo(){
+
+}
+
 /**
 添加后台用户
 */

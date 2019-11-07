@@ -108,19 +108,6 @@ func (lbc *RemoteDecitionConnection)writeLastMsgAndCloseSock(arg interface{}){
 	lbc.closeSocket();
 }
 
-/*
-发送数据给客户端
-*/
-func (lbc *RemoteDecitionConnection)Write(arg interface{}){
-	_,isOk := <- lbc.writeChan;
-	if false == isOk{
-		return;
-	}
-	lbc.waitSendMSGBuffer = append(lbc.waitSendMSGBuffer,arg);//向 “等待发送的消息队列中”添加一条消息
-	lbc.writeChan <- 1;
-	go lbc.writeToSocket();//调用消息发送函数
-}
-
 /*检查是否需要关闭客户端socket连接*/
 func (lbc *RemoteDecitionConnection)closeSocket(){
 	lbc.SID = -1;
@@ -140,6 +127,21 @@ func (lbc *RemoteDecitionConnection)closeSocket(){
 	}
 }
 
+/*
+发送数据给客户端
+*/
+func (lbc *RemoteDecitionConnection)Write(arg interface{}){
+	_,isOk := <- lbc.writeChan;
+	if false == isOk{
+		return;
+	}
+	lbc.waitSendMSGBuffer = append(lbc.waitSendMSGBuffer,arg);//向 “等待发送的消息队列中”添加一条消息
+	lbc.writeChan <- 1;
+	go lbc.writeToSocket();//调用消息发送函数
+}
+
+
+
 func (lbc *RemoteDecitionConnection)writeToSocket(){
 	sock := lbc.Sock
 	if sock == nil{
@@ -154,37 +156,40 @@ func (lbc *RemoteDecitionConnection)writeToSocket(){
 		lbc.writeChan <- 1;
 		return;
 	}
-	//取一条被写数据
-	arg := lbc.waitSendMSGBuffer[0];
-	lbc.waitSendMSGBuffer = lbc.waitSendMSGBuffer[1:j];
-	//执行写入
-	sock.SetDeadline(time.Now().Add(socketTimeoutSecond));//延长超时时间
-	data,err := json.Marshal(arg);
-	tj := len(data);
-	if err != nil || tj <= 2{
-		log.Println("sock:",lbc.SID,"数据转换出错:",err.Error())
-		lbc.writeChan <- 1
-		return;
-	}
-	data = append([]byte(pkgHead),data...);
-	data = append(data,[]byte(pkgFoot)...);
-	fmt.Println("sock:",lbc.SID," 准备写入socket的数据:",string(data));
-	n,err := sock.Write(data);
-	_ = n;
-	if err != nil{
-		lbc.writeChan <- 1;
-		if operr,ok :=err.(*net.OpError);ok == true{
-			if operr.Timeout() == true && lbc.OnTimeout != nil{
-				lbc.OnTimeout(lbc);//socket超时， 通知管理器，进行处理
+	
+	currentidx := 0;
+	for i,arg := range lbc.waitSendMSGBuffer{
+		currentidx = i + 1;
+		//取一条被写数据
+		//执行写入
+		sock.SetDeadline(time.Now().Add(socketTimeoutSecond));//延长超时时间
+		data,err := json.Marshal(arg);
+		tj := len(data);
+		if err != nil || tj <= 2{
+			log.Println("sock:",lbc.SID,"数据转换出错:",err.Error())
+			break;
+		}
+		data = append([]byte(pkgHead),data...);
+		data = append(data,[]byte(pkgFoot)...);
+		fmt.Println("sock:",lbc.SID," 准备写入socket的数据:",string(data));
+		n,err := sock.Write(data);
+		_ = n;
+		if err != nil{
+			if operr,ok :=err.(*net.OpError);ok == true{
+				if operr.Timeout() == true && lbc.OnTimeout != nil{
+					lbc.OnTimeout(lbc);//socket超时， 通知管理器，进行处理
+				}else if lbc.OnError != nil{
+					lbc.OnError(lbc);//socket错误时， 通知管理器，进行处理
+				}
 			}else if lbc.OnError != nil{
 				lbc.OnError(lbc);//socket错误时， 通知管理器，进行处理
 			}
-		}else if lbc.OnError != nil{
-			lbc.OnError(lbc);//socket错误时， 通知管理器，进行处理
+			break;
 		}
-		return;
 	}
-	lbc.writeChan <- 1;
+	lbc.waitSendMSGBuffer  = lbc.waitSendMSGBuffer[currentidx:j];//删除已经发送了的数据
+	lbc.writeChan <- 1
+	
 }
 
 /**
@@ -390,7 +395,7 @@ func c2s_StrategyChanaged(client *RemoteDecitionConnection,jsonByte []byte){
 	if err == nil{
 		client.CurrentStrategyConfigPath = req.ConditionPath;
 		client.CurrentConditionConfigPath = req.StrategyPath;
-		res := &model.StrategyChanged_s2c_notify{ConditionPath:req.ConditionPath,StrategyPath:req.StrategyPath,Msg:req.Msg}
+		res := &model.StrategyChanged_s2c_notify{Cmd:model.S_NOTIFY_C_STRATEGYCHANGED,ConditionPath:req.ConditionPath,StrategyPath:req.StrategyPath,Msg:req.Msg}
 		//通知所有客户端
 		for _,sock := range ownedConnect{
 			sock.Write(res)
