@@ -14,6 +14,7 @@ import(
 
 type AllService struct{
 	SQL m.SQLInterface;
+	Sock *RDSocket
 } 
 /**
 添加后台用户

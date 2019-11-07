@@ -12,6 +12,7 @@ var(
 	sqlType = "mysql";
 	sqlFullURL = "gmlmaster:123456@tcp(39.106.135.11:32306)/RemoteDecitionDB?charset=utf8";
 	sqlpro *SQLProxy;
+	rdsock *front.RDSocket;
 	/*sessionManager相关*/
 	sm *sessions.Sessions= sessions.New(
 		sessions.Config{
@@ -39,6 +40,9 @@ func (webs *WebServiceProxy)init(){
 	sqlpro = NewSQL(sqlType,sqlFullURL);
 	go sqlpro.Start();
 
+	//连接远程长连接服务
+	rdsock = front.NewRDSocket();
+	go rdsock.Start("tcp","0.0.0.0:63333");
 }
 
 func (webs *WebServiceProxy)Start(){
@@ -48,7 +52,7 @@ func (webs *WebServiceProxy)Start(){
 	frontSignGroup.Use(f_loginProxy.MW_CheckSinged);//添加登录校验
 	f_loginProxy.Start();//启动login相关服务
 
-	allser := &front.AllService{SQL:sqlpro}
+	allser := &front.AllService{SQL:sqlpro,Sock:rdsock}
 	webs.app.Get("AddUser",allser.AddUser);//新增后台管理账号
 	webs.app.Get("GetAllRoleType",allser.GetAllRoleType);//查询后台管理账号可选角色
 	webs.app.Get("GetAllAuth",allser.GetAllAuth);//查询后台角色的权限说明
@@ -78,6 +82,7 @@ func (webs *WebServiceProxy)Start(){
 	// //signServiceGroup2 := webs.app.Party("/rear/sign");
 	// // rearProxy := rear.LoginService{};
 	// // webs.app.Any("/",frontProxy.WelCome);
+
 }
 
 
