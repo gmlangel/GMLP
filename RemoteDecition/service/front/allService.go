@@ -20,20 +20,28 @@ type AllService struct{
 	ConditionConfigPath string
 	strategyArr []m.StrategyInfo
 	conditionArr []m.ConditionInfo
-	strategyChan chan m.SyncLoopChan
-	conditionChan chan m.SyncLoopChan
+	strategyChan chan int
+	conditionChan chan int
+	strategyChange bool
+	conditionChange bool
 } 
 //Socket长连接处理相关---------------------------------------------------------------------------------
 /**
 初始化数据*/
 func (ser *AllService)InitData(){
-	ser.strategyChan = make(chan m.SyncLoopChan);
-	ser.strategyChan = make(chan m.SyncLoopChan);
+	ser.strategyChan = make(chan int,1);
+	ser.conditionChan = make(chan int,1);
+	ser.strategyChan <- 1;
+	ser.conditionChan <- 1;
 	//请求所有的策略信息，并生成配置文件
 	ser._getAllStrategyInfo();
 	//请求所有的条件信息，并生成配置文件
 	ser._getAllConditionInfo();
-
+	ser.Sock.onLinkComplete = func (){
+		//断线重连后的重发机制
+		ser.sendStrategyChangedToServer();
+		ser.sendConditionChangedToServer();
+	}
 	go ser.syncLoop();//开启监听 策略和条件 的更新通知循环
 }
 
@@ -42,20 +50,28 @@ func (ser *AllService)syncLoop(){
 	//var item m.SyncLoopChan;
 	for{
 		select{
-			case item,isOk:= <- ser.strategyChan:
+			case _,isOk:= <- ser.strategyChan:
 				if isOk == false{
 					break;
 				}
-				ser._updateStrategyConfig();
-				ser.sendStrategyChangedToServer(item.Type,item.IdArr);
-				fmt.Println("1")
-			case item,isOk := <- ser.conditionChan:
-				if isOk == false{
+				if true == ser.strategyChange{
+					ser._saveStrategyConfig();
+					ser.sendStrategyChangedToServer();
+					ser.strategyChange = false;
+					fmt.Println("1")
+				}
+				ser.strategyChan <- 1;
+			case _,isOk2 := <- ser.conditionChan:
+				if isOk2 == false{
 					break;
 				}
-				ser._updateConditionConfig();
-				ser.sendConditionChangedToServer(item.Type,item.IdArr);
-				fmt.Println("2")
+				if true == ser.conditionChange{
+					ser._saveConditionConfig();
+					ser.sendConditionChangedToServer();
+					fmt.Println("2")
+					ser.conditionChange = false;
+				}
+				ser.conditionChan <- 1
 			default:fmt.Println("3");
 		}
 		time.Sleep(time.Second * 60);//每隔60秒，检测一次
@@ -65,9 +81,9 @@ func (ser *AllService)syncLoop(){
 通知长连接服务，策略已更新
 @param gType string "sync" = 同步 ,"add" = 新增 ,"delete" = 删除 , "update" = 更新
 */
-func(ser *AllService)sendStrategyChangedToServer(gType string,IdArr []uint64){
+func(ser *AllService)sendStrategyChangedToServer(){
 	//通知长连接服务器，策略文件与条件配置文件有更新
-	req := &m.StrategyChanged_c2s{Cmd:0x00FF003C,StrategyPath:ser.StrategyConfigPath,Type:gType,IdArr:IdArr}
+	req := &m.StrategyChanged_c2s{Cmd:0x00FF003C,StrategyPath:ser.StrategyConfigPath}
 	ser.Sock.Write(req)
 }
 
@@ -76,9 +92,9 @@ func(ser *AllService)sendStrategyChangedToServer(gType string,IdArr []uint64){
 通知长连接服务，条件已更新
 @param gType string "sync" = 同步 ,"add" = 新增 ,"delete" = 删除 , "update" = 更新
 */
-func(ser *AllService)sendConditionChangedToServer(gType string,IdArr []uint64){
+func(ser *AllService)sendConditionChangedToServer(){
 	//通知长连接服务器，策略文件与条件配置文件有更新
-	req := &m.ConditionChanged_c2s{Cmd:0x00FF003F,ConditionPath:ser.ConditionConfigPath,Type:gType,IdArr:IdArr}
+	req := &m.ConditionChanged_c2s{Cmd:0x00FF003F,ConditionPath:ser.ConditionConfigPath}
 	ser.Sock.Write(req)
 }
 
@@ -88,6 +104,7 @@ func (ser *AllService)_getAllStrategyInfo(){
 	res,err := ser.SQL.Query(queryStr);
 	var item map[string][]byte;
 	ser.strategyArr = []m.StrategyInfo{}
+	md5 := fmt.Sprintf("%v",time.Now().Unix())
 	if nil == err{
 		for _,v := range res{
 			item = v;
@@ -99,14 +116,15 @@ func (ser *AllService)_getAllStrategyInfo(){
 			si.Enabled,err = strconv.ParseUint(string(item["enabled"]),10,32);
 			si.ExpireDate,err = strconv.ParseUint(string(item["expireDate"]),10,32);
 			si.Name = string(item["name"])
+			si.MD5 = md5;
 			ser.strategyArr = append(ser.strategyArr,si);
 		}
 	}
-	ser._updateStrategyConfig();//更新本地文件
-	ser.sendStrategyChangedToServer("sync",[]uint64{});//通知长连接
+	ser._saveStrategyConfig();//更新本地文件
+	ser.sendStrategyChangedToServer();//通知长连接
 }
 
-func (ser *AllService)_updateStrategyConfig(){
+func (ser *AllService)_saveStrategyConfig(){
 	//写入本地文件
 	content,err1 := json.Marshal(ser.strategyArr)
 	if nil == err1{
@@ -128,6 +146,7 @@ func (ser *AllService)_getAllConditionInfo(){
 	res,err := ser.SQL.Query(queryStr);
 	ser.conditionArr = []m.ConditionInfo{};
 	if nil == err{
+		md5 := fmt.Sprintf("%v",time.Now().Unix())
 		for _,v := range res{
 			cItem := m.ConditionInfo{};
 			cItem.Id,_ = strconv.ParseUint(string(v["id"]),10,32);
@@ -136,14 +155,15 @@ func (ser *AllService)_getAllConditionInfo(){
 			cItem.Value = string(v["value"])
 			cItem.Operator = string(v["operator"])
 			cItem.Probability,_ = strconv.ParseFloat(string(v["probability"]),32);
+			cItem.MD5 = md5;
 			ser.conditionArr = append(ser.conditionArr,cItem);
 		}
 	}
-	ser._updateConditionConfig();
-	ser.sendConditionChangedToServer("sync",[]uint64{})//通知长连接，条件发生变更
+	ser._saveConditionConfig();
+	ser.sendConditionChangedToServer()//通知长连接，条件发生变更
 }
 
-func (ser *AllService)_updateConditionConfig(){
+func (ser *AllService)_saveConditionConfig(){
 	content,err2 := json.Marshal(ser.conditionArr)
 		if nil == err2{
 			//删除原有的配置，
@@ -549,18 +569,27 @@ func (ser *AllService)AddCondition(ctx iris.Context){
 			res.Msg = "新增条件成功"
 
 			//更新条件配置数组
-			cItem := m.ConditionInfo{};
 			tid,err := gResult.LastInsertId()
-			if nil == err{
-				cItem.Id = uint64(tid)
-			}
-			cItem.Typeid = uint64(cType);
-			cItem.TypeName = name;
-			cItem.Value = val;
-			cItem.Operator = operator;
-			cItem.Probability = probability;
-			ser.conditionArr = append(ser.conditionArr,cItem);
-			ser.conditionChan <- m.SyncLoopChan{Type:"add",IdArr:[]uint64{cItem.Id}}
+			go func(){
+				_,isOk := <- ser.conditionChan
+				if false == isOk{
+					return;
+				}
+				cItem := m.ConditionInfo{};
+				if nil == err{
+					cItem.Id = uint64(tid)
+				}
+				cItem.Typeid = uint64(cType);
+				cItem.TypeName = name;
+				cItem.Value = val;
+				cItem.Operator = operator;
+				cItem.Probability = probability;
+				md5 := fmt.Sprintf("%v",time.Now().Unix())
+				cItem.MD5 = md5;
+				ser.conditionArr = append(ser.conditionArr,cItem);
+				ser.conditionChange = true;
+				ser.conditionChan <- 1;
+			}()
 		}
 	}else{
 		res.Code = "-1";
@@ -593,16 +622,23 @@ func (ser *AllService)DeleteCondition(ctx iris.Context){
 			res.Code = "0";
 			res.Msg = "条件删除成功"
 
-			//更新条件配置数组
-			delID := uint64(id);
-			gj := len(ser.conditionArr);
-			for gi,gv := range ser.conditionArr{
-				if gv.Id == delID{
-					ser.conditionArr = append(ser.conditionArr[0:gi],ser.conditionArr[gi+1:gj]...);
-					ser.conditionChan <- m.SyncLoopChan{Type:"delete",IdArr:[]uint64{delID}}
-					break;
+			go func(){
+				_,isOk := <- ser.conditionChan
+				if false == isOk{
+					return;
 				}
-			}
+				//更新条件配置数组
+				gj := len(ser.conditionArr);
+				for gi,gv := range ser.conditionArr{
+					if gv.Id == id{
+						ser.conditionArr = append(ser.conditionArr[0:gi],ser.conditionArr[gi+1:gj]...);
+						ser.conditionChange = true;
+						break;
+					}
+				}
+				ser.conditionChan <- 1;
+			}()
+			
 		}else{
 			res.Code = "-1";
 			res.Msg = "条件删除失败，参数id对应的条件不存在或者条件信息未变更导致更新失败"
@@ -636,27 +672,37 @@ func (ser *AllService)UpdateConditionInfo(ctx iris.Context){
 		}else if count,e:=result.RowsAffected();nil == e && count > 0{
 			res.Code = "0";
 			res.Msg = "条件信息更新成功"
-			//更新条件配置文件
-			queryStr := fmt.Sprintf("select `Condition`.`id`,`Condition`.`typeID`,`ConditionType`.`enName` ,`Condition`.`value` ,`Condition`.`probability`,`Condition`.`operator` from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` where `Condition`.`id` = %d",id)
-			res,err := ser.SQL.Query(queryStr);
-			ser.conditionArr = []m.ConditionInfo{};
-			if nil == err &&  len(res) > 0{
-				subV :=res[0];
-				cItem := m.ConditionInfo{};
-				cItem.Id,_ = strconv.ParseUint(string(subV["id"]),10,32);
-				cItem.Typeid,_ = strconv.ParseUint(string(subV["typeID"]),10,32);
-				cItem.TypeName = string(subV["enName"])
-				cItem.Value = string(subV["value"])
-				cItem.Operator = string(subV["operator"])
-				cItem.Probability,_ = strconv.ParseFloat(string(subV["probability"]),32);
-				for gi,gv := range ser.conditionArr{
-					if gv.Id == cItem.Id{
-						ser.conditionArr[gi] = cItem;
-						ser.conditionChan <- m.SyncLoopChan{Type:"update",IdArr:[]uint64{cItem.Id}};
-						break;
+
+			go func(){
+				_,isOk := <- ser.conditionChan
+				if false == isOk{
+					return;
+				}
+				//更新条件配置文件
+				queryStr := fmt.Sprintf("select `Condition`.`id`,`Condition`.`typeID`,`ConditionType`.`enName` ,`Condition`.`value` ,`Condition`.`probability`,`Condition`.`operator` from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` where `Condition`.`id` = %d",id)
+				res,err := ser.SQL.Query(queryStr);
+				if nil == err &&  len(res) > 0{
+					subV :=res[0];
+					cItem := m.ConditionInfo{};
+					cItem.Id,_ = strconv.ParseUint(string(subV["id"]),10,32);
+					cItem.Typeid,_ = strconv.ParseUint(string(subV["typeID"]),10,32);
+					cItem.TypeName = string(subV["enName"])
+					cItem.Value = string(subV["value"])
+					cItem.Operator = string(subV["operator"])
+					cItem.Probability,_ = strconv.ParseFloat(string(subV["probability"]),32);
+					md5 := fmt.Sprintf("%v",time.Now().Unix())
+					cItem.MD5 = md5;
+					for gi,gv := range ser.conditionArr{
+						if gv.Id == cItem.Id{
+							ser.conditionArr[gi] = cItem;
+							ser.conditionChange = true;
+							break;
+						}
 					}
 				}
-			}
+				ser.conditionChan <- 1;
+			}()
+
 
 		}else{
 			res.Code = "-1";
@@ -748,7 +794,7 @@ func(ser *AllService)AddStrategyCategroy(ctx iris.Context){
 				if nil != err{
 					res.Code = "-1";
 					res.Msg = fmt.Sprintf("新建策略组失败，%v",err)
-				}else{
+				}else {
 					res.Code = "0";
 					res.Msg = "新建策略组成功"
 				}
@@ -862,6 +908,8 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 	}
  }
 
+
+
  /**
  删除策略组
  */
@@ -947,13 +995,44 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 				res.Msg = fmt.Sprintf("策略文件创建失败%v",err);
 			}else{
 				//写入数据库
-				_,err := ser.SQL.Exec(fmt.Sprintf("insert into `Strategy`(`name`,`expireDate`,`enabled`,`valuePath`,`sid`) values('%v',%d,%d,'%v',%d)",name,expire,isEnabled,filePath,sid));
+				sqlRes,err := ser.SQL.Exec(fmt.Sprintf("insert into `Strategy`(`name`,`expireDate`,`enabled`,`valuePath`,`sid`) values('%v',%d,%d,'%v',%d)",name,expire,isEnabled,filePath,sid));
 				if nil != err{
 					res.Code = "-1";
 					res.Msg = fmt.Sprintf("创建策略失败,%s",err.Error());
-				}else{
+				}else if count,err := sqlRes.RowsAffected();nil == err && count > 0{
 					res.Code = "0";
 					res.Msg = "创建策略成功"
+					//更新策略配置
+					go func(){
+						_,isOk := <- ser.strategyChan
+						if false == isOk{
+							return
+						}
+						tmpID,err := sqlRes.LastInsertId()
+						if nil == err{
+							querlStr := fmt.Sprintf("select * from `Strategy` where `id` = %d",tmpID)
+							tmpres,err:= ser.SQL.Query(querlStr)
+							if nil == err && len(tmpres) > 0{
+								item := tmpres[0];
+								si := m.StrategyInfo{};
+								si.Id,err = strconv.ParseUint(string(item["id"]),10,32);
+								si.Sid,err = strconv.ParseUint(string(item["sid"]),10,32);
+								si.Cgroup = string(item["conditionGroup"])
+								si.ValuePath = string(item["valuePath"])
+								si.Enabled,err = strconv.ParseUint(string(item["enabled"]),10,32);
+								si.ExpireDate,err = strconv.ParseUint(string(item["expireDate"]),10,32);
+								si.Name = string(item["name"])
+								md5 := fmt.Sprintf("%v",time.Now().Unix())
+								si.MD5 = md5;
+								ser.strategyArr = append(ser.strategyArr,si);
+								ser.strategyChange = true;
+							}
+						}
+						ser.strategyChan <- 1;
+					}()
+				}else{
+					res.Code = "-1";
+					res.Msg = "创建策略失败,数据库插入失败";
 				}
 			}
 		}
@@ -969,6 +1048,8 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 	}
  }
 
+
+
 /**
 为策略编辑匹配条件
 */
@@ -977,10 +1058,30 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 	conditionStr := ctx.URLParam("conditionGroup");//条件id的组合字符传
 	res := &m.CurrentResponse{}
 	if nil  == err1{
-		_,err:= ser.SQL.Exec(fmt.Sprintf("update `Strategy` set `conditionGroup`='%s' where `id`=%d",conditionStr,id))
+		sqlRes,err:= ser.SQL.Exec(fmt.Sprintf("update `Strategy` set `conditionGroup`='%s' where `id`=%d",conditionStr,id))
 		if nil != err{
 			res.Code = "-1";
 			res.Msg = fmt.Sprintf("策略条件变更失败,%s",err.Error())
+		}else if count,err := sqlRes.RowsAffected();nil == err && count > 0{
+			res.Code = "0";
+			res.Msg = "策略条件变更成功"
+			//更新策略配置
+			go func(){
+				_,isOk := <- ser.strategyChan
+				if false == isOk{
+					return
+				}
+				for _,gv := range ser.strategyArr{
+					if gv.Id == id{
+						gv.Cgroup = conditionStr
+						md5 := fmt.Sprintf("%v",time.Now().Unix())
+						gv.MD5 = md5;
+						ser.strategyChange = true;
+						break;
+					}
+				}
+				ser.strategyChan <- 1;
+			}()
 		}else{
 			res.Code = "0";
 			res.Msg = fmt.Sprintf("策略条件变更成功");
@@ -1135,10 +1236,36 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 					res.Msg = fmt.Sprintf("策略文件更新失败%v",err);
 				}else{
 					//写入数据库
-					_,err := ser.SQL.Exec(fmt.Sprintf("update `Strategy` set `name`='%s',`expireDate`=%d,`enabled`=%d,`valuePath`='%s' where `id` = %d",name,expire,isEnabled,filePath,id));
+					sqlRes,err := ser.SQL.Exec(fmt.Sprintf("update `Strategy` set `name`='%s',`expireDate`=%d,`enabled`=%d,`valuePath`='%s' where `id` = %d",name,expire,isEnabled,filePath,id));
 					if nil != err{
 						res.Code = "-1";
 						res.Msg = fmt.Sprintf("更新策略失败,%s",err.Error());
+					}else if count,err := sqlRes.RowsAffected();nil == err && count > 0{
+						res.Code = "0";
+						res.Msg = "更新策略成功"
+						if "" != path{
+							os.Remove(path);//移除旧的策略
+						}
+						//更新策略配置
+						go func(){
+							_,isOk := <- ser.strategyChan
+							if false == isOk{
+								return
+							}
+							for _,gv := range ser.strategyArr{
+								if gv.Id == id{
+									gv.ValuePath = filePath;
+									gv.Enabled = isEnabled;
+									gv.ExpireDate = expire;
+									gv.Name = name
+									md5 := fmt.Sprintf("%v",time.Now().Unix())
+									gv.MD5 = md5;
+									ser.strategyChange = true;
+									break;
+								}
+							}
+							ser.strategyChan <- 1;
+						}()
 					}else{
 						res.Code = "0";
 						res.Msg = "更新策略成功"
@@ -1184,6 +1311,20 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 				if "" != oldPath{
 					os.Remove(oldPath);//删除旧策略文件
 				}
+				go func(){
+					_,isOk := <- ser.strategyChan
+					if false == isOk{
+						return
+					}
+					for gi,gv := range ser.strategyArr{
+						if gv.Id == id{
+							ser.strategyArr = append(ser.strategyArr[0:gi],ser.strategyArr[gi:len(ser.strategyArr)]...)
+							ser.strategyChange = true;
+							break;
+						}
+					}
+					ser.strategyChan <- 1;
+				}()
 			}
 		}
 	}else{
@@ -1202,11 +1343,22 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
  使策略强制即时生效，即所有在线用户即时更新指定ID对应的策略
  **/
  func(ser *AllService)ForceStrategyBeUseage(ctx iris.Context){
-	_,err:=strconv.ParseUint(ctx.URLParam("id"),10,32);
+	id,err:=strconv.ParseUint(ctx.URLParam("id"),10,32);
 	res := &m.CurrentResponse{};
 	if nil == err{
 		res.Code = "0"
 		res.Msg = "策略已即时生效"
+		go func(){
+			_,isOk := <- ser.strategyChan
+			if false == isOk{
+				return
+			}
+			//通知长连接服务，强制策略生效
+			req := &m.ForceStrategyBeUse_c2s{Cmd:0x00FF0041,StrategyPath:ser.StrategyConfigPath,ConditionPath:ser.ConditionConfigPath,StrategyID:id};
+			ser.Sock.Write(req);
+			ser.strategyChan <- 1;
+		}()
+		
 	}else{
 		res.Code = "-1"
 		res.Msg = "策略未能即时生效"

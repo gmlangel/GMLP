@@ -28,20 +28,24 @@ type HeartBeat_c2s struct{
     LocalTimeinterval uint32 `json:"lt"`;//客户端发送请求时的UTC时间的秒值
 }
 
+
+type ForceStrategyBeUse_c2s struct{
+	Cmd uint32 `json:"cmd"`
+	StrategyPath string `json:"strategyPath"`
+	ConditionPath string `json:"conditionPath"`
+	StrategyID uint64 `json:"strategyId"`
+}
+
 /*策略变更协议*/
 type StrategyChanged_c2s struct{
 	Cmd uint32 `json:"cmd"`
 	StrategyPath string `json:"strategyPath"`
-	IdArr []uint64 `json:"idArr"`
-	Type string `json:"type"`
 }
 
 //条件变更协议
 type ConditionChanged_c2s struct{
 	Cmd uint32 `json:"cmd"`
 	ConditionPath string `json:"conditionPath"`
-	IdArr []uint64 `json:"idArr"`
-	Type string `json:"type"`
 }
 
 type StrategyInfo struct{
@@ -52,6 +56,7 @@ type StrategyInfo struct{
 	Enabled uint64 `json:"enabled"`
 	ExpireDate uint64 `json:"expireDate"`
 	Name string `json:"name"`
+	MD5 string `json:"md5"`
 }
 
 type ConditionInfo struct{
@@ -61,9 +66,5 @@ type ConditionInfo struct{
 	Value string `json:"value"`
 	Operator string `json:"operator"`
 	Probability float64 `json:"probability"`
-}
-
-type SyncLoopChan struct{
-	IdArr []uint64
-	Type string
+	MD5 string `json:"md5"`
 }

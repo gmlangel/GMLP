@@ -315,6 +315,9 @@ func (client *RemoteDecitionConnection)_execPackage(jsonByte []byte){
 			case model.C_REQ_S_CONDITIONCHANGED:
 				c2s_ConditionChanaged(client,jsonByte);
 				break;
+			case model.C_REQ_ForceStrategyBeUseage:
+				c2s_ForceStrategyBeUseage(client,jsonByte)
+				break;
 			default:
 				break;
 			}
@@ -378,8 +381,8 @@ func login(client *RemoteDecitionConnection,req model.JoinRoom_c2s){
 
 			if client.CurrentStrategyConfigPath != "" && client.CurrentConditionConfigPath != ""{
 				//发送策略变更协议，便于客户端更新策略
-				strategyRes := &model.StrategyChanged_s2c_notify{Cmd:model.S_NOTIFY_C_STRATEGYCHANGED,StrategyPath:client.CurrentStrategyConfigPath,Type:"sync",IdArr:[]uint64{}};
-				conditionRes := &model.ConditionChanged_s2c_notify{Cmd:model.S_NOTIFY_C_CONDITIONCHANGED,ConditionPath:client.CurrentConditionConfigPath,Type:"sync",IdArr:[]uint64{}};
+				strategyRes := &model.StrategyChanged_s2c_notify{Cmd:model.S_NOTIFY_C_STRATEGYCHANGED,StrategyPath:client.CurrentStrategyConfigPath};
+				conditionRes := &model.ConditionChanged_s2c_notify{Cmd:model.S_NOTIFY_C_CONDITIONCHANGED,ConditionPath:client.CurrentConditionConfigPath};
 				//通知所有客户端
 				client.Write(strategyRes);
 				client.Write(conditionRes);
@@ -399,10 +402,28 @@ func c2s_StrategyChanaged(client *RemoteDecitionConnection,jsonByte []byte){
 	err := json.Unmarshal(jsonByte,&req);
 	if err == nil{
 		client.CurrentStrategyConfigPath = req.StrategyPath;
-		res := &model.StrategyChanged_s2c_notify{Cmd:model.S_NOTIFY_C_STRATEGYCHANGED,StrategyPath:req.StrategyPath,Type:req.Type,IdArr:req.IdArr};
+		res := &model.StrategyChanged_s2c_notify{Cmd:model.S_NOTIFY_C_STRATEGYCHANGED,StrategyPath:req.StrategyPath};
 		//通知所有客户端
 		for _,sock := range ownedConnect{
-			sock.Write(res)
+			if nil != sock{
+				sock.Write(res)
+			}
+		}
+	}
+}
+
+func c2s_ForceStrategyBeUseage(client *RemoteDecitionConnection,jsonByte []byte){
+	var req model.ForceStrategyBeUse_c2s;
+	err := json.Unmarshal(jsonByte,&req);
+	if err == nil{
+		client.CurrentConditionConfigPath = req.ConditionPath;
+		client.CurrentStrategyConfigPath = req.StrategyPath;
+		res := &model.ForceStrategyBeUse_s2c_notify{Cmd:model.S_NOTIFY_C_ForceStrategyBeUseage,ConditionPath:req.ConditionPath,StrategyPath:req.StrategyPath,StrategyID:req.StrategyID};
+		//通知所有客户端
+		for _,sock := range ownedConnect{
+			if nil != sock{
+				sock.Write(res)
+			}
 		}
 	}
 }
@@ -412,10 +433,12 @@ func c2s_ConditionChanaged(client *RemoteDecitionConnection,jsonByte []byte){
 	err := json.Unmarshal(jsonByte,&req);
 	if err == nil{
 		client.CurrentConditionConfigPath = req.ConditionPath;
-		res := &model.ConditionChanged_s2c_notify{Cmd:model.S_NOTIFY_C_CONDITIONCHANGED,ConditionPath:req.ConditionPath,Type:req.Type,IdArr:req.IdArr};
+		res := &model.ConditionChanged_s2c_notify{Cmd:model.S_NOTIFY_C_CONDITIONCHANGED,ConditionPath:req.ConditionPath};
 		//通知所有客户端
 		for _,sock := range ownedConnect{
-			sock.Write(res)
+			if nil != sock{
+				sock.Write(res)
+			}
 		}
 	}
 }

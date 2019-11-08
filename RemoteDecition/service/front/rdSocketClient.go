@@ -28,6 +28,7 @@ type RDSocket struct{
 	waitSendMSGBuffer []interface{};
 	linkType string;//socket连接类型
 	url string;//socket连接地址
+	onLinkComplete func()
 }
 
 func(rd *RDSocket)Start(linkType string,url string){
@@ -45,6 +46,9 @@ func(rd *RDSocket)Start(linkType string,url string){
 		return;
 	}
 	rd.isConnected = true;
+	if nil != rd.onLinkComplete{
+		rd.onLinkComplete();//连接成功后，调用回调
+	}
 	fmt.Println(":connect to server ok")
 	go rd.startHeartBeat();//开启心跳
 	rd.runLoopRead();//开启消息循环
