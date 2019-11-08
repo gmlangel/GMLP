@@ -9,6 +9,7 @@ import(
 	"github.com/satori/go.uuid"
 	"errors"
 	"strings"
+	"time"
 )
 
 
@@ -19,20 +20,68 @@ type AllService struct{
 	ConditionConfigPath string
 	strategyArr []m.StrategyInfo
 	conditionArr []m.ConditionInfo
+	strategyChan chan m.SyncLoopChan
+	conditionChan chan m.SyncLoopChan
 } 
-
+//Socket长连接处理相关---------------------------------------------------------------------------------
 /**
 初始化数据*/
 func (ser *AllService)InitData(){
+	ser.strategyChan = make(chan m.SyncLoopChan);
+	ser.strategyChan = make(chan m.SyncLoopChan);
 	//请求所有的策略信息，并生成配置文件
 	ser._getAllStrategyInfo();
 	//请求所有的条件信息，并生成配置文件
 	ser._getAllConditionInfo();
 
-	 //通知长连接服务器，策略文件与条件配置文件有更新
-	req := &m.StrategyChanged_c2s{Cmd:0x00FF003C,ConditionPath:"",StrategyPath:"",Msg:""}
+	go ser.syncLoop();//开启监听 策略和条件 的更新通知循环
+}
+
+//开启监听 策略和条件 的更新通知循环，每隔60秒检测一次
+func (ser *AllService)syncLoop(){
+	//var item m.SyncLoopChan;
+	for{
+		select{
+			case item,isOk:= <- ser.strategyChan:
+				if isOk == false{
+					break;
+				}
+				ser._updateStrategyConfig();
+				ser.sendStrategyChangedToServer(item.Type,item.IdArr);
+				fmt.Println("1")
+			case item,isOk := <- ser.conditionChan:
+				if isOk == false{
+					break;
+				}
+				ser._updateConditionConfig();
+				ser.sendConditionChangedToServer(item.Type,item.IdArr);
+				fmt.Println("2")
+			default:fmt.Println("3");
+		}
+		time.Sleep(time.Second * 60);//每隔60秒，检测一次
+	}
+}
+/**
+通知长连接服务，策略已更新
+@param gType string "sync" = 同步 ,"add" = 新增 ,"delete" = 删除 , "update" = 更新
+*/
+func(ser *AllService)sendStrategyChangedToServer(gType string,IdArr []uint64){
+	//通知长连接服务器，策略文件与条件配置文件有更新
+	req := &m.StrategyChanged_c2s{Cmd:0x00FF003C,StrategyPath:ser.StrategyConfigPath,Type:gType,IdArr:IdArr}
 	ser.Sock.Write(req)
 }
+
+
+/**
+通知长连接服务，条件已更新
+@param gType string "sync" = 同步 ,"add" = 新增 ,"delete" = 删除 , "update" = 更新
+*/
+func(ser *AllService)sendConditionChangedToServer(gType string,IdArr []uint64){
+	//通知长连接服务器，策略文件与条件配置文件有更新
+	req := &m.ConditionChanged_c2s{Cmd:0x00FF003F,ConditionPath:ser.ConditionConfigPath,Type:gType,IdArr:IdArr}
+	ser.Sock.Write(req)
+}
+
 
 func (ser *AllService)_getAllStrategyInfo(){
 	queryStr := "select * from `Strategy`";
@@ -53,6 +102,11 @@ func (ser *AllService)_getAllStrategyInfo(){
 			ser.strategyArr = append(ser.strategyArr,si);
 		}
 	}
+	ser._updateStrategyConfig();//更新本地文件
+	ser.sendStrategyChangedToServer("sync",[]uint64{});//通知长连接
+}
+
+func (ser *AllService)_updateStrategyConfig(){
 	//写入本地文件
 	content,err1 := json.Marshal(ser.strategyArr)
 	if nil == err1{
@@ -67,13 +121,42 @@ func (ser *AllService)_getAllStrategyInfo(){
 			ser.StrategyConfigPath = filepath;
 		}
 	}
-	
 }
 
 func (ser *AllService)_getAllConditionInfo(){
-
+	queryStr := "select `Condition`.`id`,`Condition`.`typeID`,`ConditionType`.`enName` ,`Condition`.`value` ,`Condition`.`probability`,`Condition`.`operator` from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id`"
+	res,err := ser.SQL.Query(queryStr);
+	ser.conditionArr = []m.ConditionInfo{};
+	if nil == err{
+		for _,v := range res{
+			cItem := m.ConditionInfo{};
+			cItem.Id,_ = strconv.ParseUint(string(v["id"]),10,32);
+			cItem.Typeid,_ = strconv.ParseUint(string(v["typeID"]),10,32);
+			cItem.TypeName = string(v["enName"])
+			cItem.Value = string(v["value"])
+			cItem.Operator = string(v["operator"])
+			cItem.Probability,_ = strconv.ParseFloat(string(v["probability"]),32);
+			ser.conditionArr = append(ser.conditionArr,cItem);
+		}
+	}
+	ser._updateConditionConfig();
+	ser.sendConditionChangedToServer("sync",[]uint64{})//通知长连接，条件发生变更
 }
 
+func (ser *AllService)_updateConditionConfig(){
+	content,err2 := json.Marshal(ser.conditionArr)
+		if nil == err2{
+			//删除原有的配置，
+			os.RemoveAll("./static/conditionConfig/")
+			//存储新的配置
+			fileName,err3 := ser.writeToFile(string(content),"./static/conditionConfig/")
+			if nil == err3{
+				ser.ConditionConfigPath = fileName;
+				
+			}
+		}
+}
+//Webservice处理相关---------------------------------------------------------------------------------
 /**
 添加后台用户
 */
@@ -457,13 +540,27 @@ func (ser *AllService)AddCondition(ctx iris.Context){
 	res := &m.CurrentResponse{};
 	if nil == err1 && nil == err2 && "" != name && "" != val{
 		//写入数据库
-		_,err:= ser.SQL.Exec(fmt.Sprintf("insert into `Condition`(`typeID`,`value`,`operator`,`name`,`probability`,`des`) values(%d,'%s','%s','%s',%f,'%s')",cType,val,operator,name,probability,des))
+		gResult,err:= ser.SQL.Exec(fmt.Sprintf("insert into `Condition`(`typeID`,`value`,`operator`,`name`,`probability`,`des`) values(%d,'%s','%s','%s',%f,'%s')",cType,val,operator,name,probability,des))
 		if nil != err{
 			res.Code = "-1";
 			res.Msg = fmt.Sprintf("新增条件失败,%v",err)
 		}else{
 			res.Code = "0"
 			res.Msg = "新增条件成功"
+
+			//更新条件配置数组
+			cItem := m.ConditionInfo{};
+			tid,err := gResult.LastInsertId()
+			if nil == err{
+				cItem.Id = uint64(tid)
+			}
+			cItem.Typeid = uint64(cType);
+			cItem.TypeName = name;
+			cItem.Value = val;
+			cItem.Operator = operator;
+			cItem.Probability = probability;
+			ser.conditionArr = append(ser.conditionArr,cItem);
+			ser.conditionChan <- m.SyncLoopChan{Type:"add",IdArr:[]uint64{cItem.Id}}
 		}
 	}else{
 		res.Code = "-1";
@@ -495,6 +592,17 @@ func (ser *AllService)DeleteCondition(ctx iris.Context){
 		}else if count,e:=result.RowsAffected();nil == e&& count >0{
 			res.Code = "0";
 			res.Msg = "条件删除成功"
+
+			//更新条件配置数组
+			delID := uint64(id);
+			gj := len(ser.conditionArr);
+			for gi,gv := range ser.conditionArr{
+				if gv.Id == delID{
+					ser.conditionArr = append(ser.conditionArr[0:gi],ser.conditionArr[gi+1:gj]...);
+					ser.conditionChan <- m.SyncLoopChan{Type:"delete",IdArr:[]uint64{delID}}
+					break;
+				}
+			}
 		}else{
 			res.Code = "-1";
 			res.Msg = "条件删除失败，参数id对应的条件不存在或者条件信息未变更导致更新失败"
@@ -528,6 +636,28 @@ func (ser *AllService)UpdateConditionInfo(ctx iris.Context){
 		}else if count,e:=result.RowsAffected();nil == e && count > 0{
 			res.Code = "0";
 			res.Msg = "条件信息更新成功"
+			//更新条件配置文件
+			queryStr := fmt.Sprintf("select `Condition`.`id`,`Condition`.`typeID`,`ConditionType`.`enName` ,`Condition`.`value` ,`Condition`.`probability`,`Condition`.`operator` from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` where `Condition`.`id` = %d",id)
+			res,err := ser.SQL.Query(queryStr);
+			ser.conditionArr = []m.ConditionInfo{};
+			if nil == err &&  len(res) > 0{
+				subV :=res[0];
+				cItem := m.ConditionInfo{};
+				cItem.Id,_ = strconv.ParseUint(string(subV["id"]),10,32);
+				cItem.Typeid,_ = strconv.ParseUint(string(subV["typeID"]),10,32);
+				cItem.TypeName = string(subV["enName"])
+				cItem.Value = string(subV["value"])
+				cItem.Operator = string(subV["operator"])
+				cItem.Probability,_ = strconv.ParseFloat(string(subV["probability"]),32);
+				for gi,gv := range ser.conditionArr{
+					if gv.Id == cItem.Id{
+						ser.conditionArr[gi] = cItem;
+						ser.conditionChan <- m.SyncLoopChan{Type:"update",IdArr:[]uint64{cItem.Id}};
+						break;
+					}
+				}
+			}
+
 		}else{
 			res.Code = "-1";
 			res.Msg = "条件信息更新失败，参数id对应的条件不存在";

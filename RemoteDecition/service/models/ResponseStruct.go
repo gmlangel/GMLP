@@ -31,9 +31,17 @@ type HeartBeat_c2s struct{
 /*策略变更协议*/
 type StrategyChanged_c2s struct{
 	Cmd uint32 `json:"cmd"`
-	ConditionPath string `json:"conditionPath"`
 	StrategyPath string `json:"strategyPath"`
-	Msg string `json:"msg"`
+	IdArr []uint64 `json:"idArr"`
+	Type string `json:"type"`
+}
+
+//条件变更协议
+type ConditionChanged_c2s struct{
+	Cmd uint32 `json:"cmd"`
+	ConditionPath string `json:"conditionPath"`
+	IdArr []uint64 `json:"idArr"`
+	Type string `json:"type"`
 }
 
 type StrategyInfo struct{
@@ -52,5 +60,10 @@ type ConditionInfo struct{
 	TypeName string `json:"typeName"`
 	Value string `json:"value"`
 	Operator string `json:"operator"`
-	Probability string `json:"probability"`
+	Probability float64 `json:"probability"`
+}
+
+type SyncLoopChan struct{
+	IdArr []uint64
+	Type string
 }

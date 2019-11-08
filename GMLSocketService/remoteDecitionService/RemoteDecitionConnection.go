@@ -312,6 +312,9 @@ func (client *RemoteDecitionConnection)_execPackage(jsonByte []byte){
 			case model.C_REQ_S_STRATEGYCHANGED:
 				c2s_StrategyChanaged(client,jsonByte);
 				break;
+			case model.C_REQ_S_CONDITIONCHANGED:
+				c2s_ConditionChanaged(client,jsonByte);
+				break;
 			default:
 				break;
 			}
@@ -375,9 +378,11 @@ func login(client *RemoteDecitionConnection,req model.JoinRoom_c2s){
 
 			if client.CurrentStrategyConfigPath != "" && client.CurrentConditionConfigPath != ""{
 				//发送策略变更协议，便于客户端更新策略
-				strategyRes := &model.StrategyChanged_s2c_notify{ConditionPath:client.CurrentConditionConfigPath,StrategyPath:client.CurrentStrategyConfigPath,Msg:"{}"}
+				strategyRes := &model.StrategyChanged_s2c_notify{Cmd:model.S_NOTIFY_C_STRATEGYCHANGED,StrategyPath:client.CurrentStrategyConfigPath,Type:"sync",IdArr:[]uint64{}};
+				conditionRes := &model.ConditionChanged_s2c_notify{Cmd:model.S_NOTIFY_C_CONDITIONCHANGED,ConditionPath:client.CurrentConditionConfigPath,Type:"sync",IdArr:[]uint64{}};
 				//通知所有客户端
 				client.Write(strategyRes);
+				client.Write(conditionRes);
 			}
 			
 		}
@@ -393,9 +398,21 @@ func c2s_StrategyChanaged(client *RemoteDecitionConnection,jsonByte []byte){
 	var req model.StrategyChanged_c2s;
 	err := json.Unmarshal(jsonByte,&req);
 	if err == nil{
-		client.CurrentStrategyConfigPath = req.ConditionPath;
-		client.CurrentConditionConfigPath = req.StrategyPath;
-		res := &model.StrategyChanged_s2c_notify{Cmd:model.S_NOTIFY_C_STRATEGYCHANGED,ConditionPath:req.ConditionPath,StrategyPath:req.StrategyPath,Msg:req.Msg}
+		client.CurrentStrategyConfigPath = req.StrategyPath;
+		res := &model.StrategyChanged_s2c_notify{Cmd:model.S_NOTIFY_C_STRATEGYCHANGED,StrategyPath:req.StrategyPath,Type:req.Type,IdArr:req.IdArr};
+		//通知所有客户端
+		for _,sock := range ownedConnect{
+			sock.Write(res)
+		}
+	}
+}
+
+func c2s_ConditionChanaged(client *RemoteDecitionConnection,jsonByte []byte){
+	var req model.ConditionChanged_c2s;
+	err := json.Unmarshal(jsonByte,&req);
+	if err == nil{
+		client.CurrentConditionConfigPath = req.ConditionPath;
+		res := &model.ConditionChanged_s2c_notify{Cmd:model.S_NOTIFY_C_CONDITIONCHANGED,ConditionPath:req.ConditionPath,Type:req.Type,IdArr:req.IdArr};
 		//通知所有客户端
 		for _,sock := range ownedConnect{
 			sock.Write(res)
