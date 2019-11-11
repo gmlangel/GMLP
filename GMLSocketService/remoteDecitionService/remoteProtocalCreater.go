@@ -13,11 +13,11 @@ func CreateProtocal(cmd uint32)interface{}{
 	case model.S_RES_C_HEARTBEAT:
 		result = createHeartBeat_s2c()
 		break;
-	case model.S_RES_C_JOINROOM:
-		result = createJoinRoom_s2c();
+	case model.S_RES_C_LOGIN:
+		result = createLogin_s2c();
 		break;
-	case model.S_RES_C_LEAVEROOM:
-		result = createLeaveRoom_s2c();
+	case model.S_RES_C_LOGOUT:
+		result = createlogout_s2c();
 		break;
 	case model.S_NOTIFY_C_OFFLINE:
 		result = createOfflineNotify_s2c();
@@ -38,13 +38,13 @@ func createHeartBeat_s2c()interface{}{
 	return result;
 }
 
-func createJoinRoom_s2c()interface{}{
-	result := &model.JoinRoom_s2c{Cmd:model.S_RES_C_JOINROOM,Rid:0,Code:0,C_Seq:0,FaildMsg:""};
+func createLogin_s2c()interface{}{
+	result := &model.Login_s2c{Cmd:model.S_RES_C_LOGIN,Code:0,C_Seq:0,FaildMsg:""};
 	return result;
 }
 
-func createLeaveRoom_s2c()interface{}{
-	result := &model.LeaveRoom_s2c{Cmd:model.S_RES_C_LEAVEROOM,Rid:0,Uid:0,Code:0};
+func createlogout_s2c()interface{}{
+	result := &model.Logout_s2c{Cmd:model.S_RES_C_LOGOUT,Uid:0,Code:0};
 	return result;
 }
 

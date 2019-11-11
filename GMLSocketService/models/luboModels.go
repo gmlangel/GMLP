@@ -198,6 +198,31 @@ type HeartBeat_s2c struct{
     Servertime uint32 `json:"st"`;//服务器端UTC时间的秒值
 }
 
+type Login_c2s struct{
+    Cmd uint32 `json:"cmd"`
+    Seq uint32 `json:"seq"`;//数据包的序号，可以为0
+    Uid int64 `json:"uid"`;//用户ID
+    NickName string `json:"nn"`;//用户昵称
+}
+
+type Login_s2c struct{
+    Cmd uint32 `json:"cmd"`
+    C_Seq uint32 `json:"c_seq"`;//数据包的序号，可以为0
+    Code uint32 `json:"code"`;//进入教室是否成功0 = 成功 ,262 = 进入room失败,uid无效,263 = 进入room失败,roomId小于0,无效,  code = 14  课程未开始
+    FaildMsg string `json:"fe"`;//报错信息
+}
+
+type Logout_c2s struct{
+    Cmd uint32 `json:"cmd"`
+    Uid int64 `json:"uid"`;//用户ID
+}
+
+type Logout_s2c struct{
+    Cmd uint32 `json:"cmd"`
+    Uid int64 `json:"uid"`;//用户ID
+    Code uint32 `json:"code"`;// 0 = 成功
+}
+
 /*客户端进入教室*/
 type JoinRoom_c2s struct{
     Cmd uint32 `json:"cmd"`

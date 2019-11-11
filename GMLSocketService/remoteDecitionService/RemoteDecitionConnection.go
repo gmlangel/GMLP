@@ -34,8 +34,6 @@ type RemoteDecitionConnection struct{
 	OnTimeout func (*RemoteDecitionConnection);/*当当前socket超时时触发*/
 	OnError func (*RemoteDecitionConnection);/*当当前socket 发生除了Timeout错误以外，如EOF时触发*/
 	OnSocketCloseComplete func();//当当前socket连接被close完毕后触发的处理函数。
-	CurrentStrategyConfigPath string;
-	CurrentConditionConfigPath string;
 }
 
 
@@ -303,10 +301,10 @@ func (client *RemoteDecitionConnection)_execPackage(jsonByte []byte){
 					client.Write(resObj);
 				}
 				break;
-			case model.C_REQ_S_JOINROOM:
+			case model.C_REQ_S_LOGIN:
 				c2s_login(client,jsonByte);
 				break;
-			case model.C_REQ_S_LEAVEROOM:
+			case model.C_REQ_S_LOGOUT:
 				c2s_logout(client,jsonByte);
 				break;
 			case model.C_REQ_S_STRATEGYCHANGED:
@@ -332,7 +330,7 @@ func (client *RemoteDecitionConnection)_execPackage(jsonByte []byte){
 处理进入教室
 */
 func c2s_login(client *RemoteDecitionConnection,jsonByte []byte){
-	var req model.JoinRoom_c2s;
+	var req model.Login_c2s;
 	err := json.Unmarshal(jsonByte,&req);
 	if err == nil{
 		uid := req.Uid;
@@ -358,14 +356,14 @@ func c2s_login(client *RemoteDecitionConnection,jsonByte []byte){
 }
 
 /**进入教室*/
-func login(client *RemoteDecitionConnection,req model.JoinRoom_c2s){
+func login(client *RemoteDecitionConnection,req model.Login_c2s){
 	result := false;
-	tempRes := CreateProtocal(model.S_RES_C_JOINROOM);
+	tempRes := CreateProtocal(model.S_RES_C_LOGIN);
 	if tempRes == nil{
 		return ;
 	}
 
-	res,ok := tempRes.(*model.JoinRoom_s2c);
+	res,ok := tempRes.(*model.Login_s2c);
 	if ok{
 		if req.Uid <= 0{
 			res.Code = 262;
@@ -379,12 +377,17 @@ func login(client *RemoteDecitionConnection,req model.JoinRoom_c2s){
 			client.Write(res);
 			result = true;
 
-			if client.CurrentStrategyConfigPath != "" && client.CurrentConditionConfigPath != ""{
+			if CurrentStrategyConfigPath != ""{
 				//发送策略变更协议，便于客户端更新策略
-				strategyRes := &model.StrategyChanged_s2c_notify{Cmd:model.S_NOTIFY_C_STRATEGYCHANGED,StrategyPath:client.CurrentStrategyConfigPath};
-				conditionRes := &model.ConditionChanged_s2c_notify{Cmd:model.S_NOTIFY_C_CONDITIONCHANGED,ConditionPath:client.CurrentConditionConfigPath};
+				strategyRes := &model.StrategyChanged_s2c_notify{Cmd:model.S_NOTIFY_C_STRATEGYCHANGED,StrategyPath:CurrentStrategyConfigPath};
+				
 				//通知所有客户端
 				client.Write(strategyRes);
+				
+			}
+
+			if CurrentConditionConfigPath != ""{
+				conditionRes := &model.ConditionChanged_s2c_notify{Cmd:model.S_NOTIFY_C_CONDITIONCHANGED,ConditionPath:CurrentConditionConfigPath};
 				client.Write(conditionRes);
 			}
 			
@@ -401,7 +404,7 @@ func c2s_StrategyChanaged(client *RemoteDecitionConnection,jsonByte []byte){
 	var req model.StrategyChanged_c2s;
 	err := json.Unmarshal(jsonByte,&req);
 	if err == nil{
-		client.CurrentStrategyConfigPath = req.StrategyPath;
+		CurrentStrategyConfigPath = req.StrategyPath;
 		res := &model.StrategyChanged_s2c_notify{Cmd:model.S_NOTIFY_C_STRATEGYCHANGED,StrategyPath:req.StrategyPath};
 		//通知所有客户端
 		for _,sock := range ownedConnect{
@@ -416,8 +419,8 @@ func c2s_ForceStrategyBeUseage(client *RemoteDecitionConnection,jsonByte []byte)
 	var req model.ForceStrategyBeUse_c2s;
 	err := json.Unmarshal(jsonByte,&req);
 	if err == nil{
-		client.CurrentConditionConfigPath = req.ConditionPath;
-		client.CurrentStrategyConfigPath = req.StrategyPath;
+		CurrentConditionConfigPath = req.ConditionPath;
+		CurrentStrategyConfigPath = req.StrategyPath;
 		res := &model.ForceStrategyBeUse_s2c_notify{Cmd:model.S_NOTIFY_C_ForceStrategyBeUseage,ConditionPath:req.ConditionPath,StrategyPath:req.StrategyPath,StrategyID:req.StrategyID};
 		//通知所有客户端
 		for _,sock := range ownedConnect{
@@ -432,7 +435,7 @@ func c2s_ConditionChanaged(client *RemoteDecitionConnection,jsonByte []byte){
 	var req model.ConditionChanged_c2s;
 	err := json.Unmarshal(jsonByte,&req);
 	if err == nil{
-		client.CurrentConditionConfigPath = req.ConditionPath;
+		CurrentConditionConfigPath = req.ConditionPath;
 		res := &model.ConditionChanged_s2c_notify{Cmd:model.S_NOTIFY_C_CONDITIONCHANGED,ConditionPath:req.ConditionPath};
 		//通知所有客户端
 		for _,sock := range ownedConnect{
@@ -447,7 +450,7 @@ func c2s_ConditionChanaged(client *RemoteDecitionConnection,jsonByte []byte){
 处理离开教室
 */
 func c2s_logout(client *RemoteDecitionConnection,jsonByte []byte){
-	var req model.LeaveRoom_c2s;
+	var req model.Logout_c2s;
 	err := json.Unmarshal(jsonByte,&req);
 	if err == nil{
 		logout(client,req.Uid);
@@ -461,9 +464,9 @@ func logout(client *RemoteDecitionConnection,uid int64){
 	UnOwnedConnect_SetValue(client.SID,client);
 	OwnedConnect_SetValue(client.SID,nil);
 	OwnedConnectUIDMap_SetValue(uid,nil);
-	temp := CreateProtocal(model.S_RES_C_LEAVEROOM);
+	temp := CreateProtocal(model.S_RES_C_LOGOUT);
 	if temp != nil{
-		if res,ok := temp.(*model.LeaveRoom_s2c);ok == true{
+		if res,ok := temp.(*model.Logout_s2c);ok == true{
 			res.Uid = client.UID;
 			client.Write(res);
 		}

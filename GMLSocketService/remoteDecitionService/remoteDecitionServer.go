@@ -24,6 +24,9 @@ var(
 
 	connectIdPool = []int64{};/*客户端连接ID池*/
 	destroyChan = make(chan int,1);/*client socket释放操作时的互斥锁*/
+
+	CurrentStrategyConfigPath string;/*策略配置文件的地址*/
+	CurrentConditionConfigPath string;/*策略条件配置文件的地址*/
 )
 
 //向unOwnedConnect 添加或者设置值
