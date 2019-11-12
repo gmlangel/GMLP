@@ -104,7 +104,7 @@ func(ser *AllService)sendConditionChangedToServer(){
 
 
 func (ser *AllService)_getAllStrategyInfo(){
-	queryStr := "select * from `Strategy`";
+	queryStr := "select `Strategy`.`id`,`Strategy`.`sid`,`Strategy`.`conditionGroup`,`Strategy`.`valuePath`,`Strategy`.`enabled`,`Strategy`.`expireDate`,`Strategy`.`lastUpdate`,`Strategy`.`name`,`StrategyCategroy`.`name` as `sname` from `Strategy` left join `StrategyCategroy` on `Strategy`.`sid` = `StrategyCategroy`.`id`";
 	res,err := ser.SQL.Query(queryStr);
 	var item map[string][]byte;
 	ser.strategyArr = []m.StrategyInfo{}
@@ -119,6 +119,7 @@ func (ser *AllService)_getAllStrategyInfo(){
 			si.Enabled,err = strconv.ParseUint(string(item["enabled"]),10,32);
 			si.ExpireDate,err = strconv.ParseUint(string(item["expireDate"]),10,32);
 			si.Name = string(item["name"])
+			si.Sname = string(item["sname"]);
 			si.LastUpdate = string(item["lastUpdate"]);
 			ser.strategyArr = append(ser.strategyArr,si);
 		}
@@ -1011,7 +1012,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 						}
 						tmpID,err := sqlRes.LastInsertId()
 						if nil == err{
-							querlStr := fmt.Sprintf("select * from `Strategy` where `id` = %d",tmpID)
+							querlStr := fmt.Sprintf("select `Strategy`.`id`,`Strategy`.`sid`,`Strategy`.`conditionGroup`,`Strategy`.`valuePath`,`Strategy`.`enabled`,`Strategy`.`expireDate`,`Strategy`.`lastUpdate`,`Strategy`.`name`,`StrategyCategroy`.`name` as `sname` from `Strategy` left join `StrategyCategroy` on `Strategy`.`sid` = `StrategyCategroy`.`id` where `Strategy`.`id` = %d",tmpID)
 							tmpres,err:= ser.SQL.Query(querlStr)
 							if nil == err && len(tmpres) > 0{
 								item := tmpres[0];
@@ -1023,6 +1024,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 								si.Enabled,err = strconv.ParseUint(string(item["enabled"]),10,32);
 								si.ExpireDate,err = strconv.ParseUint(string(item["expireDate"]),10,32);
 								si.Name = string(item["name"])
+								si.Sname = string(item["sname"])
 								lastUpdate := fmt.Sprintf("%v",time.Now().Unix())
 								si.LastUpdate = lastUpdate;
 								ser.strategyArr = append(ser.strategyArr,si);

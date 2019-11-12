@@ -51,6 +51,7 @@ type ConditionChanged_c2s struct{
 type StrategyInfo struct{
 	Id uint64 `json:"id"`
 	Sid uint64 `json:"sid"`
+	Sname string `json:"sname"`
 	Cgroup string `json:"conditionGroup"`
 	ValuePath string `json:"strategyPath"`
 	Enabled uint64 `json:"enabled"`
