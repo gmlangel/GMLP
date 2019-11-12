@@ -42,15 +42,16 @@ func (ser *AllService)InitData(){
 		ser.sendStrategyChangedToServer();
 		ser.sendConditionChangedToServer();
 	}
-	go ser.syncLoop();//开启监听 策略和条件 的更新通知循环
+	//开启监听 策略和条件 的更新通知循环
+	go ser.syncStrategyLoop();
+	go ser.syncConditionLoop();
 }
 
-//开启监听 策略和条件 的更新通知循环，每隔60秒检测一次
-func (ser *AllService)syncLoop(){
+//开启监听 策略和条件 的更新通知循环，每隔120秒检测一次
+func (ser *AllService)syncStrategyLoop(){
 	//var item m.SyncLoopChan;
 	for{
-		select{
-			case _,isOk:= <- ser.strategyChan:
+		_,isOk:= <- ser.strategyChan;
 				if isOk == false{
 					break;
 				}
@@ -58,23 +59,26 @@ func (ser *AllService)syncLoop(){
 					ser._saveStrategyConfig();
 					ser.sendStrategyChangedToServer();
 					ser.strategyChange = false;
-					fmt.Println("1")
 				}
 				ser.strategyChan <- 1;
-			case _,isOk2 := <- ser.conditionChan:
+		time.Sleep(time.Second * 120);//每隔120秒，检测一次
+	}
+}
+
+func (ser *AllService)syncConditionLoop(){
+	//var item m.SyncLoopChan;
+	for{
+		_,isOk2 := <- ser.conditionChan
 				if isOk2 == false{
 					break;
 				}
 				if true == ser.conditionChange{
 					ser._saveConditionConfig();
 					ser.sendConditionChangedToServer();
-					fmt.Println("2")
 					ser.conditionChange = false;
 				}
 				ser.conditionChan <- 1
-			default:fmt.Println("3");
-		}
-		time.Sleep(time.Second * 60);//每隔60秒，检测一次
+		time.Sleep(time.Second * 120);//每隔120秒，检测一次
 	}
 }
 /**
@@ -104,7 +108,6 @@ func (ser *AllService)_getAllStrategyInfo(){
 	res,err := ser.SQL.Query(queryStr);
 	var item map[string][]byte;
 	ser.strategyArr = []m.StrategyInfo{}
-	md5 := fmt.Sprintf("%v",time.Now().Unix())
 	if nil == err{
 		for _,v := range res{
 			item = v;
@@ -116,7 +119,7 @@ func (ser *AllService)_getAllStrategyInfo(){
 			si.Enabled,err = strconv.ParseUint(string(item["enabled"]),10,32);
 			si.ExpireDate,err = strconv.ParseUint(string(item["expireDate"]),10,32);
 			si.Name = string(item["name"])
-			si.MD5 = md5;
+			si.LastUpdate = string(item["lastUpdate"]);
 			ser.strategyArr = append(ser.strategyArr,si);
 		}
 	}
@@ -142,11 +145,10 @@ func (ser *AllService)_saveStrategyConfig(){
 }
 
 func (ser *AllService)_getAllConditionInfo(){
-	queryStr := "select `Condition`.`id`,`Condition`.`typeID`,`ConditionType`.`enName` ,`Condition`.`value` ,`Condition`.`probability`,`Condition`.`operator` from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id`"
+	queryStr := "select `Condition`.`id`,`Condition`.`lastUpdate`,`Condition`.`typeID`,`ConditionType`.`enName` ,`Condition`.`value` ,`Condition`.`probability`,`Condition`.`operator` from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id`"
 	res,err := ser.SQL.Query(queryStr);
 	ser.conditionArr = []m.ConditionInfo{};
 	if nil == err{
-		md5 := fmt.Sprintf("%v",time.Now().Unix())
 		for _,v := range res{
 			cItem := m.ConditionInfo{};
 			cItem.Id,_ = strconv.ParseUint(string(v["id"]),10,32);
@@ -155,7 +157,7 @@ func (ser *AllService)_getAllConditionInfo(){
 			cItem.Value = string(v["value"])
 			cItem.Operator = string(v["operator"])
 			cItem.Probability,_ = strconv.ParseFloat(string(v["probability"]),32);
-			cItem.MD5 = md5;
+			cItem.LastUpdate = string(v["lastUpdate"]);
 			ser.conditionArr = append(ser.conditionArr,cItem);
 		}
 	}
@@ -584,8 +586,8 @@ func (ser *AllService)AddCondition(ctx iris.Context){
 				cItem.Value = val;
 				cItem.Operator = operator;
 				cItem.Probability = probability;
-				md5 := fmt.Sprintf("%v",time.Now().Unix())
-				cItem.MD5 = md5;
+				lastUpdate := fmt.Sprintf("%v",time.Now().Unix())
+				cItem.LastUpdate = lastUpdate;
 				ser.conditionArr = append(ser.conditionArr,cItem);
 				ser.conditionChange = true;
 				ser.conditionChan <- 1;
@@ -663,9 +665,10 @@ func (ser *AllService)UpdateConditionInfo(ctx iris.Context){
 	operator := ctx.URLParam("operator");
 	probability,err3 := strconv.ParseFloat(ctx.URLParam("probability"),32);
 	des := ctx.URLParam("des");
+	lastUpdate := fmt.Sprintf("%v",time.Now().Unix())
 	res := &m.CurrentResponse{}
 	if nil == err1 && nil == err2 && nil == err3 && "" != name && "" != val{
-		result,err := ser.SQL.Exec(fmt.Sprintf("update `Condition` set `typeID`=%d,`value`='%s',`operator`='%s',`name`='%s',`probability`=%f,`des`='%s' where `id`=%d",cType,val,operator,name,probability,des,id))
+		result,err := ser.SQL.Exec(fmt.Sprintf("update `Condition` set `typeID`=%d,`value`='%s',`operator`='%s',`name`='%s',`probability`=%f,`des`='%s',`lastUpdate`='%s' where `id`=%d",cType,val,operator,name,probability,des,lastUpdate,id))
 		if nil != err{
 			res.Code = "-1";
 			res.Msg = fmt.Sprintf("条件信息更新失败,%v",err);
@@ -690,8 +693,7 @@ func (ser *AllService)UpdateConditionInfo(ctx iris.Context){
 					cItem.Value = string(subV["value"])
 					cItem.Operator = string(subV["operator"])
 					cItem.Probability,_ = strconv.ParseFloat(string(subV["probability"]),32);
-					md5 := fmt.Sprintf("%v",time.Now().Unix())
-					cItem.MD5 = md5;
+					cItem.LastUpdate = lastUpdate;
 					for gi,gv := range ser.conditionArr{
 						if gv.Id == cItem.Id{
 							ser.conditionArr[gi] = cItem;
@@ -1022,8 +1024,8 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 								si.Enabled,err = strconv.ParseUint(string(item["enabled"]),10,32);
 								si.ExpireDate,err = strconv.ParseUint(string(item["expireDate"]),10,32);
 								si.Name = string(item["name"])
-								md5 := fmt.Sprintf("%v",time.Now().Unix())
-								si.MD5 = md5;
+								lastUpdate := fmt.Sprintf("%v",time.Now().Unix())
+								si.LastUpdate = lastUpdate;
 								ser.strategyArr = append(ser.strategyArr,si);
 								ser.strategyChange = true;
 							}
@@ -1056,9 +1058,10 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
  func(ser *AllService)EditConditionForStrategy(ctx iris.Context){
 	id,err1:= strconv.ParseUint(ctx.URLParam("id"),10,32); //策略id
 	conditionStr := ctx.URLParam("conditionGroup");//条件id的组合字符传
+	lastUpdate := fmt.Sprintf("%v",time.Now().Unix())
 	res := &m.CurrentResponse{}
 	if nil  == err1{
-		sqlRes,err:= ser.SQL.Exec(fmt.Sprintf("update `Strategy` set `conditionGroup`='%s' where `id`=%d",conditionStr,id))
+		sqlRes,err:= ser.SQL.Exec(fmt.Sprintf("update `Strategy` set `conditionGroup`='%s',`lastUpdate`='%s' where `id`=%d",conditionStr,lastUpdate,id))
 		if nil != err{
 			res.Code = "-1";
 			res.Msg = fmt.Sprintf("策略条件变更失败,%s",err.Error())
@@ -1071,11 +1074,11 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 				if false == isOk{
 					return
 				}
-				for _,gv := range ser.strategyArr{
+				for gi,gv := range ser.strategyArr{
 					if gv.Id == id{
 						gv.Cgroup = conditionStr
-						md5 := fmt.Sprintf("%v",time.Now().Unix())
-						gv.MD5 = md5;
+						gv.LastUpdate = lastUpdate;
+						ser.strategyArr[gi] = gv;
 						ser.strategyChange = true;
 						break;
 					}
@@ -1213,6 +1216,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 	expire,err2 := strconv.ParseUint(ctx.PostValue("expire"),10,32);//过期时间戳
 	isEnabled,err3:= strconv.ParseUint(ctx.PostValue("enabled"),10,32);//是否为开启状态
 	name := ctx.PostValue("name");//策略名称
+	lastUpdate := fmt.Sprintf("%v",time.Now().Unix())
 	res := &m.CurrentResponse{};
 	if nil == err3 && nil == err1 && nil == err2 && "" != strategyContext && "" != name{
 		//校验strategyContext是否为json
@@ -1236,7 +1240,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 					res.Msg = fmt.Sprintf("策略文件更新失败%v",err);
 				}else{
 					//写入数据库
-					sqlRes,err := ser.SQL.Exec(fmt.Sprintf("update `Strategy` set `name`='%s',`expireDate`=%d,`enabled`=%d,`valuePath`='%s' where `id` = %d",name,expire,isEnabled,filePath,id));
+					sqlRes,err := ser.SQL.Exec(fmt.Sprintf("update `Strategy` set `name`='%s',`expireDate`=%d,`enabled`=%d,`valuePath`='%s',`lastUpdate`='%s' where `id` = %d",name,expire,isEnabled,filePath,lastUpdate,id));
 					if nil != err{
 						res.Code = "-1";
 						res.Msg = fmt.Sprintf("更新策略失败,%s",err.Error());
@@ -1252,14 +1256,14 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 							if false == isOk{
 								return
 							}
-							for _,gv := range ser.strategyArr{
+							for gi,gv := range ser.strategyArr{
 								if gv.Id == id{
 									gv.ValuePath = filePath;
 									gv.Enabled = isEnabled;
 									gv.ExpireDate = expire;
-									gv.Name = name
-									md5 := fmt.Sprintf("%v",time.Now().Unix())
-									gv.MD5 = md5;
+									gv.Name = name	
+									gv.LastUpdate = lastUpdate;
+									ser.strategyArr[gi] = gv;
 									ser.strategyChange = true;
 									break;
 								}
@@ -1318,7 +1322,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 					}
 					for gi,gv := range ser.strategyArr{
 						if gv.Id == id{
-							ser.strategyArr = append(ser.strategyArr[0:gi],ser.strategyArr[gi:len(ser.strategyArr)]...)
+							ser.strategyArr = append(ser.strategyArr[0:gi],ser.strategyArr[gi+1:len(ser.strategyArr)]...)
 							ser.strategyChange = true;
 							break;
 						}

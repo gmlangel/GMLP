@@ -56,7 +56,7 @@ type StrategyInfo struct{
 	Enabled uint64 `json:"enabled"`
 	ExpireDate uint64 `json:"expireDate"`
 	Name string `json:"name"`
-	MD5 string `json:"md5"`
+	LastUpdate string `json:"lastUpdate"`
 }
 
 type ConditionInfo struct{
@@ -66,5 +66,5 @@ type ConditionInfo struct{
 	Value string `json:"value"`
 	Operator string `json:"operator"`
 	Probability float64 `json:"probability"`
-	MD5 string `json:"md5"`
+	LastUpdate string `json:"lastUpdate"`
 }
