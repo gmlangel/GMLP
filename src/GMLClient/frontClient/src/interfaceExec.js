@@ -453,16 +453,14 @@ function getAllStrategyCategroy(callbackFunc){
 /**
  * 更新策略类别信息
  * http://localhost:8080/UpdateStrategyCategroy?name=测试策略4&des=这是444&templateContent={"name":"郭明龙4"}&id=3
- * @param name string 策略类别名称
  * @param des string 描述
  * @param templateContent string 策略模板内容
  * @param id int 策略类别id
 */
-function updateStrategyCategroy(name,des,templateContent,id,callbackFunc){
+function updateStrategyCategroy(des,templateContent,id,callbackFunc){
     $.ajax({
         url:interfaceDomain + "UpdateStrategyCategroy",
         data:{
-            name:name,
             des:des,
             templateContent:templateContent,
             id:id,

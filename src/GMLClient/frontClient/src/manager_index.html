@@ -168,7 +168,7 @@
     <div class="layui-form-item" style="padding-top: 30px;">
         <label class="layui-form-label">类别名称</label>
         <div class="layui-input-block">
-            <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input"
+            <input type="text" name="" lay-verify="required|regEnAndZh" placeholder="请输入" autocomplete="off" class="layui-input"
                 id="tb_add_scName">
         </div>
     </div>
@@ -180,7 +180,7 @@
                  "strategyName":{
                       "type":"string",
                       "def_v":"1对1教室策略",
-                      "des":"策略名称"
+                      "des":"策略描述"
                  },
                  "canSendImg":{
                       "type":"bool",
@@ -211,7 +211,7 @@
 <!-- 新增/编辑策略信息 的模板 -->
 <form style="display:none;width:540px;" class="layui-form" lay-filter="panel_addStrategy" id="panel_addStrategy">
     <div class="layui-form-item" style="padding-top: 30px;">
-        <label class="layui-form-label">策略名称</label>
+        <label class="layui-form-label">策略描述</label>
         <div class="layui-input-block">
             <input type="text" name="" lay-verify="required" placeholder="请输入" autocomplete="off" class="layui-input"
                 id="tb_add_SName">
@@ -357,7 +357,11 @@
                     } else if (v < mi || v > ma) {
                         return "数值超出范围:" + mi + " - " + ma;
                     }
-                }
+                },
+                regEnAndZh:[
+                /^[^ \?`~\!\@\#\$\%\^\&\*\(\)\-\+\=<>\:\"\{\}\,\.\\\/\;\'\[\]·！#￥（——）：；“”‘、，\|《。》？、【】]{4,32}$/img
+                ,'必须为非特殊字符的4-12连续中/英文 数字'
+                ]
             });
             //添加 新增条件类型和新增条件的处理
             bindAddConditionAboutEvent(form, layer, laypage)
@@ -1477,6 +1481,7 @@
             let tb_add_sc_template = document.getElementById("tb_add_sc_template");
             let tb_add_sc_des = document.getElementById("tb_add_sc_des")
             tb_add_scName.value = "";
+            tb_add_scName.disabled = false;
             tb_add_sc_template.value = "";
             tb_add_sc_des.value = "";
             form.render(null, "panel_addStrategyCategroy");//刷新表单的内容
@@ -1505,7 +1510,6 @@
             btn_addSC_commit.style.display = "none";
             form.on("submit(btn_editSC_commit)", function (reqData) {
                 //新增 策略类型
-                let sname = tb_add_scName.value;
                 let templateContent = tb_add_sc_template.value;
                 let jsonObj = JSON.parse(templateContent);
                 if (!jsonObj) {
@@ -1514,7 +1518,7 @@
                 }
                 let scDes = tb_add_sc_des.value;
                 layer.close(openidx);//关闭弹窗
-                updateStrategyCategroy(sname, scDes, templateContent, sid, (data, err) => {
+                updateStrategyCategroy(scDes, templateContent, sid, (data, err) => {
                     if (data != null) {
                         if (data.code == "0") {
                             layer.alert("更新策略类别成功")
@@ -1573,6 +1577,7 @@
             let tb_add_sc_template = document.getElementById("tb_add_sc_template");
             let tb_add_sc_des = document.getElementById("tb_add_sc_des")
             tb_add_scName.value = strategyCategroyInfo.name;
+            tb_add_scName.disabled = true;
             let tmpO = strategyCategroyTemplateMap[strategyCategroyInfo.baseTemplatePath]
             tb_add_sc_template.value = tmpO ? JSON.stringify(tmpO) : "";
             tb_add_sc_des.value = strategyCategroyInfo.des;
@@ -1994,7 +1999,7 @@
                     strategyItem_left = document.createElement("div");
                     strategyItem_left.setAttribute("class", "strategyListItem_left");
                     strategyItem_left.innerHTML = `<div>
-                                        <label class="gml_label">策略名</label>
+                                        <label class="gml_label">策略描述</label>
                                         <label class="gml_label_v">`+ sgy.name + `</label>
                                     </div>
                                     <div>
@@ -2097,7 +2102,7 @@
                             <div id="strategyListItem_0" class="strategyListItem">
                                 <div class="strategyListItem_left">
                                     <div>
-                                        <label class="gml_label">策略名</label>
+                                        <label class="gml_label">策略描述</label>
                                         <label class="gml_label_v">1v1牛逼策略</label>
                                     </div>
                                     <div>

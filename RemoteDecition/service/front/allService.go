@@ -857,11 +857,10 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 	// des := ctx.URLParam("des");
 	// templateContent := ctx.URLParam("templateContent");
 	id,err1 := strconv.ParseUint(ctx.PostValue("id"),10,32);
-	name := ctx.PostValue("name");
 	des := ctx.PostValue("des");
 	templateContent := ctx.PostValue("templateContent");
 	res := &m.CurrentResponse{}
-	if nil == err1 && "" != name && "" != des && "" != templateContent{
+	if nil == err1 && "" != des && "" != templateContent{
 		//校验模板格式
 		var jsonObj []map[string]interface{};
 		jsonErr := json.Unmarshal([]byte(templateContent),&jsonObj);
@@ -882,7 +881,7 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 					res.Msg = fmt.Sprintf("策略模板%v",e);
 				}else{
 					//写入数据库
-					_,e := ser.SQL.Exec(fmt.Sprintf("update `StrategyCategroy` set `name`='%s',`des`='%s',`baseTemplatePath`='%s' where `id`=%d",name,des,filePath,id))
+					_,e := ser.SQL.Exec(fmt.Sprintf("update `StrategyCategroy` set `des`='%s',`baseTemplatePath`='%s' where `id`=%d",des,filePath,id))
 					if nil != e{
 						res.Code = "-1";
 						res.Msg = fmt.Sprintf("更新策略组信息失败,%s",e.Error());
