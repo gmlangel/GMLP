@@ -157,21 +157,21 @@ func (sev *RemoteDecitionServer)_openServer(){
 		//生成socket的管理器
 		remoteDecitionclient := NewRemoteDecitionConn(sid,newClient);
 		remoteDecitionclient.OnTimeout = func(cli * RemoteDecitionConnection){
-			DestroySocket(cli,nil);//释放socket
+			DestroySocket(cli,"timeout",nil);//释放socket
 		}
 		remoteDecitionclient.OnError = func(cli * RemoteDecitionConnection){
-			DestroySocket(cli,nil);//释放socket
+			DestroySocket(cli,"error",nil);//释放socket
 		}
 		//塞入无主socket记录集
 		UnOwnedConnect_SetValue(sid,remoteDecitionclient);
 		//打印客户端信息
-		fmt.Println("new Client join,Address:",newClient.RemoteAddr().String(), " discription:",remoteDecitionclient);
+		fmt.Println("new Client join,Address:",newClient.RemoteAddr().String());
 	}
 }
 
 
 /*释放一个client Socket*/
-func DestroySocket(cli * RemoteDecitionConnection,completeFunc func()){
+func DestroySocket(cli * RemoteDecitionConnection,killType string,completeFunc func()){
 	destroyChan <- 1
 	sid := cli.SID;
 	uid := cli.UID;
@@ -181,11 +181,18 @@ func DestroySocket(cli * RemoteDecitionConnection,completeFunc func()){
 	OwnedConnectUIDMap_SetValue(uid,nil);
 	//返回socketID 到id池,以便之后的链接使用
 	connectIdPool = append(connectIdPool,sid);
-	res := CreateProtocal(model.S_NOTIFY_C_OFFLINE).(*model.OfflineNotify_s2c);
-	res.Code = 259;
-	res.Reason = "您已经被踢";
-	cli.OnSocketCloseComplete = completeFunc;//设置 cli完成关闭后的处理函数
-	cli.DestroySocket(res);
+	if "force" == killType{
+		//发送强踢协议
+		res := CreateProtocal(model.S_NOTIFY_C_OFFLINE).(*model.OfflineNotify_s2c);
+		res.Code = 259;
+		res.Reason = "您已经被踢";
+		cli.OnSocketCloseComplete = completeFunc;//设置 cli完成关闭后的处理函数
+		cli.DestroySocket(res);
+	}else{
+		//发送普通断开协议
+		cli.DestroySocket("{\"cmd\":0}");
+	}
+	
 	//fmt.Println(fmt.Sprintf("sev.unOwnedConnect = %v, sev.ownedConnect = %v, sev.ownedConnectUIDMap = %v",unOwnedConnect,ownedConnect,ownedConnectUIDMap))
 	<- destroyChan
 }
@@ -205,19 +212,19 @@ func (sev *RemoteDecitionServer)CloseServer(){
 	//停止所有socket
 	for key := range unOwnedConnect{
 		if sock := unOwnedConnect[key];sock != nil{
-			DestroySocket(sock,nil);
+			DestroySocket(sock,"normal",nil);
 		}
 	}
 
 	for key := range ownedConnect{
 		if sock := ownedConnect[key];sock != nil{
-			DestroySocket(sock,nil);
+			DestroySocket(sock,"normal",nil);
 		}
 	}
 
 	for key := range ownedConnectUIDMap{
 		if sock := ownedConnectUIDMap[key];sock != nil{
-			DestroySocket(sock,nil);
+			DestroySocket(sock,"normal",nil);
 		}
 	}
 	//释放数组和集合

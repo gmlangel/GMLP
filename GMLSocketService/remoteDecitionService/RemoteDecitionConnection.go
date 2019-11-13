@@ -347,7 +347,7 @@ func c2s_login(client *RemoteDecitionConnection,jsonByte []byte){
 					login(client,req);
 			}else{
 				//不同的socket，之前的socket已经存在于教室，则将其踢出
-				DestroySocket(preClient,func(){
+				DestroySocket(preClient,"force",func(){
 					login(client,req);
 				})
 			}
