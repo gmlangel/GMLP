@@ -1354,14 +1354,28 @@ func(ser *AllService)UpdateStrategyCategroy(ctx iris.Context){
 		res.Code = "0"
 		res.Msg = "策略已即时生效"
 		go func(){
-			_,isOk := <- ser.strategyChan
-			if false == isOk{
-				return
+			_,isOk:= <- ser.strategyChan;
+			if isOk == false{
+				return;
+			}
+
+			_,isOk2 := <- ser.conditionChan
+			if isOk2 == false{
+				return;
+			}
+			if true == ser.strategyChange{
+				ser._saveStrategyConfig();
+				ser.strategyChange = false;
+			}
+			if true == ser.conditionChange{
+				ser._saveConditionConfig();
+				ser.conditionChange = false;
 			}
 			//通知长连接服务，强制策略生效
 			req := &m.ForceStrategyBeUse_c2s{Cmd:0x00FF0041,StrategyPath:ser.StrategyConfigPath,ConditionPath:ser.ConditionConfigPath,StrategyID:id};
 			ser.Sock.Write(req);
 			ser.strategyChan <- 1;
+			ser.conditionChan <- 1
 		}()
 		
 	}else{
