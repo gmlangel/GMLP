@@ -1,0 +1,210 @@
+[
+	{
+		"name": "canSendMousePos",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否允许发送鼠标位置"
+	},
+	{
+		"name": "canReceiveMousePos",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否接收鼠标位置"
+	},
+	{
+		"name": "canDrawWhiteBorad",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以进行白板绘制"
+	},
+	{
+		"name": "canSendChangePageNum",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以主动进行教材翻页"
+	},
+	{
+		"name": "canSendClearWhiteDataToRemote",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以发送“清除白板数据”命令"
+	},
+	{
+		"name": "canSendUndoWhiteDataToRemote",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以发送“回退白板数据”命令"
+	},
+	{
+		"name": "canHandler",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以举手，申请上麦"
+	},
+	{
+		"name": "canSendMsg",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以发送文本聊天消息"
+	},
+	{
+		"name": "canSendMsgInClassRoom",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以在教室内发送文本聊天消息（用于全体禁言和全体解禁）"
+	},
+	{
+		"name": "canAudioUpload",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以发送音频上行数据"
+	},
+	{
+		"name": "canVideoUpload",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以发送视频上行数据"
+	},
+	{
+		"name": "canVideoDownload",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以订阅视频下行数据"
+	},
+	{
+		"name": "canShowTeacherTipsTool",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否要显示老师提示语工具条"
+	},
+	{
+		"name": "canSetOtherHand",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以设置其他用户上下麦"
+	},
+	{
+		"name": "canRecode",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以录音"
+	},
+	{
+		"name": "canSetCommon",
+		"type": "bool",
+		"def_v": 0,
+		"des": "可以设置其他人教室内的一些权限"
+	},
+	{
+		"name": "canKickUser",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以踢人出教室"
+	},
+	{
+		"name": "canSendQuestionHudong",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否允许发送互动问题"
+	},
+	{
+		"name": "canSendAnswerHudong",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否允许回答互动问题"
+	},
+	{
+		"name": "whiteSrokeColor",
+		"type": "int",
+		"def_v": 4278190335,
+		"min_v": 0,
+		"max_v": 4294967295,
+		"des": "上报CPU信息时间间隔，单位：毫秒"
+	},
+	{
+		"name": "chatItemMenuType",
+		"type": "int",
+		"def_v": 0,
+		"min_v": 0,
+		"max_v": 2,
+		"des": "聊天消息右键菜单的样式 0为不显示右键菜单  2为显示老师应该显示的菜单"
+	},
+	{
+		"name": "canCloseOrOpenMyCamera",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否允许关闭自己的摄像头"
+	},
+	{
+		"name": "canControlMic",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以控制麦克风  静音和恢复"
+	},
+	{
+		"name": "canShowOnlytea",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否显示“只看老师复选框”"
+	},
+	{
+		"name": "toSayStyle",
+		"type": "int",
+		"def_v": 0,
+		"min_v": 0,
+		"max_v": 2,
+		"des": "“想对对方说”控件的显示样式"
+	},
+	{
+		"name": "needPDFSpecialTreatment",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否需要对教材尺寸进行特殊处理"
+	},
+	{
+		"name": "canShowEvaluePanel",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以显示“课后评价面板”"
+	},
+	{
+		"name": "needCountSVCLinkTime",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否需要统计svc单次连接时长"
+	},
+	{
+		"name": "group",
+		"type": "string",
+		"def_v": "0",
+		"des": "用户类型分组"
+	},
+	{
+		"name": "canTheFarWall",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否可以让远端上墙"
+	},
+	{
+		"name": "enableSpeechTest",
+		"type": "bool",
+		"def_v": 0,
+		"des": "是否开启语速检测"
+	},
+	{
+		"name": "wallViewWidth",
+		"type": "float",
+		"def_v": 200.0,
+		"min_v": 0.0,
+		"max_v": 2000.0,
+		"des": "默认上墙视频的宽度"
+	},
+	{
+		"name": "wallViewHeight",
+		"type": "float",
+		"def_v": 150.0,
+		"min_v": 0.0,
+		"max_v": 2000.0,
+		"des": "默认上墙视频的高度"
+	}
+]
