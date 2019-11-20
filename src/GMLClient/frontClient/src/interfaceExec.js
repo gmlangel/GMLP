@@ -1,4 +1,4 @@
-var interfaceDomain = "http://localhost:8080/"
+var interfaceDomain = "http://39.106.135.11:8080/"
 
 /**
  * 后台登录
