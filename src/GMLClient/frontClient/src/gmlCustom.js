@@ -885,7 +885,9 @@ function makeStringNode(v, parentName, defValue) {
     }
     let tb1 = document.createElement("input");
     tb1.setAttribute("type", "text");
-    tb1.setAttribute("lay-verify", "required");
+    if(v.def_v.trim() != ""){
+        tb1.setAttribute("lay-verify", "required");
+    }
     tb1.setAttribute("placeholder", v.def_v);
     tb1.setAttribute("autocomplete", "off");
     tb1.setAttribute("class", "layui-input");
