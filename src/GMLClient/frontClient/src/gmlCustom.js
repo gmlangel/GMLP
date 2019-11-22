@@ -893,7 +893,7 @@ function makeStringNode(v, parentName, defValue) {
     tb1.setAttribute("class", "layui-input");
     tb1.setAttribute("id", parentName + v.name);
     tb1.setAttribute("name", parentName + v.name);
-    if (defValue)
+    if (defValue || defValue == "0")
         tb1.value = defValue;
     sd1.appendChild(tb1);
     d1.appendChild(l1);
