@@ -1709,7 +1709,8 @@
             form.on("submit(btn_addStrategy_commit)", function (reqData) {
                 ////新增 策略类型
                 let sName = tb_add_SName.value;
-                let sDate = new Date(tb_add_SDate.value).valueOf();
+                let dataStr = tb_add_SDate.value.replace(/[-]+/ig,"/")
+                let sDate = new Date(dataStr).valueOf();
                 if (isNaN(sDate) == false)
                     sDate = sDate / 1000;
                 let sIsEnabled = (!!tb_add_SEnabled.checked) ? 1 : 0;
@@ -1924,7 +1925,8 @@
             form.on("submit(btn_editStrategy_commit)", function (reqData) {
                 //编辑策略信息
                 let sName = tb_add_SName.value;
-                let sDate = new Date(tb_add_SDate.value).valueOf();
+                let dataStr = tb_add_SDate.value.replace(/[-]+/ig,"/")
+                let sDate = new Date(dataStr).valueOf();
                 if (isNaN(sDate) == false)
                     sDate = sDate / 1000;
                 let sIsEnabled = (!!tb_add_SEnabled.checked) ? 1 : 0;
