@@ -948,6 +948,7 @@ function createCombbox() {
     let optionContainer = document.createElement("select");
     optionContainer.setAttribute("lay-filter", "cTypelist")
     optionContainer.setAttribute("name", "panel_bindConditiontoStrategy_combbox");
+    optionContainer.setAttribute("lay-search","lay-search")
 
     subItme = document.createElement("option");
     subItme.setAttribute("value", -1);
