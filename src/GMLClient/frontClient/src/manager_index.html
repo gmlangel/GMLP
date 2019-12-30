@@ -220,7 +220,8 @@
     <div class="layui-form-item">
         <label class="layui-form-label">过期时间</label>
         <div class="layui-inline">
-            <input type="text" class="layui-input" lay-verify="required" id="tb_add_SDate">
+            <input type="checkbox" class="layui-input" lay-skin="switch" lay-text="永久|指定" lay-filter="tb_add_SwitchData"  id="tb_add_SwitchData">
+            <input type="text" class="layui-input" lay-verify="required" id="tb_add_SDate" style="margin-top: 15px;">
         </div>
     </div>
     <div class="layui-form-item">
@@ -1706,13 +1707,27 @@
             btn_addStrategy_cancel.style.display = "inline-block";
             let btn_addStrategy_commit = document.getElementById("btn_addStrategy_commit");
             btn_addStrategy_commit.style.display = "inline-block";
+            form.on('switch(tb_add_SwitchData)', function(data){
+                let canHide = data.elem.checked;
+                if(canHide == true){
+                    tb_add_SDate.disabled = true;
+                }else{
+                    tb_add_SDate.removeAttribute("disabled")
+                }
+            });  
             form.on("submit(btn_addStrategy_commit)", function (reqData) {
                 ////新增 策略类型
                 let sName = tb_add_SName.value;
-                let dataStr = tb_add_SDate.value.replace(/[-]+/ig,"/")
-                let sDate = new Date(dataStr).valueOf();
-                if (isNaN(sDate) == false)
-                    sDate = sDate / 1000;
+                let sDate = 0;
+                if(!!tb_add_SwitchData.checked == true){
+                    //永久生效
+                }else{
+                    //指定日期生效
+                    let dataStr = tb_add_SDate.value.replace(/[-]+/ig,"/")
+                    sDate = new Date(dataStr).valueOf();
+                    if (isNaN(sDate) == false)
+                        sDate = sDate / 1000;
+                }
                 let sIsEnabled = (!!tb_add_SEnabled.checked) ? 1 : 0;
                 let reqContext = createStrategyContentByTemplateObj(templateObj);
                 let strategyContext = JSON.stringify(reqContext);
@@ -1748,10 +1763,13 @@
 
             //填充内容
             let tb_add_SName = document.getElementById("tb_add_SName");
+            let tb_add_SwitchData = document.getElementById("tb_add_SwitchData");
             let tb_add_SDate = document.getElementById("tb_add_SDate");
             let tb_add_SEnabled = document.getElementById("tb_add_SEnabled")
             tb_add_SName.value = "";
             tb_add_SDate.value = "";
+            tb_add_SDate.disabled = true;
+            tb_add_SwitchData.checked = true;
             tb_add_SEnabled.checked = false;
             form.render(null, "panel_addStrategy");//刷新表单的内容
 
@@ -1925,10 +1943,16 @@
             form.on("submit(btn_editStrategy_commit)", function (reqData) {
                 //编辑策略信息
                 let sName = tb_add_SName.value;
-                let dataStr = tb_add_SDate.value.replace(/[-]+/ig,"/")
-                let sDate = new Date(dataStr).valueOf();
-                if (isNaN(sDate) == false)
-                    sDate = sDate / 1000;
+                let sDate = 0;
+                if(!!tb_add_SwitchData.checked == true){
+                    //永久生效
+                }else{
+                    //指定日期生效
+                    let dataStr = tb_add_SDate.value.replace(/[-]+/ig,"/")
+                    sDate = new Date(dataStr).valueOf();
+                    if (isNaN(sDate) == false)
+                        sDate = sDate / 1000;
+                }
                 let sIsEnabled = (!!tb_add_SEnabled.checked) ? 1 : 0;
                 let reqContext = createStrategyContentByTemplateObj(templateObj);
                 let strategyContext = JSON.stringify(reqContext);
@@ -1964,11 +1988,19 @@
 
             //填充内容
             let tb_add_SName = document.getElementById("tb_add_SName");
+            let tb_add_SwitchData = document.getElementById("tb_add_SwitchData");
             let tb_add_SDate = document.getElementById("tb_add_SDate");
             let tb_add_SEnabled = document.getElementById("tb_add_SEnabled")
             tb_add_SName.value = strategyInfo.name;
             tb_add_SDate.value = makeDateTimeStr(new Date(strategyInfo.expireDate * 1000), "yyyy-MM-dd HH:mm:ss");
             tb_add_SEnabled.checked = (strategyInfo.enabled == 1);
+            tb_add_SwitchData.checked = (strategyInfo.expireDate == 0)
+            if((!!tb_add_SwitchData.checked) == false){
+                tb_add_SDate.removeAttribute("disabled")
+            }else{
+                tb_add_SDate.disabled = true;
+            }
+             
             form.render(null, "panel_addStrategy");//刷新表单的内容
 
             //弹出面板
@@ -2006,7 +2038,7 @@
                                     </div>
                                     <div>
                                         <label class="gml_label">过期时间</label>
-                                        <label class="gml_label_v">`+ makeDateTimeStr(eDate, "yyyy-MM-dd HH:mm:ss") + `</label>
+                                        <label class="gml_label_v">`+ (sgy.expireDate == 0 ? "永久生效" : makeDateTimeStr(eDate, "yyyy-MM-dd HH:mm:ss")) + `</label>
                                     </div>
                                     <div>
                                         <label class="gml_label">是否启用</label>
