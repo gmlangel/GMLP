@@ -793,7 +793,7 @@ function makeFloatNode(v, parentName, defValue) {
     tb1.setAttribute("name", parentName + v.name);
     tb1.setAttribute("min", min);
     tb1.setAttribute("max", max);
-    if (defValue)
+    if (defValue != null && defValue != undefined)
         tb1.value = defValue;
     sd1.appendChild(tb1);
     d1.appendChild(l1);
@@ -828,7 +828,7 @@ function makeIntNode(v, parentName, defValue) {
     tb1.setAttribute("name", parentName + v.name);
     tb1.setAttribute("min", min);
     tb1.setAttribute("max", max);
-    if (defValue)
+    if (defValue != null && defValue != undefined)
         tb1.value = defValue;
     sd1.appendChild(tb1);
     d1.appendChild(l1);
