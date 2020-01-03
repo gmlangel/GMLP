@@ -17,6 +17,7 @@ import (
 type AllService struct {
 	SQL                 m.SQLInterface
 	Sock                *RDSocket
+	SVCClient           *SVCPushClient
 	StrategyConfigPath  string
 	ConditionConfigPath string
 	strategyArr         []m.StrategyInfo
@@ -39,11 +40,11 @@ func (ser *AllService) InitData() {
 	ser._getAllStrategyInfo()
 	//请求所有的条件信息，并生成配置文件
 	ser._getAllConditionInfo()
-	ser.Sock.onLinkComplete = func() {
-		//断线重连后的重发机制
-		ser.sendStrategyChangedToServer()
-		ser.sendConditionChangedToServer()
-	}
+	// ser.Sock.onLinkComplete = func() {
+	// 	//断线重连后的重发机制
+	// 	ser.sendStrategyChangedToServer()
+	// 	ser.sendConditionChangedToServer()
+	// }
 	//开启监听 策略和条件 的更新通知循环
 	go ser.syncStrategyLoop()
 	go ser.syncConditionLoop()
@@ -91,7 +92,8 @@ func (ser *AllService) syncConditionLoop() {
 func (ser *AllService) sendStrategyChangedToServer() {
 	//通知长连接服务器，策略文件与条件配置文件有更新
 	req := &m.StrategyChanged_c2s{Cmd: 0x00FF003C, StrategyPath: ser.StrategyConfigPath}
-	ser.Sock.Write(req)
+	//ser.Sock.Write(req)
+	ser.SVCClient.PushMsg(req)
 }
 
 /**
@@ -101,7 +103,8 @@ func (ser *AllService) sendStrategyChangedToServer() {
 func (ser *AllService) sendConditionChangedToServer() {
 	//通知长连接服务器，策略文件与条件配置文件有更新
 	req := &m.ConditionChanged_c2s{Cmd: 0x00FF003F, ConditionPath: ser.ConditionConfigPath}
-	ser.Sock.Write(req)
+	//ser.Sock.Write(req)
+	ser.SVCClient.PushMsg(req)
 }
 
 func (ser *AllService) _getAllStrategyInfo() {
@@ -1368,7 +1371,8 @@ func (ser *AllService) ForceStrategyBeUseage(ctx iris.Context) {
 			}
 			//通知长连接服务，强制策略生效
 			req := &m.ForceStrategyBeUse_c2s{Cmd: 0x00FF0041, StrategyPath: ser.StrategyConfigPath, ConditionPath: ser.ConditionConfigPath, StrategyID: id}
-			ser.Sock.Write(req)
+			//ser.Sock.Write(req)
+			ser.SVCClient.PushMsg(req)
 			ser.strategyChan <- 1
 			ser.conditionChan <- 1
 		}()
