@@ -10,7 +10,7 @@ import (
 
 func main() {
 	debug := false //调试模式
-	fmt.Println("RemoteDecition远程决策服务开始启动....")
+	fmt.Println("RemoteDecition远程决策服务v 1.0开始启动....")
 	//初始化服务器
 	app := iris.New()
 	//修改跨域访问限制

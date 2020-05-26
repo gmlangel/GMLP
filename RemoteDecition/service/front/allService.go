@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"sync"
+
 	m "../models"
 	"github.com/kataras/iris"
 	uuid "github.com/satori/go.uuid"
@@ -26,12 +28,17 @@ type AllService struct {
 	conditionChan       chan int
 	strategyChange      bool
 	conditionChange     bool
+
+	tmpConditionTypeInfoArr  []map[string]interface{}
+	tmpConditionTypeInfoLock *sync.Mutex
 }
 
 //Socket长连接处理相关---------------------------------------------------------------------------------
 /**
 初始化数据*/
 func (ser *AllService) InitData() {
+	ser.tmpConditionTypeInfoArr = []map[string]interface{}{}
+	ser.tmpConditionTypeInfoLock = &sync.Mutex{}
 	ser.strategyChan = make(chan int, 1)
 	ser.conditionChan = make(chan int, 1)
 	ser.strategyChan <- 1
@@ -40,11 +47,11 @@ func (ser *AllService) InitData() {
 	ser._getAllStrategyInfo()
 	//请求所有的条件信息，并生成配置文件
 	ser._getAllConditionInfo()
-	// ser.Sock.onLinkComplete = func() {
-	// 	//断线重连后的重发机制
-	// 	ser.sendStrategyChangedToServer()
-	// 	ser.sendConditionChangedToServer()
-	// }
+	ser.Sock.onLinkComplete = func() {
+		//断线重连后的重发机制
+		ser.sendStrategyChangedToServer()
+		ser.sendConditionChangedToServer()
+	}
 	//开启监听 策略和条件 的更新通知循环
 	go ser.syncStrategyLoop()
 	go ser.syncConditionLoop()
@@ -92,7 +99,7 @@ func (ser *AllService) syncConditionLoop() {
 func (ser *AllService) sendStrategyChangedToServer() {
 	//通知长连接服务器，策略文件与条件配置文件有更新
 	req := &m.StrategyChanged_c2s{Cmd: 0x00FF003C, StrategyPath: ser.StrategyConfigPath}
-	//ser.Sock.Write(req)
+	ser.Sock.Write(req)
 	ser.SVCClient.PushMsg(req)
 }
 
@@ -103,7 +110,7 @@ func (ser *AllService) sendStrategyChangedToServer() {
 func (ser *AllService) sendConditionChangedToServer() {
 	//通知长连接服务器，策略文件与条件配置文件有更新
 	req := &m.ConditionChanged_c2s{Cmd: 0x00FF003F, ConditionPath: ser.ConditionConfigPath}
-	//ser.Sock.Write(req)
+	ser.Sock.Write(req)
 	ser.SVCClient.PushMsg(req)
 }
 
@@ -514,6 +521,10 @@ func (ser *AllService) GetAllConditionTypeInfo(ctx iris.Context) {
 			}
 			arr = append(arr, item)
 		}
+		tmpConditionTypeInfoLock := ser.tmpConditionTypeInfoLock
+		tmpConditionTypeInfoLock.Lock()
+		ser.tmpConditionTypeInfoArr = arr
+		tmpConditionTypeInfoLock.Unlock()
 		res.Data = arr
 	}
 	resBytes, err := json.Marshal(res)
@@ -522,6 +533,26 @@ func (ser *AllService) GetAllConditionTypeInfo(ctx iris.Context) {
 	} else {
 		ctx.Write(resBytes)
 	}
+}
+
+/**
+获取条件类型的英文名称
+*/
+func (ser *AllService) getConditionEnName(ctypeId uint64) string {
+	tmpConditionTypeInfoLock := ser.tmpConditionTypeInfoLock
+	tmpConditionTypeInfoLock.Lock()
+	defer tmpConditionTypeInfoLock.Unlock()
+	arr := ser.tmpConditionTypeInfoArr
+	result := ""
+	for _, conditionTypeInfo := range arr {
+		if id, isok := conditionTypeInfo["id"].(uint64); isok == true {
+			if id == ctypeId {
+				result, _ = conditionTypeInfo["enName"].(string)
+				break
+			}
+		}
+	}
+	return result
 }
 
 /**
@@ -585,9 +616,17 @@ func (ser *AllService) AddCondition(ctx iris.Context) {
 				cItem := m.ConditionInfo{}
 				if nil == err {
 					cItem.Id = uint64(tid)
+				} else {
+					ser.conditionChan <- 1
+					return
 				}
 				cItem.Typeid = uint64(cType)
-				cItem.TypeName = name
+				typeName := ser.getConditionEnName(cItem.Typeid)
+				if typeName == "" {
+					ser.conditionChan <- 1
+					return
+				}
+				cItem.TypeName = typeName
 				cItem.Value = val
 				cItem.Operator = operator
 				cItem.Probability = probability
@@ -1371,7 +1410,7 @@ func (ser *AllService) ForceStrategyBeUseage(ctx iris.Context) {
 			}
 			//通知长连接服务，强制策略生效
 			req := &m.ForceStrategyBeUse_c2s{Cmd: 0x00FF0041, StrategyPath: ser.StrategyConfigPath, ConditionPath: ser.ConditionConfigPath, StrategyID: id}
-			//ser.Sock.Write(req)
+			ser.Sock.Write(req)
 			ser.SVCClient.PushMsg(req)
 			ser.strategyChan <- 1
 			ser.conditionChan <- 1
