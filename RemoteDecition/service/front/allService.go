@@ -586,6 +586,69 @@ func (ser *AllService) AddConditionType(ctx iris.Context) {
 }
 
 /**
+更新条件类型信息
+*/
+func (ser *AllService) UpdateConditionType(ctx iris.Context) {
+	id, err1 := strconv.ParseUint(ctx.URLParam("id"), 10, 32)
+	zn := ctx.URLParam("zn")
+	en := ctx.URLParam("en")
+	des := ctx.URLParam("des")
+	res := &m.CurrentResponse{}
+	if nil == err1 {
+		result, err := ser.SQL.Exec(fmt.Sprintf("update `ConditionType` set `zhName`='%s',`enName`='%s',`des`='%s' where `id`=%d", zn, en, des, id))
+		if nil != err {
+			res.Code = "-1"
+			res.Msg = fmt.Sprintf("条件类型更新失败,%v", err)
+		} else if count, e := result.RowsAffected(); nil == e && count > 0 {
+			res.Code = "0"
+			res.Msg = "条件类型更新成功"
+
+			// go func() {
+			// 	_, isOk := <-ser.conditionChan
+			// 	if false == isOk {
+			// 		return
+			// 	}
+			// 	//更新条件配置文件
+			// 	queryStr := fmt.Sprintf("select `Condition`.`id`,`Condition`.`typeID`,`ConditionType`.`enName` ,`Condition`.`value` ,`Condition`.`probability`,`Condition`.`operator` from   `Condition` LEFT JOIN   `ConditionType`   on   `Condition`.`typeID` = `ConditionType`.`id` where `Condition`.`id` = %d", id)
+			// 	res, err := ser.SQL.Query(queryStr)
+			// 	if nil == err && len(res) > 0 {
+			// 		subV := res[0]
+			// 		cItem := m.ConditionInfo{}
+			// 		cItem.Id, _ = strconv.ParseUint(string(subV["id"]), 10, 32)
+			// 		cItem.Typeid, _ = strconv.ParseUint(string(subV["typeID"]), 10, 32)
+			// 		cItem.TypeName = string(subV["enName"])
+			// 		cItem.Value = string(subV["value"])
+			// 		cItem.Operator = string(subV["operator"])
+			// 		cItem.Probability, _ = strconv.ParseFloat(string(subV["probability"]), 32)
+			// 		cItem.LastUpdate = lastUpdate
+			// 		for gi, gv := range ser.conditionArr {
+			// 			if gv.Id == cItem.Id {
+			// 				ser.conditionArr[gi] = cItem
+			// 				ser.conditionChange = true
+			// 				break
+			// 			}
+			// 		}
+			// 	}
+			// 	ser.conditionChan <- 1
+			// }()
+
+		} else {
+			res.Code = "-1"
+			res.Msg = "条件类型更新失败，参数id对应的条件类型不存在"
+		}
+	} else {
+		res.Code = "-1"
+		res.Msg = "更新条件类型失败，请检查请求参数"
+	}
+	resBytes, err := json.Marshal(res)
+	if nil != err {
+		ctx.Write([]byte(""))
+	} else {
+		ctx.Write(resBytes)
+	}
+}
+
+/**
 添加条件信息
 */
 func (ser *AllService) AddCondition(ctx iris.Context) {

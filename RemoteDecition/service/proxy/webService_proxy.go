@@ -78,6 +78,7 @@ func (webs *WebServiceProxy) Start() {
 	webs.app.Get("GetAllConditionInfo", allser.GetAllConditionInfo)                         //分页获取策略条件信息
 	webs.app.Get("GetAllConditionTypeInfo", allser.GetAllConditionTypeInfo)                 //获取所有策略条件类型的信息
 	webs.app.Get("AddConditionType", allser.AddConditionType)                               //添加条件类型
+	webs.app.Get("UpdateConditionType", allser.UpdateConditionType)                         //更新条件类型信息
 	webs.app.Get("AddCondition", allser.AddCondition)                                       //新增条件
 	webs.app.Get("UpdateConditionInfo", allser.UpdateConditionInfo)                         //更新条件信息接口
 	webs.app.Get("DeleteCondition", allser.DeleteCondition)                                 //删除策略条件接口
