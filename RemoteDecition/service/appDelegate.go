@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	debug := false //调试模式
+	debug := true //调试模式
 	fmt.Println("RemoteDecition远程决策服务v 1.0开始启动....")
 	//初始化服务器
 	app := iris.New()
@@ -18,7 +18,7 @@ func main() {
 		AllowedOrigins:   []string{"*"}, // allows everything, use that to change the hosts."*"代表允许所有域访问，这是一个数组，可以添加多个域名
 		AllowCredentials: true,
 		AllowedMethods:   []string{"HEAD", "GET", "POST"},
-	})
+		AllowedHeaders:   []string{"accept, content-type", "Access-Control-Allow-Origin"}})
 	app.Use(crs)
 	//启动静态服务
 	staticPro := proxy.NewStaticManager(app)
