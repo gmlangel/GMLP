@@ -502,7 +502,7 @@ func (ser *AllService) GetAllConditionInfo(ctx iris.Context) {
 获取所有条件类型信息的接口
 */
 func (ser *AllService) GetAllConditionTypeInfo(ctx iris.Context) {
-	result, err := ser.SQL.Query("select * from `ConditionType`")
+	result, err := ser.SQL.Query("select * from `ConditionType` order by `id` DESC")
 	res := &m.DataResponse{}
 	if nil != err {
 		res.Code = "-1"

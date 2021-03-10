@@ -1,26 +1,26 @@
-var interfaceDomain = "https://www.juliaol.cn:8080/"
-
+var interfaceDomain = "http://localhost:8080/"
+//var interfaceDomain = "https://www.juliaol.cn:8080/"
 /**
  * 后台登录
  * http://localhost:8080/front/signByAccount?ln=guominglong&pwd=543b10.
  * @param ln string 用户名
  * @param pwd string 用户登录密码
 */
-function signByAccount(ln,pwd,callbackFunc){
+function signByAccount(ln, pwd, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "signByAccount",
-        data:{
-            ln:ln,
-            pwd:pwd,
-            t:new Date().valueOf()
+        url: interfaceDomain + "signByAccount",
+        data: {
+            ln: ln,
+            pwd: pwd,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -29,19 +29,19 @@ function signByAccount(ln,pwd,callbackFunc){
  * 登出后台
  * 
 */
-function signOut(callbackFunc){
+function signOut(callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "signOut",
-        data:{
-            t:new Date().valueOf()
+        url: interfaceDomain + "signOut",
+        data: {
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -55,22 +55,22 @@ function signOut(callbackFunc){
  * @param roleID int 角色类型ID
  * @param callbackFunc function(data,err)回调函数
 */
-function addUser(ln,pwd,roleID,callbackFunc){
+function addUser(ln, pwd, roleID, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "AddUser",
-        data:{
-            ln:ln,
-            pwd:pwd,
-            roleID:roleID,
-            t:new Date().valueOf()
+        url: interfaceDomain + "AddUser",
+        data: {
+            ln: ln,
+            pwd: pwd,
+            roleID: roleID,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -79,19 +79,19 @@ function addUser(ln,pwd,roleID,callbackFunc){
  * 获取所有的用户角色类型
  * http://localhost:8080/GetAllRoleType
 */
-function getAllRoleType(callbackFunc){
+function getAllRoleType(callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "GetAllRoleType",
-        data:{
-            t:new Date().valueOf()
+        url: interfaceDomain + "GetAllRoleType",
+        data: {
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -101,19 +101,19 @@ function getAllRoleType(callbackFunc){
  * http://localhost:8080/GetAllAuth
  * 
 */
-function getAllAuth(callbackFunc){
+function getAllAuth(callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "GetAllAuth",
-        data:{
-            t:new Date().valueOf()
+        url: interfaceDomain + "GetAllAuth",
+        data: {
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -122,19 +122,19 @@ function getAllAuth(callbackFunc){
  * 获取后台管理账号总数
  * http://localhost:8080/GetUsersCount
 */
-function getUserCount(callbackFunc){
+function getUserCount(callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "GetUsersCount",
-        data:{
-            t:new Date().valueOf()
+        url: interfaceDomain + "GetUsersCount",
+        data: {
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -145,21 +145,21 @@ function getUserCount(callbackFunc){
  * @param startPoint int 开始读取数据的索引
  * @param readCount int 读取条数
 */
-function getAllUsers(startPoint,readCount,callbackFunc){
+function getAllUsers(startPoint, readCount, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "GetAllUsers",
-        data:{
-            startPoint:startPoint,
-            readCount:readCount,
-            t:new Date().valueOf()
+        url: interfaceDomain + "GetAllUsers",
+        data: {
+            startPoint: startPoint,
+            readCount: readCount,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -169,20 +169,20 @@ function getAllUsers(startPoint,readCount,callbackFunc){
  * http://localhost:8080/DeleteUser?uid=1
  * @param uid int 用户id
 */
-function deleteUser(uid,callbackFunc){
+function deleteUser(uid, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "DeleteUser",
-        data:{
-            uid:uid,
-            t:new Date().valueOf()
+        url: interfaceDomain + "DeleteUser",
+        data: {
+            uid: uid,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -195,23 +195,23 @@ function deleteUser(uid,callbackFunc){
  * @param rid int 用户角色类型ID
  * @param uid int 用户id
 */
-function updateUserInfo(uid,sn,sp,rid,callbackFunc){
+function updateUserInfo(uid, sn, sp, rid, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "UpdateUserInfo",
-        data:{
-            uid:uid,
-            sn:sn,
-            sp:sp,
-            rid:rid,
-            t:new Date().valueOf()
+        url: interfaceDomain + "UpdateUserInfo",
+        data: {
+            uid: uid,
+            sn: sn,
+            sp: sp,
+            rid: rid,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -222,21 +222,21 @@ function updateUserInfo(uid,sn,sp,rid,callbackFunc){
  * @param startPoint int 起始位置
  * @param readCount int 获取数量
 */
-function getAllConditionInfo(startPoint,readCount,callbackFunc){
+function getAllConditionInfo(startPoint, readCount, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "GetAllConditionInfo",
-        data:{
-            startPoint:startPoint,
-            readCount:readCount,
-            t:new Date().valueOf()
+        url: interfaceDomain + "GetAllConditionInfo",
+        data: {
+            startPoint: startPoint,
+            readCount: readCount,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -245,19 +245,19 @@ function getAllConditionInfo(startPoint,readCount,callbackFunc){
  * 获取策略条件总数
  * http://localhost:8080/GetConditionCount
 */
-function getConditionCount(callbackFunc){
+function getConditionCount(callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "GetConditionCount",
-        data:{
-            t:new Date().valueOf()
+        url: interfaceDomain + "GetConditionCount",
+        data: {
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -267,19 +267,19 @@ function getConditionCount(callbackFunc){
  * http://localhost:8080/GetAllConditionTypeInfo
  * 
 */
-function getAllConditionTypeInfo(callbackFunc){
+function getAllConditionTypeInfo(callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "GetAllConditionTypeInfo",
-        data:{
-            t:new Date().valueOf()
+        url: interfaceDomain + "GetAllConditionTypeInfo",
+        data: {
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -292,22 +292,22 @@ function getAllConditionTypeInfo(callbackFunc){
  * @param en string 英文名
  * @param des string 描述
 */
-function addConditionType(zn,en,des,callbackFunc){
+function addConditionType(zn, en, des, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "AddConditionType",
-        data:{
-            zn:zn,
-            en:en,
-            des:des,
-            t:new Date().valueOf()
+        url: interfaceDomain + "AddConditionType",
+        data: {
+            zn: zn,
+            en: en,
+            des: des,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -322,25 +322,25 @@ function addConditionType(zn,en,des,callbackFunc){
  * @param probability number 生效几率 0-1之间任意小数
  * @param des string 条件描述
 */
-function addCondition(cType,operator,name,value,probability,des,callbackFunc){
+function addCondition(cType, operator, name, value, probability, des, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "AddCondition",
-        data:{
-            cType:cType,
-            operator:operator,
-            name:name,
-            value:value,
-            probability:probability,
-            des:des,
-            t:new Date().valueOf()
+        url: interfaceDomain + "AddCondition",
+        data: {
+            cType: cType,
+            operator: operator,
+            name: name,
+            value: value,
+            probability: probability,
+            des: des,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -356,26 +356,26 @@ function addCondition(cType,operator,name,value,probability,des,callbackFunc){
  * @param des string 条件描述
  * @param id int 条件ID
 */
-function updateConditionInfo(cType,operator,name,value,probability,des,id,callbackFunc){
+function updateConditionInfo(cType, operator, name, value, probability, des, id, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "UpdateConditionInfo",
-        data:{
-            cType:cType,
-            operator:operator,
-            name:name,
-            value:value,
-            probability:probability,
-            des:des,
-            id:id,
-            t:new Date().valueOf()
+        url: interfaceDomain + "UpdateConditionInfo",
+        data: {
+            cType: cType,
+            operator: operator,
+            name: name,
+            value: value,
+            probability: probability,
+            des: des,
+            id: id,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -385,20 +385,20 @@ function updateConditionInfo(cType,operator,name,value,probability,des,id,callba
  * http://localhost:8080/DeleteCondition?id=3
  * @param id int 条件ID
 */
-function deleteCondition(id,callbackFunc){
+function deleteCondition(id, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "DeleteCondition",
-        data:{
-            id:id,
-            t:new Date().valueOf()
+        url: interfaceDomain + "DeleteCondition",
+        data: {
+            id: id,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -410,22 +410,22 @@ function deleteCondition(id,callbackFunc){
  * @param des string 描述
  * @param templateContent string 策略模板内容
 */
-function addStrategyCategroy(name,des,templateContent,callbackFunc){
+function addStrategyCategroy(name, des, templateContent, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "AddStrategyCategroy",
-        data:{
-            name:name,
-            des:des,
-            templateContent:templateContent,
-            t:new Date().valueOf()
+        url: interfaceDomain + "AddStrategyCategroy",
+        data: {
+            name: name,
+            des: des,
+            templateContent: templateContent,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"POST",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "POST",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -433,19 +433,19 @@ function addStrategyCategroy(name,des,templateContent,callbackFunc){
 /**
  * 获取所有的 策略类别信息
 */
-function getAllStrategyCategroy(callbackFunc){
+function getAllStrategyCategroy(callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "GetAllStrategyCategroyInfo",
-        data:{
-            t:new Date().valueOf()
+        url: interfaceDomain + "GetAllStrategyCategroyInfo",
+        data: {
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -457,22 +457,22 @@ function getAllStrategyCategroy(callbackFunc){
  * @param templateContent string 策略模板内容
  * @param id int 策略类别id
 */
-function updateStrategyCategroy(des,templateContent,id,callbackFunc){
+function updateStrategyCategroy(des, templateContent, id, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "UpdateStrategyCategroy",
-        data:{
-            des:des,
-            templateContent:templateContent,
-            id:id,
-            t:new Date().valueOf()
+        url: interfaceDomain + "UpdateStrategyCategroy",
+        data: {
+            des: des,
+            templateContent: templateContent,
+            id: id,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"POST",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "POST",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -483,20 +483,20 @@ function updateStrategyCategroy(des,templateContent,id,callbackFunc){
  * http://localhost:8080/DeleteStrategyCategroy?id=3
  * @param id int 策略类别ID
 */
-function deleteStrategyCategroy(id,callbackFunc){
+function deleteStrategyCategroy(id, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "DeleteStrategyCategroy",
-        data:{
-            id:id,
-            t:new Date().valueOf()
+        url: interfaceDomain + "DeleteStrategyCategroy",
+        data: {
+            id: id,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -511,24 +511,24 @@ function deleteStrategyCategroy(id,callbackFunc){
  * @param enabled int 是否启用 0或者1
  * @param name string 策略名
  */
-function addStrategy(sid,strategyContext,expire,enabled,name,callbackFunc){
+function addStrategy(sid, strategyContext, expire, enabled, name, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "AddStrategy",
-        data:{
-            sid:sid,
-            strategyContext:strategyContext,
-            expire:expire,
-            enabled:enabled,
-            name:name,
-            t:new Date().valueOf()
+        url: interfaceDomain + "AddStrategy",
+        data: {
+            sid: sid,
+            strategyContext: strategyContext,
+            expire: expire,
+            enabled: enabled,
+            name: name,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"POST",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "POST",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -539,21 +539,21 @@ function addStrategy(sid,strategyContext,expire,enabled,name,callbackFunc){
  * @param id int 策略id
  * @param conditionGroup string 条件组
 */
-function editConditionForStrategy(id,conditionGroup,callbackFunc){
+function editConditionForStrategy(id, conditionGroup, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "EditConditionForStrategy",
-        data:{
-            id:id,
-            conditionGroup:conditionGroup,
-            t:new Date().valueOf()
+        url: interfaceDomain + "EditConditionForStrategy",
+        data: {
+            id: id,
+            conditionGroup: conditionGroup,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -563,20 +563,20 @@ function editConditionForStrategy(id,conditionGroup,callbackFunc){
  * http://localhost:8080/SelectConditionInfoByStrategyID?id=2
  * @param id int 策略ID
 */
-function getConditionInfoByStrategyID(id,callbackFunc){
+function getConditionInfoByStrategyID(id, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "SelectConditionInfoByStrategyID",
-        data:{
-            id:id,
-            t:new Date().valueOf()
+        url: interfaceDomain + "SelectConditionInfoByStrategyID",
+        data: {
+            id: id,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -586,20 +586,20 @@ function getConditionInfoByStrategyID(id,callbackFunc){
  * http://localhost:8080/GetStrategyByStrategyCategroyID?sid=2
  * @param sid int 策略类别ID
 */
-function getStrategyByStrategyCategroyID(sid,callbackFunc){
+function getStrategyByStrategyCategroyID(sid, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "GetStrategyByStrategyCategroyID",
-        data:{
-            sid:sid,
-            t:new Date().valueOf()
+        url: interfaceDomain + "GetStrategyByStrategyCategroyID",
+        data: {
+            sid: sid,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -613,24 +613,24 @@ function getStrategyByStrategyCategroyID(sid,callbackFunc){
  * @param enabled int 是否启用 0或者1
  * @param name string 策略名
 */
-function updateStrategyInfo(id,strategyContext,expire,enabled,name,callbackFunc){
+function updateStrategyInfo(id, strategyContext, expire, enabled, name, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "UpdateStrategyInfo",
-        data:{
-            id:id,
-            strategyContext:strategyContext,
-            expire:expire,
-            enabled:enabled,
-            name:name,
-            t:new Date().valueOf()
+        url: interfaceDomain + "UpdateStrategyInfo",
+        data: {
+            id: id,
+            strategyContext: strategyContext,
+            expire: expire,
+            enabled: enabled,
+            name: name,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"POST",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "POST",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -640,20 +640,20 @@ function updateStrategyInfo(id,strategyContext,expire,enabled,name,callbackFunc)
  * http://localhost:8080/DeleteStrategyByID?id=4
  * @param id int 策略ID
 */
-function deleteStrategyByID(id,callbackFunc){
+function deleteStrategyByID(id, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "DeleteStrategyByID",
-        data:{
-            id:id,
-            t:new Date().valueOf()
+        url: interfaceDomain + "DeleteStrategyByID",
+        data: {
+            id: id,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
@@ -663,20 +663,20 @@ function deleteStrategyByID(id,callbackFunc){
  * http://localhost:8080/ForceStrategyBeUseage?id=4
  * @param id int 策略ID
 */
-function forceStrategyBeUseage(id,callbackFunc){
+function forceStrategyBeUseage(id, callbackFunc) {
     $.ajax({
-        url:interfaceDomain + "ForceStrategyBeUseage",
-        data:{
-            id:id,
-            t:new Date().valueOf()
+        url: interfaceDomain + "ForceStrategyBeUseage",
+        data: {
+            id: id,
+            t: new Date().valueOf()
         },
-        dataType:"json",
-        method:"GET",
-        success:function(data){
-            callbackFunc(data,null);
+        dataType: "json",
+        method: "GET",
+        success: function (data) {
+            callbackFunc(data, null);
         },
-        error:function(err){
-            callbackFunc(null,err);
+        error: function (err) {
+            callbackFunc(null, err);
         }
     })
 }
